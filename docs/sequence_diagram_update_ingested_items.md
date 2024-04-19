@@ -31,17 +31,17 @@ sequenceDiagram
         end
         W->>AlmaItem: alma_item.item_call_number_mismatch()
         alt there is a mismatch 
-            AlmaItem-->W: true
+            AlmaItem-->>W: true
             W->>Report: mismatch
         else
-            AlmaItem-->W: false
+            AlmaItem-->>W: false
         end
         W->>AlmaClient: update(alma_item.barcode, alma_item.update_body)
         alt successful update
             AlmaClient-->>W: success
             W->>Report: successful_update
         else unsuccessful update
-            AlmaClient-->W: error
+            AlmaClient-->>W: error
             W->>Report: unsuccessful update
         end
     end
