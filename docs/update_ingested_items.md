@@ -15,3 +15,8 @@ flowchart TD
     L -- Yes --> M[Increase update_cnt counter;\nGo to next item]
     L -- No --> N[Print error; Go to Next item]
 ```
+This is how the perl/bash script currently works, not how it should work.
+
+How to figure out the `barcode`:
+* for `miua` and `miun` the `htid` is the `barcode`
+* for `mdp` the barcode is everything after `mdp.`
