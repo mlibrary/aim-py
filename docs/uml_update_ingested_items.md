@@ -1,3 +1,51 @@
+## Class Diagram
+```mermaid
+classDiagram
+    class Wrapper {
+        -Int number_of_days
+        +initialize(number_of_days)
+        +run()
+    }
+
+    class HathiTrustItem{
+        -String htid
+        +initialize(htid)
+        +barcode()
+    }
+    class AlmaItem{
+        -String raw_data
+        +.for(barcode)
+        +initialize(raw_data)
+        +has_no_barcode()
+        +item_call_num_htid_mismatch()
+        +body_for_update()
+    }
+    class EmptyAlmaItem{
+
+    }
+    AlmaItem <|-- EmptyAlmaItem
+    
+    Wrapper -- AlmaClient
+    Wrapper -- AlmaItem
+    AlmaItem -- AlmaClient
+    Wrapper -- Report
+    Wrapper -- HathiTrustItem
+    
+    
+    class AlmaClient{
+        +get_item()
+        +update_item()
+    }
+
+    class Report{
+        -Dict counters
+        +initialize(list_of_counters)
+        +update_report(kind, message)
+    }
+
+ ```
+
+## Sequence Diagram
 ```mermaid
 sequenceDiagram
     Participant W as Wrapper
