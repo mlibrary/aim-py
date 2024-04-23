@@ -79,6 +79,13 @@ sequenceDiagram
         else has barcode
             AlmaItem-->>W: false
         end
+        W->>AlmaItem: has_matching_htid_in_item_call_num()
+        alt there is a match in the item call number
+            AlmaItem-->>W: true
+            W->>Report: skip (go to next item in the loop)
+        else
+            AlmaItem-->>W: false
+        end
         W->>AlmaItem: alma_item.item_call_number_mismatch()
         alt there is a mismatch 
             AlmaItem-->>W: true
