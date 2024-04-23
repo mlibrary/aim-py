@@ -14,10 +14,12 @@ classDiagram
     }
     class AlmaItem{
         -String raw_data
-        +.for(barcode)
+        -String htid
+        +.for(barcode,htid)
         +initialize(raw_data)
         +has_no_barcode()
         +item_call_num_htid_mismatch()
+        +has_matching_htid_in_item_call_num()
         +body_for_update()
     }
     class EmptyAlmaItem{
