@@ -26,6 +26,27 @@ flowchart TD
     R -- No --> S[Do nothing]
     R --Yes --> T[Remove from digifeeds set]
 ```
+## Database tables
+```mermaid
+erDiagram
+    ITEM ||--o{ ITEM_STATUS : has_many
+    ITEM {
+        string barcode
+    
+    }
+
+    ITEM_STATUS {
+        string item_barcode
+        string status_name
+        date date
+    }
+
+    STATUS {
+        string name
+        string description
+    }
+    STATUS ||--o{ ITEM_STATUS: has_many
+```
 
 ## CLI scripts
 ```
