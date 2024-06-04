@@ -4,23 +4,28 @@ flowchart TD
     A[Folder with Scans]
     B[Argo Events]
     C[New item workflow]
+    D[Is item in DB?]
+    E[Has it been added to an Alma set?]
+    F[Add to DB]
+    G[Add to digifeeds set\nAdd status of added_to_digifeeds_set]
 
     B --Notices there's a new file--> A
     B --> C
-    C --> D[Is item in DB?]
-    D --No --> F[Add to DB]
-    F --> G[Add to digifeeds set\nAdd status of added_to_digifeeds_set]
-    D --Yes--> E[Has it been added to an Alma set?]
+    C --> D
+    F --> E
+    D --No --> F
+    D --Yes--> E
     E --No --> G
-
-    H[Daily, check the Folder with Scans] --> I[For every barcode, is it\nin zephir AND \nHas it been two weeks since we saw it in zephir?]
-    I --No --> N[Skip]
-    I --Yes--> J[Add start copying status;\nZip and Copy it to pickup location;\nAdd finished copying status]
-    J --> K[Delete from Folder with Scans; Add delete_from_folder status]
+    E --Yes--> U[Skip]
 
     L[Daily, Get items where in_zephir is false] --> M[Check zephir for item. Is it there?]
     M --No -->O[Skip]
     M --Yes -->P[Add in_zephir status]
+
+    H[Daily, check the Folder with Scans] --> I[For every barcode,\ndoes it have an in_zephir status?\nAND \nhas it been two weeks since the in_zephir status got created?]
+    I --No --> N[Skip]
+    I --Yes--> J[Add start copying status;\nZip and Copy it to pickup location;\nAdd finished copying status]
+    J --> K[Rename or move item in Folder with Scans;\nAdd pending_deletion status]
 
     Q[Monthly or less frequent, Get the digifeeds set] --> R[Does the item have an item call number?]
     R -- No --> S[Do nothing]
