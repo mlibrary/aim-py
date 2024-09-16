@@ -1,4 +1,4 @@
-from aim.models import Item, Status
+from aim.models import Item, Status, ItemStatus
 
 class TestItem:
     def test_item_valid(self, db_session):
@@ -8,13 +8,21 @@ class TestItem:
         item = db_session.query(Item).filter_by(barcode="valid_barcode").first()
         assert item.barcode == "valid_barcode"
 
-    def test_second_item(self, db_session):
-        valid_item = Item(barcode="valid2_barcode")
-        db_session.add(valid_item)
+    def test_item_statuses(self, db_session):
+        item = Item(barcode="valid_barcode")
+        db_session.add(item)
         db_session.commit()
-        item = db_session.query(Item).filter_by(barcode="valid2_barcode").first()
-        breakpoint()
-        assert item.barcode == "valid2_barcode"
+        status = db_session.query(Status).filter_by(name="in_zephir").first()
+        db_session.refresh(item)
+        assert(len(item.statuses)) == 0
+        item_status = ItemStatus(item=item,status=status)
+        db_session.add(item_status)
+        db_session.commit()
+        db_session.refresh(item)
+        assert item.barcode == "valid_barcode"
+        assert(len(item.statuses)) == 1
+
+    
         
       
   
