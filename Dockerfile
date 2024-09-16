@@ -31,6 +31,12 @@ CMD ["tail", "-f", "/dev/null"]
 # Both build and development need poetry, so it is its own step.
 FROM base as poetry
 
+RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
+  python3-dev \ 
+  default-libmysqlclient-dev \ 
+  build-essential \ 
+  pkg-config
+
 RUN pip install poetry==${POETRY_VERSION}
 
 # Use this page as a reference for python and poetry environment variables: https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED

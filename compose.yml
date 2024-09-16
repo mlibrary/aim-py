@@ -15,3 +15,18 @@ services:
       - .:/app
     tty: true
     stdin_open: true
+
+  database:
+      image: mariadb
+      volumes:
+        - database:/var/lib/mysql
+      ports:
+        - 3306:3306
+      environment:
+        - MARIADB_ROOT_PASSWORD=password
+        - MARIADB_USER=user
+        - MARIADB_PASSWORD=password
+        - MARIADB_DATABASE=database
+  
+volumes:
+  database:
