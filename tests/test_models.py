@@ -21,6 +21,7 @@ class TestItem:
         db_session.refresh(item)
         assert item.barcode == "valid_barcode"
         assert(len(item.statuses)) == 1
+        assert(item.statuses[0].created_at)
 
     
         

@@ -1,6 +1,7 @@
-from sqlalchemy import Integer, String, ForeignKey
+from sqlalchemy import String, ForeignKey, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
-from datetime import datetime
+import datetime
 
 class Base(DeclarativeBase):
   pass
@@ -21,9 +22,12 @@ class ItemStatus(Base):
     __tablename__ = 'item_statuses'
     item_barcode: Mapped[int] = mapped_column(ForeignKey('items.barcode'), primary_key=True)
     status_id: Mapped[int] = mapped_column(ForeignKey('statuses.id'), primary_key=True)
+    #https://docs.sqlalchemy.org/en/20/core/functions.html#sqlalchemy.sql.functions.now Tell the db to set the date.
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()) 
 
     item: Mapped["Item"] = relationship(back_populates="statuses")
     status: Mapped["Status"] = relationship()
+
 
 def load_statuses(session: Session):
     objects = [
