@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 import sqlalchemy as sa
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
-from aim.models import Base, load_statuses, Status
+from aim.digifeeds.database.models import Base, load_statuses, Status
 
 from aim.services import S
 

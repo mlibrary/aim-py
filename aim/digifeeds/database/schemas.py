@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
 class ItemStatus(BaseModel):
@@ -6,16 +6,12 @@ class ItemStatus(BaseModel):
     description: str = Field(alias="status_description")
     created_at: datetime
 
-    class Config:
-        from_attributes = True
-        populate_by_name = True
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
 class ItemBase(BaseModel):
-    barcode: str = Field(alias="item_barcode")
+    model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
-    class Config:
-        from_attributes = True
-        populate_by_name = True
+    barcode: str = Field(alias="item_barcode")
 
 class Item(ItemBase):
     created_at: datetime

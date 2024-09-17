@@ -1,4 +1,4 @@
-from aim.models import Item, Status, ItemStatus
+from aim.digifeeds.database.models import Item, Status, ItemStatus
 
 class TestItem:
     def test_item_valid(self, db_session):
@@ -16,13 +16,16 @@ class TestItem:
         status = db_session.query(Status).filter_by(name="in_zephir").first()
         db_session.refresh(item)
         assert(len(item.statuses)) == 0
+
         item_status = ItemStatus(item=item,status=status)
         db_session.add(item_status)
         db_session.commit()
         db_session.refresh(item)
+
         assert item.barcode == "valid_barcode"
         assert(len(item.statuses)) == 1
         assert(item.statuses[0].created_at)
+        assert item.statuses[0].status_name == "in_zephir"
 
     
         

@@ -1,8 +1,8 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
+from aim.digifeeds.database import crud, models, schemas
 from aim.services import S
-from aim import models, schemas, crud
 
 engine = create_engine(S.mysql_database)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

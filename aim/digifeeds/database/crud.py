@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from aim import models, schemas
+from aim.digifeeds.database import schemas
+from aim.digifeeds.database import models
 
 def get_item(db: Session, barcode: str):
     return db.query(models.Item).filter(models.Item.barcode == barcode).first()
