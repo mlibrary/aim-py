@@ -1,8 +1,10 @@
 import pytest
+from fastapi.testclient import TestClient
 import sqlalchemy as sa
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
 from aim.models import Base, load_statuses, Status
+
 from aim.services import S
 
 engine = create_engine(
@@ -64,3 +66,16 @@ def db_session(scope="module"):
     session.close()
     transaction.rollback()
     connection.close()
+
+# A fixture for the fastapi test client which depends on the
+# previous session fixture. Instead of creating a new session in the
+# dependency override as before, it uses the one provided by the
+# session fixture.
+@pytest.fixture()
+def client(session):
+    def override_get_db():
+        yield session
+
+    app.dependency_overrides[get_db] = override_get_db
+    yield TestClient(app)
+    del app.dependency_overrides[get_db]

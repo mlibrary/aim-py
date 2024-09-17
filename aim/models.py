@@ -1,6 +1,7 @@
 from sqlalchemy import String, ForeignKey, DateTime
 from sqlalchemy.sql import func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
+from sqlalchemy.ext.associationproxy import association_proxy
 import datetime
 
 class Base(DeclarativeBase):
@@ -10,6 +11,7 @@ class Item(Base):
     __tablename__ = 'items'
 
     barcode:  Mapped[str] = mapped_column(String(256), unique=True, primary_key=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()) 
     statuses: Mapped[list["ItemStatus"]] = relationship()
 
 class Status(Base):
@@ -17,6 +19,7 @@ class Status(Base):
     id:  Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(256))
     description:  Mapped[str] = mapped_column(String(499))
+    items: Mapped[list["ItemStatus"]] = relationship()
 
 class ItemStatus(Base):
     __tablename__ = 'item_statuses'
@@ -26,7 +29,12 @@ class ItemStatus(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now()) 
 
     item: Mapped["Item"] = relationship(back_populates="statuses")
-    status: Mapped["Status"] = relationship()
+    status: Mapped["Status"] = relationship(back_populates="items")
+
+    #proxies
+    status_name = association_proxy(target_collection="status", attr="name")
+    status_description = association_proxy(target_collection="status", attr="description")
+
 
 
 def load_statuses(session: Session):

@@ -7,6 +7,7 @@ class TestItem:
         db_session.commit()
         item = db_session.query(Item).filter_by(barcode="valid_barcode").first()
         assert item.barcode == "valid_barcode"
+        assert item.created_at
 
     def test_item_statuses(self, db_session):
         item = Item(barcode="valid_barcode")

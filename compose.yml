@@ -9,6 +9,8 @@ services:
         GID: ${GID:-1000}
         DEV: ${DEV:-false}
         POETRY_VERSION: ${POETRY_VERSION:-1.5.1}
+    ports:
+      - 8000:8000
     env_file:
       - env.development
       - .env
