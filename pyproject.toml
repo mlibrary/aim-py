@@ -13,6 +13,7 @@ sqlalchemy = "^2.0.34"
 mysqlclient = "^2.2.4"
 fastapi = {extras = ["standard"], version = "^0.114.2"}
 httpx = "^0.27.2"
+alembic = "^1.13.2"
 
 
 [tool.poetry.group.dev.dependencies]

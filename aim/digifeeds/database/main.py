@@ -7,7 +7,7 @@ from aim.services import S
 if S.ci_on == None: # pragma: no cover 
    engine = create_engine(S.mysql_database)
    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-   models.Base.metadata.create_all(bind=engine)
+#    models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 

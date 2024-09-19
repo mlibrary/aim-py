@@ -21,6 +21,10 @@ class Status(Base):
     description:  Mapped[str] = mapped_column(String(499))
     items: Mapped[list["ItemStatus"]] = relationship()
 
+    def __repr__(self):
+      return ( f'Status(id={self.id}, name={self.name}, description={self.description})')
+
+
 class ItemStatus(Base):
     __tablename__ = 'item_statuses'
     item_barcode: Mapped[int] = mapped_column(ForeignKey('items.barcode'), primary_key=True)
@@ -38,12 +42,23 @@ class ItemStatus(Base):
 
 
 def load_statuses(session: Session):
-    objects = [
-        Status(name="in_zephir", description="Item is in zephir"),
-        Status(name="added_to_digifeeds_set", description="Item has been added to the digifeeds set"),
-        Status(name="copying_start", description="The process for zipping and copying an item to the pickup location has started"),
-        Status(name="copying_end", description="The process for zipping and copying an item to the pickup location has completed successfully"),
-        Status(name="pending_deletion", description="The item has been copied to the pickup location and can be deleted upon ingest confirmation"),
+    statuses = [
+        {"name": "in_zephir", "description": "Item is in zephir"},
+        {"name": "added_to_digifeeds_set", "description": "Item has been added to the digifeeds set"},
+        {"name": "copying_start", "description": "The process for zipping and copying an item to the pickup location has started"},
+        {"name": "copying_end", "description": "The process for zipping and copying an item to the pickup location has completed successfully"},
+        {"name": "pending_deletion", "description": "The item has been copied to the pickup location and can be deleted upon ingest confirmation"},
+        {"name": "not_found_in_alma", "description": "Barcode wasn't found in Alma"},
     ]
+    objects = []
+    for status in statuses:
+        sts = session.query(Status).filter_by(name = status["name"]).first()
+        if sts == None:
+          objects.append(Status(**status))
+
+    print(f"Statuses to load: {objects}")
+
     session.bulk_save_objects(objects)
     session.commit()
+
+    print("Statuses loaded.")
