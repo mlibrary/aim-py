@@ -11,7 +11,7 @@ models.Base.metadata.create_all(bind=engine)
 app = FastAPI()
 
 # Dependency
-def get_db():
+def get_db(): # pragma: no cover 
     db = SessionLocal()
     try:
         yield db
@@ -29,11 +29,11 @@ def get_item(barcode: str, db: Session = Depends(get_db)) -> schemas.Item:
     db_item = crud.get_item(barcode=barcode, db=db)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
-    
     return db_item
 
-@app.post("/items/", response_model_by_alias=False)
-def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)) -> schemas.Item:
+@app.post("/items/{barcode}", response_model_by_alias=False)
+def create_item(barcode: str, db: Session = Depends(get_db)) -> schemas.Item:
+    item = schemas.ItemCreate(barcode=barcode)
     db_item = crud.get_item(barcode=item.barcode, db=db)
     if db_item:
         raise HTTPException(status_code=400, detail="Item already exists")

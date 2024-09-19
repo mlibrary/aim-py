@@ -3,6 +3,7 @@ from fastapi.testclient import TestClient
 import sqlalchemy as sa
 from sqlalchemy import StaticPool, create_engine
 from sqlalchemy.orm import sessionmaker
+from aim.digifeeds.database.main import app, get_db
 from aim.digifeeds.database.models import Base, load_statuses, Status
 
 from aim.services import S
@@ -72,9 +73,9 @@ def db_session(scope="module"):
 # dependency override as before, it uses the one provided by the
 # session fixture.
 @pytest.fixture()
-def client(session):
+def client(db_session):
     def override_get_db():
-        yield session
+        yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
