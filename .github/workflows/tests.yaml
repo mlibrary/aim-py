@@ -22,4 +22,6 @@ jobs:
       - name: setup pytest.ini
         run: mv .github/pytest.ini pytest.ini
       - name: Run tests
+        env:
+          CI: "true"
         run: poetry run pytest 
