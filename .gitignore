@@ -10,3 +10,6 @@ __pycache__
 .gitconfig
 .venv
 .ssh
+htmlcov/
+.coverage
+.gnupg

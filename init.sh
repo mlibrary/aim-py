@@ -14,3 +14,16 @@ fi
 
 echo "🚢 Build docker images"
 docker compose build
+
+echo "📦 Build python packages"
+docker compose run --rm app poetry install
+
+echo "🧳 Run database migrations"
+docker compose up -d database
+docker compose run --rm app sh -c "cd aim/digifeeds/database && poetry run alembic upgrade heads"
+
+echo "🗄️ Load statuses"
+docker compose run --rm app sh -c "poetry run python aim/digifeeds/bin/load_statuses.py"
+
+
+

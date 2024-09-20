@@ -22,6 +22,11 @@ ARG GID=1000
 RUN groupadd -g ${GID} -o app
 RUN useradd -m -d /app -u ${UID} -g ${GID} -o -s /bin/bash app
 
+RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
+  python3-dev \ 
+  default-libmysqlclient-dev \ 
+  build-essential \ 
+  pkg-config
 
 # Set the working directory to /app
 WORKDIR /app
@@ -30,6 +35,13 @@ CMD ["tail", "-f", "/dev/null"]
 
 # Both build and development need poetry, so it is its own step.
 FROM base as poetry
+
+
+RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
+  python3-dev \ 
+  default-libmysqlclient-dev \ 
+  build-essential \ 
+  pkg-config
 
 RUN pip install poetry==${POETRY_VERSION}
 
