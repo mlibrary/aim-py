@@ -1,4 +1,4 @@
-name: Manual Deploy to Workshop
+name: Manual Deploy to Production
 
 on:
   workflow_dispatch:
@@ -7,22 +7,23 @@ on:
         description: tag
         required: true
 
+
 jobs:
-  build-unstable:
-    uses: mlibrary/platform-engineering-workflows/.github/workflows/build-unstable.yml@v1
+  build-production:
+    uses: mlibrary/platform-engineering-workflows/.github/workflows/build-production.yml@v1
     with:
       image_name: ${{ vars.IMAGE_NAME }}
       tag: ${{ github.event.inputs.tag }}
       dockerfile: Dockerfile
     secrets: inherit
 
-  deploy-workshop-digifeeds:
-    needs: build-unstable
-    name: Deploy to workshop - digifeeds
+  deploy-production-digifeeds:
+    needs: build-production
+    name: Deploy to production - digifeeds
     uses: mlibrary/platform-engineering-workflows/.github/workflows/deploy.yml@v1
     with:
-      image: ${{ needs.build-unstable.outputs.image }}
-      file: environments/digifeeds/workshop/app-image.txt
+      image: ghcr.io/mlibrary/${{ vars.IMAGE_NAME }}:${{ github.event.inputs.tag }}
+      file: environments/digifeeds/production/app-image.txt
       CONFIG_REPO_RW_APP_ID: ${{ vars.CONFIG_REPO_RW_APP_ID }}
       CONFIG_REPO_FULL_NAME: ${{ vars.CONFIG_REPO_FULL_NAME }}
     secrets: inherit

@@ -1,24 +1,24 @@
-name: Manual Deploy to Workshop
+name: Docker Build Main and Deploy to Workshop
 
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: tag
-        required: true
+  workflow_run:
+    workflows: [ 'Run Tests' ]
+    branches: [ main ]
+    types: [ completed ]
 
 jobs:
   build-unstable:
+    name: Build unstable ${{ github.sha }}
     uses: mlibrary/platform-engineering-workflows/.github/workflows/build-unstable.yml@v1
     with:
       image_name: ${{ vars.IMAGE_NAME }}
-      tag: ${{ github.event.inputs.tag }}
+      tag: ${{ github.sha }}
       dockerfile: Dockerfile
     secrets: inherit
 
   deploy-workshop-digifeeds:
     needs: build-unstable
-    name: Deploy to workshop - digifeeds
+    name: "Deploy to workshop - digifeeds"
     uses: mlibrary/platform-engineering-workflows/.github/workflows/deploy.yml@v1
     with:
       image: ${{ needs.build-unstable.outputs.image }}
