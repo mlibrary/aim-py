@@ -1,0 +1,14 @@
+name: Manual Deploy to Workshop
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: tag
+        required: true
+
+jobs:
+    echo:
+        runs-on: ubuntu-latest
+        steps:
+            - run: echo "${{ github.event.inputs.tag }}"
