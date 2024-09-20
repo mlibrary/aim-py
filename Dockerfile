@@ -12,7 +12,7 @@
 FROM python:3.11-slim-bookworm as base
 
 # Allowing the argumenets to be read into the dockerfile. Ex:  .env > compose.yml > Dockerfile
-ARG POETRY_VERSION
+ARG POETRY_VERSION=1.5.1
 ARG UID=1000
 ARG GID=1000
 
