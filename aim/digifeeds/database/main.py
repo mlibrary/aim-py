@@ -1,10 +1,10 @@
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
-from aim.digifeeds.database import crud, models, schemas
+from aim.digifeeds.database import crud, schemas
 from aim.services import S
 
-if S.ci_on == None: # pragma: no cover 
+if S.ci_on is None: # pragma: no cover 
    engine = create_engine(S.mysql_database)
    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 #    models.Base.metadata.create_all(bind=engine)

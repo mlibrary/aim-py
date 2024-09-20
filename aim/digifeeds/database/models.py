@@ -53,7 +53,7 @@ def load_statuses(session: Session):
     objects = []
     for status in statuses:
         sts = session.query(Status).filter_by(name = status["name"]).first()
-        if sts == None:
+        if sts is None:
           objects.append(Status(**status))
 
     print(f"Statuses to load: {objects}")

@@ -18,8 +18,8 @@ alembic = "^1.13.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.2"
-ruff = "^0.2.2"
 pytest-cov = "^5.0.0"
+ruff = "^0.6.6"
 
 [tool.pytest.ini_options]
 addopts = "--cov=aim --cov-report=html --cov-report=term:skip-covered"

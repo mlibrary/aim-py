@@ -1,4 +1,4 @@
-from aim.digifeeds.database import crud, models
+from aim.digifeeds.database import crud
 from aim.digifeeds.database.schemas import ItemCreate
 import pytest
 

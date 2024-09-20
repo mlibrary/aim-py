@@ -21,6 +21,8 @@ jobs:
       - run: poetry install
       - name: setup pytest.ini
         run: mv .github/pytest.ini pytest.ini
+      - name: Linting
+        run: poetry run ruff check
       - name: Run tests
         env:
           CI: "true"

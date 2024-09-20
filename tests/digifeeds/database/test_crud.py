@@ -17,7 +17,7 @@ class TestCrud:
 
     def test_get_item_that_does_not_exist(self, db_session):
         item_in_db = get_item(barcode="does not exist", db=db_session)
-        assert(item_in_db) == None
+        assert(item_in_db) is None
 
     def test_get_items_all(self, db_session):
         item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
@@ -58,7 +58,7 @@ class TestCrud:
 
     def test_get_status_that_does_not_exist(self, db_session):
         status = get_status(db=db_session, name="does_not_exist")
-        assert(status) == None 
+        assert(status) is None 
 
     def test_get_statuses(self, db_session):
         statuses = get_statuses(db=db_session)
