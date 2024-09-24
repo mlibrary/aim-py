@@ -26,7 +26,9 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   python3-dev \ 
   default-libmysqlclient-dev \ 
   build-essential \ 
-  pkg-config
+  pkg-config \
+  default-mysql-client \
+  vim-tiny
 
 # Set the working directory to /app
 WORKDIR /app
@@ -87,7 +89,8 @@ RUN mkdir -p /venv && chown ${UID}:${GID} /venv
 # By adding /venv/bin to the PATH the dependencies in the virtual environment
 # are used
 ENV VIRTUAL_ENV=/venv \
-    PATH="/venv/bin:$PATH"
+    PATH="/venv/bin:$PATH" \
+    PYTHONPATH="/app"
 
 COPY --chown=${UID}:${GID} . /app
 COPY --chown=${UID}:${GID} --from=build "/app/.venv" ${VIRTUAL_ENV}
