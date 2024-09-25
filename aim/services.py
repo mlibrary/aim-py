@@ -12,3 +12,4 @@ S.mysql_database = sa.engine.URL.create(
 )
 S.test_database = "sqlite:///:memory:"
 S.ci_on = os.getenv("CI")
+S.digifeeds_api_url = os.getenv("DIGIFEEDS_API_URL") or "http://api:8000"
