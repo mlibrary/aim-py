@@ -34,6 +34,8 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
 # Set the working directory to /app
 WORKDIR /app
 
+ENV PYTHONPATH="/app"
+
 CMD ["tail", "-f", "/dev/null"]
 
 # Both build and development need poetry, so it is its own step.
@@ -76,6 +78,13 @@ FROM base as production
 # Switch to the non-root user "user"
 # RUN mkdir -p /venv && chown ${UID}:${GID} /venv
 
+<<<<<<< HEAD
+=======
+# By adding /venv/bin to the PATH the dependencies in the virtual environment
+# are used
+ENV VIRTUAL_ENV=/venv \
+    PATH="/venv/bin:$PATH"
+>>>>>>> 2f9cc22 (start digifeeds cli)
 
 COPY --chown=${UID}:${GID} . /app
 COPY --chown=${UID}:${GID} --from=build "/app/requirements.txt" /app/requirements.txt
