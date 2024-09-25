@@ -9,7 +9,7 @@
 # wheel packages, which are both needed for installing applications like Pandas and Numpy.
 
 # The base layer will contain the dependencies shared by the other layers
-FROM python:3.11-slim-bookworm as base
+FROM python:3.11-slim-bookworm AS base
 
 # Allowing the argumenets to be read into the dockerfile. Ex:  .env > compose.yml > Dockerfile
 ARG POETRY_VERSION=1.8.3
@@ -39,7 +39,7 @@ ENV PYTHONPATH="/app"
 CMD ["tail", "-f", "/dev/null"]
 
 # Both build and development need poetry, so it is its own step.
-FROM base as poetry
+FROM base AS poetry
 
 RUN pip install poetry==${POETRY_VERSION}
 
@@ -58,7 +58,7 @@ ENV PYTHONUNBUFFERED=1\
     POETRY_VIRTUALENVS_IN_PROJECT=1 \
     POETRY_CACHE_DIR=/tmp/poetry_cache
 
-FROM poetry as build
+FROM poetry AS build
 # Just copy the files needed to install the dependencies
 COPY pyproject.toml poetry.lock README.md ./
 
@@ -66,7 +66,7 @@ COPY pyproject.toml poetry.lock README.md ./
 RUN poetry export --without dev -f requirements.txt --output requirements.txt
 
 # We want poetry on in development
-FROM poetry as development
+FROM poetry AS development
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
    git
 
@@ -74,17 +74,10 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
 USER app
 
 # We don't want poetry on in production, so we copy the needed files form the build stage
-FROM base as production
+FROM base AS production
 # Switch to the non-root user "user"
 # RUN mkdir -p /venv && chown ${UID}:${GID} /venv
 
-<<<<<<< HEAD
-=======
-# By adding /venv/bin to the PATH the dependencies in the virtual environment
-# are used
-ENV VIRTUAL_ENV=/venv \
-    PATH="/venv/bin:$PATH"
->>>>>>> 2f9cc22 (start digifeeds cli)
 
 COPY --chown=${UID}:${GID} . /app
 COPY --chown=${UID}:${GID} --from=build "/app/requirements.txt" /app/requirements.txt
