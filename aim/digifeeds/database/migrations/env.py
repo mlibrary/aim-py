@@ -13,7 +13,11 @@ from aim.services import S
 config = context.config
 
 # Set url from environment variable
-config.set_main_option("sqlalchemy.url", S.mysql_database)
+config.set_main_option(
+    "sqlalchemy.url",
+    # This is for handling passwords with special characters
+    S.mysql_database.render_as_string(hide_password=False).replace("%", "%%"),
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

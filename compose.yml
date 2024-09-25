@@ -28,7 +28,7 @@ services:
     environment:
       - MARIADB_ROOT_PASSWORD=password
       - MARIADB_USER=user
-      - MARIADB_PASSWORD=password
+      - MARIADB_PASSWORD=test@123
       - MARIADB_DATABASE=database
 
 volumes:
