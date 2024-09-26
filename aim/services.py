@@ -9,7 +9,9 @@ Services = NamedTuple(
         ("mysql_database", sa.engine.URL),
         ("test_database", str),
         ("ci_on", str | None),
+        ("alma_api_key", str),
         ("digifeeds_api_url", str),
+        ("digifeeds_set_id", str),
     ],
 )
 
@@ -24,6 +26,8 @@ S = Services(
     test_database="sqlite:///:memory:",
     ci_on=os.getenv("CI"),
     digifeeds_api_url=os.getenv("DIGIFEEDS_API_URL") or "http://api:8000",
+    digifeeds_set_id=os.getenv("DIGIFEEDS_SET_ID") or "digifeeds_set_id",
+    alma_api_key=os.getenv("ALMA_API_KEY") or "alma_api_key",
 )
 
 # S = SimpleNamespace()

@@ -9,20 +9,18 @@ class DBClient:
     def get_item(self, barcode: str):
         url = self._url(f"items/{barcode}")
         response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-        elif response.status_code == 404:
+        if response.status_code == 404:
             return None
-        else:
+        elif response.status_code != 200:
             response.raise_for_status()
+        return response.json()
 
     def add_item(self, barcode: str):
         url = self._url(f"items/{barcode}")
         response = requests.post(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
+        if response.status_code != 200:
             response.raise_for_status()
+        return response.json()
 
     def get_or_add_item(self, barcode: str):
         item = self.get_item(barcode)
@@ -33,10 +31,9 @@ class DBClient:
     def add_item_status(self, barcode: str, status: str):
         url = self._url(f"items/{barcode}/status/{status}")
         response = requests.put(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
+        if response.status_code != 200:
             response.raise_for_status()
+        return response.json()
 
     def _url(self, path) -> str:
         return f"{self.base_url}/{path}"
