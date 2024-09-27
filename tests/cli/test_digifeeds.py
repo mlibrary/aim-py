@@ -60,3 +60,14 @@ def test_load_statuses(mocker):
     assert session_local_mock.call_count == 1
     assert load_statuse_mock.call_count == 1
     assert result.exit_code == 0
+
+
+def test_list_barcodes_in_input_bucket(mocker):
+    list_barcodes_mock = mocker.patch(
+        "aim.cli.digifeeds.list_barcodes_in_bucket",
+        return_value=["barcode1", "barcode2"],
+    )
+    result = runner.invoke(app, ["digifeeds", "list-barcodes-in-input-bucket"])
+    assert list_barcodes_mock.call_count == 1
+    assert result.exit_code == 0
+    assert "['barcode1', 'barcode2']" == result.stdout

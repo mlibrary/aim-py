@@ -12,6 +12,10 @@ Services = NamedTuple(
         ("alma_api_url", str),
         ("digifeeds_api_url", str),
         ("digifeeds_set_id", str),
+        ("digifeeds_s3_access_key", str),
+        ("digifeeds_s3_secret_access_key", str),
+        ("digifeeds_s3_bucket", str),
+        ("digifeeds_s3_input_path", str),
     ],
 )
 
@@ -29,4 +33,11 @@ S = Services(
     digifeeds_set_id=os.getenv("DIGIFEEDS_SET_ID") or "digifeeds_set_id",
     alma_api_key=os.getenv("ALMA_API_KEY") or "alma_api_key",
     alma_api_url="https://api-na.hosted.exlibrisgroup.com/almaws/v1",
+    digifeeds_s3_access_key=os.getenv("DIGIFEEDS_S3_ACCESS_KEY")
+    or "digifeeds_s3_access_key",
+    digifeeds_s3_secret_access_key=os.getenv("DIGIFEEDS_S3_SECRET_ACCESS_KEY")
+    or "digifeeds_s3_secret_access_key",
+    digifeeds_s3_bucket=os.getenv("DIGIFEEDS_S3_BUCKET") or "digifeeds_s3_bucket",
+    digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
+    or "path_to_input_barcodes",
 )
