@@ -12,7 +12,7 @@ class AlmaClient:
                 "Authorization": f"apikey { S.alma_api_key }",
             }
         )
-        self.base_url = "https://api-na.hosted.exlibrisgroup.com/almaws/v1"
+        self.base_url = S.alma_api_url
         self.digifeeds_set_id = S.digifeeds_set_id
 
     def add_barcode_to_digifeeds_set(self, barcode: str) -> None:

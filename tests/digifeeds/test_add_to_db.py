@@ -9,11 +9,6 @@ from aim.services import S
 
 
 @pytest.fixture
-def alma_base_url():
-    return "https://api-na.hosted.exlibrisgroup.com/almaws/v1"
-
-
-@pytest.fixture
 def item_data():
     with open("tests/fixtures/digifeeds/item.json") as f:
         output = json.load(f)
@@ -46,7 +41,7 @@ def test_add_to_db_barcode_thats_not_in_the_digifeeds_set(mocker, item_data):
 
 
 @responses.activate
-def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data, alma_base_url):
+def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
     get_item_mock = mocker.patch(
         "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
@@ -64,7 +59,7 @@ def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data, alma_base_url)
             ]
         },
     }
-    add_to_digifeeds_url = f"{alma_base_url}/conf/sets/{S.digifeeds_set_id}"
+    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
     add_to_digifeeds_set = responses.post(
         add_to_digifeeds_url,
         json=error_body,
@@ -81,7 +76,7 @@ def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data, alma_base_url)
 
 
 @responses.activate
-def test_add_to_db_barcode_that_causes_alma_error(mocker, item_data, alma_base_url):
+def test_add_to_db_barcode_that_causes_alma_error(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
     get_item_mock = mocker.patch(
         "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
@@ -99,7 +94,7 @@ def test_add_to_db_barcode_that_causes_alma_error(mocker, item_data, alma_base_u
             ]
         },
     }
-    add_to_digifeeds_url = f"{alma_base_url}/conf/sets/{S.digifeeds_set_id}"
+    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
     add_to_digifeeds_set = responses.post(
         add_to_digifeeds_url,
         json=error_body,

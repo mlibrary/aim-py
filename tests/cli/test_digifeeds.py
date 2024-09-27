@@ -16,13 +16,8 @@ def item_data():
     return output
 
 
-@pytest.fixture
-def alma_base_url():
-    return "https://api-na.hosted.exlibrisgroup.com/almaws/v1"
-
-
 @responses.activate
-def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data, alma_base_url):
+def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
     item_data["statuses"][0]["name"] = "in_zephir"
     get_add_url = f"{S.digifeeds_api_url}/items/some_barcode"
 
@@ -32,7 +27,7 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data, alma_base_url):
         f"{get_add_url}/status/added_to_digifeeds_set", json=item_data, status=200
     )
 
-    add_to_digifeeds_url = f"{alma_base_url}/conf/sets/{S.digifeeds_set_id}"
+    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
     add_to_digifeeds_query = {
         "id_type": "BARCODE",
         "op": "add_members",
