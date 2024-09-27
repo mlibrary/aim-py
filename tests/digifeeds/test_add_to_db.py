@@ -109,5 +109,6 @@ def test_add_to_db_barcode_that_causes_alma_error(mocker, item_data, alma_base_u
     with pytest.raises(Exception) as exc_info:
         add_to_db("my_barcode")
     assert exc_info.type is HTTPError
+    assert add_to_digifeeds_set.call_count == 1
     get_item_mock.assert_called_once()
     add_status_mock.assert_not_called()

@@ -18,7 +18,7 @@ def test_get_item_not_found():
     url = f"{S.digifeeds_api_url}/items/my_barcode"
     responses.get(url, json={"item": "my_item"}, status=404)
     item = DBClient().get_item(barcode="my_barcode")
-    assert item == None
+    assert item is None
 
 
 @responses.activate
