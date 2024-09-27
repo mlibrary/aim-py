@@ -14,4 +14,6 @@ def add_to_db(barcode: str):
             if any(e["errorCode"] == "60120" for e in errorList):
                 DBClient().add_item_status(barcode=barcode, status="not_found_in_alma")
                 return None
+            else:
+                raise ext_inst
         DBClient().add_item_status(barcode=barcode, status="added_to_digifeeds_set")

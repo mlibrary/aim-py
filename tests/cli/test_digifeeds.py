@@ -56,3 +56,12 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data, alma_base_url):
     assert add_item_status.call_count == 1
     assert result.exit_code == 0
     assert 'Adding barcode "some_barcode" to database' in result.stdout
+
+
+def test_load_statuses(mocker):
+    session_local_mock = mocker.patch("aim.digifeeds.database.main.SessionLocal")
+    load_statuse_mock = mocker.patch("aim.digifeeds.database.models.load_statuses")
+    result = runner.invoke(app, ["digifeeds", "load-statuses"])
+    assert session_local_mock.call_count == 1
+    assert load_statuse_mock.call_count == 1
+    assert result.exit_code == 0
