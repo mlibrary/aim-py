@@ -70,4 +70,4 @@ def test_list_barcodes_in_input_bucket(mocker):
     result = runner.invoke(app, ["digifeeds", "list-barcodes-in-input-bucket"])
     assert list_barcodes_mock.call_count == 1
     assert result.exit_code == 0
-    assert "['barcode1', 'barcode2']" == result.stdout
+    assert '["barcode1", "barcode2"]' == result.stdout

@@ -2,6 +2,8 @@ import typer
 from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
 from aim.digifeeds.list_barcodes_in_bucket import list_barcodes_in_bucket
 from aim.digifeeds.database import models, main
+import json
+import sys
 
 
 app = typer.Typer()
@@ -21,4 +23,4 @@ def load_statuses():
 
 @app.command()
 def list_barcodes_in_input_bucket():
-    print(list_barcodes_in_bucket(), end="")
+    json.dump(list_barcodes_in_bucket(), sys.stdout)
