@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "aim"
 version = "0.1.0"
-description = "Boilerplate code for developing a python app in docker"
+description = "A CLI for the AIM team"
 authors = ["Monique Rio <mrio@umich.edu>", "David Fulmer <dfulmer@umich.edu>"]
 readme = "README.md"
 packages = [{include = "aim"}]
@@ -20,6 +20,7 @@ alembic = "^1.13.2"
 pytest = "^8.0.2"
 pytest-cov = "^5.0.0"
 ruff = "^0.6.6"
+
 
 [tool.pytest.ini_options]
 addopts = "--cov=aim --cov-report=html --cov-report=term:skip-covered"
