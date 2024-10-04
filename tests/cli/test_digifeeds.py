@@ -5,6 +5,7 @@ from responses import matchers
 from typer.testing import CliRunner
 from aim.cli.main import app
 from aim.services import S
+from aim.digifeeds.item import Item
 
 runner = CliRunner()
 
@@ -23,8 +24,10 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
 
     get_item = responses.get(get_add_url, json={}, status=404)
     post_item = responses.post(get_add_url, json=item_data, status=200)
+    more_statuses = item_data.copy()
+    more_statuses["statuses"].append({"name": "added_to_digifeeds_set"})
     add_item_status = responses.put(
-        f"{get_add_url}/status/added_to_digifeeds_set", json=item_data, status=200
+        f"{get_add_url}/status/added_to_digifeeds_set", json=more_statuses, status=200
     )
 
     add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
@@ -51,6 +54,17 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
     assert add_item_status.call_count == 1
     assert result.exit_code == 0
     assert 'Adding barcode "some_barcode" to database' in result.stdout
+    assert "Item added to digifeeds set" in result.stdout
+
+
+def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
+    item_data["statuses"][0]["name"] = "not_found_in_alma"
+    item = Item(item_data)
+    mocker.patch("aim.cli.digifeeds.add_to_digifeeds_db", return_value=item)
+
+    result = runner.invoke(app, ["digifeeds", "add-to-db", "some_barcode"])
+    assert "Item not found in alma" in result.stdout
+    assert "Item not added to digifeeds set" in result.stdout
 
 
 def test_load_statuses(mocker):

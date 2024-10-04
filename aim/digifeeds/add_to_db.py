@@ -12,8 +12,16 @@ def add_to_db(barcode: str):
         except HTTPError as ext_inst:
             errorList = ext_inst.response.json()["errorList"]["error"]
             if any(e["errorCode"] == "60120" for e in errorList):
-                DBClient().add_item_status(barcode=barcode, status="not_found_in_alma")
-                return None
+                if not item.has_status("not_found_in_alma"):
+                    item = Item(
+                        DBClient().add_item_status(
+                            barcode=barcode, status="not_found_in_alma"
+                        )
+                    )
+                return item
             else:
                 raise ext_inst
-        DBClient().add_item_status(barcode=barcode, status="added_to_digifeeds_set")
+        item = Item(
+            DBClient().add_item_status(barcode=barcode, status="added_to_digifeeds_set")
+        )
+    return item

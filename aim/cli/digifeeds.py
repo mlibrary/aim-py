@@ -11,8 +11,14 @@ app = typer.Typer()
 
 @app.command()
 def add_to_db(barcode: str):
-    add_to_digifeeds_db(barcode)
     print(f'Adding barcode "{barcode}" to database')
+    item = add_to_digifeeds_db(barcode)
+    if item.has_status("not_found_in_alma"):
+        print("Item not found in alma.")
+    if item.has_status("added_to_digifeeds_set"):
+        print("Item added to digifeeds set")
+    else:
+        print("Item not added to digifeeds set")
 
 
 @app.command()

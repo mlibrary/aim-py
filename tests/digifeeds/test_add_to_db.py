@@ -21,23 +21,26 @@ def test_add_to_db_barcode_thats_in_the_digifeeds_set(mocker, item_data):
     )
     result = add_to_db("my_barcode")
     get_item_mock.assert_called_once()
-    assert result is None
+    assert result.barcode == "some_barcode"
 
 
 def test_add_to_db_barcode_thats_not_in_the_digifeeds_set(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
     get_item_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
+        "aim.digifeeds.add_to_db.DBClient.get_or_add_item", return_value=item_data
     )
-    add_status_mock = mocker.patch("aim.digifeeds.db_client.DBClient.add_item_status")
+    add_status_mock = mocker.patch(
+        "aim.digifeeds.add_to_db.DBClient.add_item_status", return_value=item_data
+    )
     add_to_digifeeds_set_mock = mocker.patch(
-        "aim.digifeeds.alma_client.AlmaClient.add_barcode_to_digifeeds_set"
+        "aim.digifeeds.add_to_db.AlmaClient.add_barcode_to_digifeeds_set",
+        return_value=item_data,
     )
-    result = add_to_db("my_barcode")
+    result = add_to_db("some_barcode")
     get_item_mock.assert_called_once()
     add_status_mock.assert_called_once()
     add_to_digifeeds_set_mock.assert_called_once()
-    assert result is None
+    assert result.barcode == "some_barcode"
 
 
 @responses.activate
@@ -46,7 +49,9 @@ def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data):
     get_item_mock = mocker.patch(
         "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
     )
-    add_status_mock = mocker.patch("aim.digifeeds.db_client.DBClient.add_item_status")
+    add_status_mock = mocker.patch(
+        "aim.digifeeds.db_client.DBClient.add_item_status", return_value=item_data
+    )
     error_body = {
         "errorsExist": True,
         "errorList": {
@@ -66,13 +71,13 @@ def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data):
         status=400,
     )
 
-    result = add_to_db("my_barcode")
+    result = add_to_db("some_barcode")
     get_item_mock.assert_called_once()
     add_status_mock.assert_called_once_with(
-        barcode="my_barcode", status="not_found_in_alma"
+        barcode="some_barcode", status="not_found_in_alma"
     )
     assert add_to_digifeeds_set.call_count == 1
-    assert result is None
+    assert result.barcode == "some_barcode"
 
 
 @responses.activate
