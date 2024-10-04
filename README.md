@@ -48,14 +48,15 @@ alembic upgrade heads
 The alembic migrations live in the `aim/digifeeds/database/migrations` folder.
 
 #### Web API for the Database
-To run the api:
+The docker compose `api` service runs the application on port 8000.
 
-In the `/app` folder of the container run:
-```
-uvicorn aim.digifeeds.database.main:app --host 0.0.0.0 --reload
-```
+Assuming docker compose is up for the `aim-py` repository, in the browser go to:
+http://localhost:8000/docs to work with the API.
 
-In the browser go to: http://localhost:8000/docs to work with the API.
+#### CLI
+
+The digifeeds CLI is in the file `aim/cli/digifeeds.py` It has a mix a database
+operations and application operations.
 
 ## Tests
 
