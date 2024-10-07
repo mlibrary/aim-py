@@ -11,7 +11,12 @@ else:  # pragma: no cover
     engine = create_engine(S.mysql_database)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-app = FastAPI()
+
+description = """
+The Digifeeds API enables tracking of images sent to HathiTrust and Google
+through the digifeeds workflow
+"""
+app = FastAPI(title="Digifeeds", description=description)
 
 
 # Dependency
