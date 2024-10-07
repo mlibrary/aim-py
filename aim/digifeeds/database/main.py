@@ -50,7 +50,16 @@ def get_item(
     return db_item
 
 
-@app.post("/items/{barcode}", response_model_by_alias=False)
+@app.post(
+    "/items/{barcode}",
+    response_model_by_alias=False,
+    responses={
+        400: {
+            "description": "Bad request</br></br>The item already exists",
+            "model": schemas.Response400,
+        }
+    },
+)
 def create_item(
     barcode: str = Path(..., description="The barcode of the item"),
     db: Session = Depends(get_db),
