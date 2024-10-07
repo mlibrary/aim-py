@@ -35,6 +35,13 @@ def get_items(
     ),
     db: Session = Depends(get_db),
 ) -> list[schemas.Item]:
+    """
+    Get the digifeeds items.
+
+    These items can be filtered by whether or not their metadata is in Zephir or
+    all of them can be fetched.
+    """
+
     db_items = crud.get_items(in_zephir=in_zephir, db=db)
     return db_items
 
