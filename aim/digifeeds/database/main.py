@@ -1,4 +1,4 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Path, Query
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from aim.digifeeds.database import crud, schemas
@@ -11,7 +11,12 @@ else:  # pragma: no cover
     engine = create_engine(S.mysql_database)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-app = FastAPI()
+
+description = """
+The Digifeeds API enables tracking of images sent to HathiTrust and Google
+through the digifeeds workflow
+"""
+app = FastAPI(title="Digifeeds", description=description)
 
 
 # Dependency
@@ -25,22 +30,47 @@ def get_db():  # pragma: no cover
 
 @app.get("/items/", response_model_by_alias=False)
 def get_items(
-    in_zephir: bool | None = None, db: Session = Depends(get_db)
+    in_zephir: bool | None = Query(
+        None, description="Filter for items that do or do not have metadata in Zephir"
+    ),
+    db: Session = Depends(get_db),
 ) -> list[schemas.Item]:
+    """
+    Get the digifeeds items.
+
+    These items can be filtered by whether or not their metadata is in Zephir or
+    all of them can be fetched.
+    """
+
     db_items = crud.get_items(in_zephir=in_zephir, db=db)
     return db_items
 
 
 @app.get("/items/{barcode}", response_model_by_alias=False)
-def get_item(barcode: str, db: Session = Depends(get_db)) -> schemas.Item:
+def get_item(
+    barcode: str = Path(..., description="The barcode of the item"),
+    db: Session = Depends(get_db),
+) -> schemas.Item:
     db_item = crud.get_item(barcode=barcode, db=db)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_item
 
 
-@app.post("/items/{barcode}", response_model_by_alias=False)
-def create_item(barcode: str, db: Session = Depends(get_db)) -> schemas.Item:
+@app.post(
+    "/items/{barcode}",
+    response_model_by_alias=False,
+    responses={
+        400: {
+            "description": "Bad request</br></br>The item already exists",
+            "model": schemas.Response400,
+        }
+    },
+)
+def create_item(
+    barcode: str = Path(..., description="The barcode of the item"),
+    db: Session = Depends(get_db),
+) -> schemas.Item:
     item = schemas.ItemCreate(barcode=barcode)
     db_item = crud.get_item(barcode=item.barcode, db=db)
     if db_item:
