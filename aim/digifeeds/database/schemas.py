@@ -48,3 +48,19 @@ class StatusBase(BaseModel):
 
 class Status(StatusBase):
     description: str
+
+
+class Response(BaseModel):
+    detail: str
+
+
+class Response400(Response):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "detail": "Item already exists.",
+                }
+            ]
+        }
+    )
