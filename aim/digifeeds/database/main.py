@@ -112,5 +112,11 @@ def update_item(
 
 @app.get("/statuses")
 def get_statuses(db: Session = Depends(get_db)) -> list[schemas.Status]:
+    """
+    Get digifeeds statuses.
+
+    Get a list of statuses.
+    """
+
     db_statuses = crud.get_statuses(db=db)
     return db_statuses
