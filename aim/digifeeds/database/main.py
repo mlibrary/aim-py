@@ -77,6 +77,12 @@ def create_item(
     barcode: str = Path(..., description="The barcode of the item"),
     db: Session = Depends(get_db),
 ) -> schemas.Item:
+    """
+    Create a digifeeds item.
+
+    The item can be created with the barcode of the item and must not already exist.
+    """
+
     item = schemas.ItemCreate(barcode=barcode)
     db_item = crud.get_item(barcode=item.barcode, db=db)
     if db_item:
