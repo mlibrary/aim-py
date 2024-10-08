@@ -1,3 +1,6 @@
+"""Digifeeds CLI
+====================
+"""
 import typer
 from typing_extensions import Annotated
 from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
@@ -23,6 +26,9 @@ def add_to_db(
     If the barcode is in the database fetch it and then try to add it to the
     Digifeeds set in Alma. Prints an error message if the barcode isn't found in Alma.
     Prints the status of adding the item to the digifeeds set.
+
+    Args:
+        barcode (str): Barcode of item
     """
     print(f'Adding barcode "{barcode}" to database')
     item = add_to_digifeeds_db(barcode)

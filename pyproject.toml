@@ -29,6 +29,11 @@ responses = "^0.25.3"
 pytest-socket = "^0.7.0"
 pytest-mock = "^3.14.0"
 moto = {extras = ["s3"], version = "^5.0.15"}
+sphinx = "^8.0.2"
+sphinx-rtd-theme = "^3.0.0"
+sphinx-autobuild = "^2024.10.3"
+myst-parser = "^4.0.0"
+sphinxcontrib-mermaid = "^0.9.2"
 
 
 [tool.pytest.ini_options]

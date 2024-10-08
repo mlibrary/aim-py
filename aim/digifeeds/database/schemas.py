@@ -1,3 +1,4 @@
+"""Digifeeds Pydantic Models"""
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
@@ -36,6 +37,7 @@ class Item(ItemBase):
             ]
         }
     )
+
 
 
 class ItemCreate(ItemBase):
