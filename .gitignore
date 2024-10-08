@@ -14,3 +14,4 @@ htmlcov/
 .coverage
 .gnupg
 requirements.txt
+docs/_build

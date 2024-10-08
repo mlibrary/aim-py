@@ -4,6 +4,17 @@ from aim.digifeeds.database import models
 
 
 def get_item(db: Session, barcode: str):
+    """
+    Get item from the database
+
+    Args:
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        barcode (str): Barcode of the item
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+
+    """
     return db.query(models.Item).filter(models.Item.barcode == barcode).first()
 
 
