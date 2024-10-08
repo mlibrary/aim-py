@@ -51,6 +51,12 @@ def get_item(
     barcode: str = Path(..., description="The barcode of the item"),
     db: Session = Depends(get_db),
 ) -> schemas.Item:
+    """
+    Get a digifeeds item.
+
+    The item can be fetched by the barcode of the item.
+    """
+
     db_item = crud.get_item(barcode=barcode, db=db)
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
