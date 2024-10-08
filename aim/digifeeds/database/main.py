@@ -95,6 +95,12 @@ def create_item(
 def update_item(
     barcode: str, status_name: str, db: Session = Depends(get_db)
 ) -> schemas.Item:
+    """
+    Update a digifeeds item.
+
+    The item can be updated with the barcode of the item and the status.
+    """
+
     db_status = crud.get_status(name=status_name, db=db)
     if db_status is None:
         raise HTTPException(status_code=404, detail="Status not found")
