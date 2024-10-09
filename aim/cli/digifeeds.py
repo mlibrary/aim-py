@@ -36,10 +36,16 @@ def add_to_db(
 
 @app.command()
 def load_statuses():
+    """
+    Fetch the statuses from teh database.
+    """
     with main.SessionLocal() as db_session:
         models.load_statuses(session=db_session)
 
 
 @app.command()
 def list_barcodes_in_input_bucket():
+    """
+    List the barcodes currently in the input bucket.
+    """
     json.dump(list_barcodes_in_bucket(), sys.stdout)
