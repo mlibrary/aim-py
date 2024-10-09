@@ -16,6 +16,12 @@ description = """
 The Digifeeds API enables tracking of images sent to HathiTrust and Google
 through the digifeeds workflow
 """
+tags_metadata = [
+    {
+        "name": "Digifeeds Database",
+        "description": "Digifeeds items and statuses.",
+    },
+]
 app = FastAPI(title="Digifeeds", description=description)
 
 
@@ -28,7 +34,7 @@ def get_db():  # pragma: no cover
         db.close()
 
 
-@app.get("/items/", response_model_by_alias=False)
+@app.get("/items/", response_model_by_alias=False, tags=["Digifeeds Database"])
 def get_items(
     in_zephir: bool | None = Query(
         None, description="Filter for items that do or do not have metadata in Zephir"
@@ -46,7 +52,7 @@ def get_items(
     return db_items
 
 
-@app.get("/items/{barcode}", response_model_by_alias=False)
+@app.get("/items/{barcode}", response_model_by_alias=False, tags=["Digifeeds Database"])
 def get_item(
     barcode: str = Path(..., description="The barcode of the item"),
     db: Session = Depends(get_db),
@@ -72,6 +78,7 @@ def get_item(
             "model": schemas.Response400,
         }
     },
+    tags=["Digifeeds Database"]
 )
 def create_item(
     barcode: str = Path(..., description="The barcode of the item"),
@@ -91,7 +98,7 @@ def create_item(
     return db_item
 
 
-@app.put("/items/{barcode}/status/{status_name}", response_model_by_alias=False)
+@app.put("/items/{barcode}/status/{status_name}", response_model_by_alias=False, tags=["Digifeeds Database"])
 def update_item(
     barcode: str, status_name: str, db: Session = Depends(get_db)
 ) -> schemas.Item:
@@ -110,7 +117,7 @@ def update_item(
     return crud.add_item_status(db=db, item=db_item, status=db_status)
 
 
-@app.get("/statuses")
+@app.get("/statuses", tags=["Digifeeds Database"])
 def get_statuses(db: Session = Depends(get_db)) -> list[schemas.Status]:
     """
     Get digifeeds statuses.
