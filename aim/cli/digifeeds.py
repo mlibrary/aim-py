@@ -37,7 +37,7 @@ def add_to_db(
 @app.command()
 def load_statuses():
     """
-    Fetch the statuses from teh database.
+    Fetch the statuses from the database.
     """
     with main.SessionLocal() as db_session:
         models.load_statuses(session=db_session)
