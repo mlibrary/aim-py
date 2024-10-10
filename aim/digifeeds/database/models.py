@@ -1,6 +1,6 @@
 """
 Digifeeds Models
-========= 
+================ 
 """
 
 from sqlalchemy import String, ForeignKey, DateTime

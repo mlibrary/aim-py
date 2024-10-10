@@ -23,9 +23,10 @@ classDiagram
         +has_matching_htid_in_item_call_num()
         +body_for_update()
     }
-    class EmptyAlmaItem{
 
-    }
+    class EmptyAlmaItem
+    
+
     AlmaItem <|-- EmptyAlmaItem
     
     Wrapper -- AlmaClient
@@ -45,7 +46,6 @@ classDiagram
         +initialize(list_of_counters)
         +update_report(kind, message)
     }
-
  ```
 
 ## Sequence Diagram

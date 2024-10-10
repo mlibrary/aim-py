@@ -15,6 +15,6 @@ documentation for details.
    :titlesonly:
    :caption: Contents:
 
+   api/aim
    digifeeds/index
    future_projects/index
-   api/aim

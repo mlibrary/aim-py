@@ -1,5 +1,5 @@
 """Digifeeds Crud operations
-=====
+============================
 
 Operations that act on the digifeeds database
 """
