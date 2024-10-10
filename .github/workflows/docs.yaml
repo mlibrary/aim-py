@@ -3,7 +3,7 @@ name: Build and deploy docs
 on: push
 
 jobs:
-  docs:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,5 +21,22 @@ jobs:
       - run: poetry install
       - name: build docs
         run: poetry run sphinx-build ./docs docs/_build
-      - name: list _build
-        run: ls ./docs/_build
+      - name: upload build directory
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ./docs/_build/
+
+  deploy:  
+    needs: build
+    permissions:
+      pages: write      # to deploy to Pages
+      id-token: write   # to verify the deployment originates from an appropriate source
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4  
+
