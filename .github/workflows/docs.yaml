@@ -1,0 +1,25 @@
+name: Build and deploy docs
+
+on: push
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create .env file
+        run: cat env.* > .env
+      - name: Load .env file
+        uses: xom9ikk/dotenv@v2.3.0
+      - name: Install poetry
+        run: pipx install poetry
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+      - run: poetry install
+      - name: build docs
+        run: poetry run sphinx-build ./docs
+      - name: list _build
+        run: ls ./docs/_build
