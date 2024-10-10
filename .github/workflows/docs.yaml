@@ -20,6 +20,6 @@ jobs:
           cache: 'poetry'
       - run: poetry install
       - name: build docs
-        run: poetry run sphinx-build ./docs
+        run: poetry run sphinx-build ./docs docs/_build
       - name: list _build
         run: ls ./docs/_build
