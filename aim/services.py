@@ -2,22 +2,45 @@ from typing import NamedTuple
 import os
 import sqlalchemy as sa
 
-Services = NamedTuple(
-    "Services",
-    [
-        ("mysql_database", sa.engine.URL),
-        ("test_database", str),
-        ("ci_on", str | None),
-        ("alma_api_key", str),
-        ("alma_api_url", str),
-        ("digifeeds_api_url", str),
-        ("digifeeds_set_id", str),
-        ("digifeeds_s3_access_key", str),
-        ("digifeeds_s3_secret_access_key", str),
-        ("digifeeds_s3_bucket", str),
-        ("digifeeds_s3_input_path", str),
-    ],
-)
+
+class Services(NamedTuple):
+    """
+    Global Configuration Services
+    """
+
+    #: The Digifeeds MySQL database
+    mysql_database: sa.engine.URL
+
+    #: A sqlite in memory digifeeds database for testing
+    test_database: str
+
+    #: Is this being run in Github Actions?
+    ci_on: str | None
+
+    #: The Alma API Key
+    alma_api_key: str
+
+    #: The Alma API url
+    alma_api_url: str
+
+    #: The digifeeds database API URL
+    digifeeds_api_url: str
+
+    #: The Alma Set Id for the digifeeds set
+    digifeeds_set_id: str
+
+    #: The S3 bucket access key for digifeeds
+    digifeeds_s3_access_key: str
+
+    #: The S3 bucket secret access key for digifeeds
+    digifeeds_s3_secret_access_key: str
+
+    #: The S3 bucket name for the digifeeds process
+    digifeeds_s3_bucket: str
+
+    #: The url in the s3 bucket for the digifeeds process
+    digifeeds_s3_input_path: str
+
 
 S = Services(
     mysql_database=sa.engine.URL.create(
@@ -37,7 +60,8 @@ S = Services(
     or "digifeeds_s3_access_key",
     digifeeds_s3_secret_access_key=os.getenv("DIGIFEEDS_S3_SECRET_ACCESS_KEY")
     or "digifeeds_s3_secret_access_key",
-    digifeeds_s3_bucket=os.getenv("DIGIFEEDS_S3_BUCKET") or "digifeeds_s3_bucket",
+    digifeeds_s3_bucket=os.getenv(
+        "DIGIFEEDS_S3_BUCKET") or "digifeeds_s3_bucket",
     digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
     or "path_to_input_barcodes",
 )
