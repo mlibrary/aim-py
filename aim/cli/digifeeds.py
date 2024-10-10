@@ -1,3 +1,6 @@
+"""Digifeeds CLI
+====================
+"""
 import typer
 from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
 from aim.digifeeds.list_barcodes_in_bucket import list_barcodes_in_bucket
@@ -11,6 +14,11 @@ app = typer.Typer()
 
 @app.command()
 def add_to_db(barcode: str):
+    """Adds barcode to the digifeeds db
+
+    Args:
+        barcode (str): Barcode of item
+    """
     print(f'Adding barcode "{barcode}" to database')
     item = add_to_digifeeds_db(barcode)
     if item.has_status("not_found_in_alma"):

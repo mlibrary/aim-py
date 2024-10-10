@@ -1,5 +1,7 @@
+"""Digifeeds Pydantic Models"""
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
+
 
 class ItemStatus(BaseModel):
     name: str = Field(alias="status_name")
@@ -8,17 +10,21 @@ class ItemStatus(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
+
 class ItemBase(BaseModel):
     model_config = ConfigDict(populate_by_name=True, from_attributes=True)
 
     barcode: str = Field(alias="item_barcode")
 
+
 class Item(ItemBase):
     created_at: datetime
     statuses: list[ItemStatus] = []
 
+
 class ItemCreate(ItemBase):
     pass
+
 
 class StatusBase(BaseModel):
     name: str
@@ -26,5 +32,3 @@ class StatusBase(BaseModel):
 
 class Status(StatusBase):
     description: str
-
-

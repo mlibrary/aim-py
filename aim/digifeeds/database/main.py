@@ -1,3 +1,8 @@
+"""Fast API Main
+===========
+The main document for Fast API
+"""
+
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker

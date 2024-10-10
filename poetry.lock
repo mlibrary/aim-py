@@ -911,6 +911,25 @@ files = [
 ]
 
 [[package]]
+name = "mdit-py-plugins"
+version = "0.4.2"
+description = "Collection of plugins for markdown-it-py"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "mdit_py_plugins-0.4.2-py3-none-any.whl", hash = "sha256:0c673c3f889399a33b95e88d2f0d111b4447bdfea7f237dab2d488f459835636"},
+    {file = "mdit_py_plugins-0.4.2.tar.gz", hash = "sha256:5f2cd1fdb606ddf152d37ec30e46101a60512bc0e5fa1a7002c36647b09e26b5"},
+]
+
+[package.dependencies]
+markdown-it-py = ">=1.0.0,<4.0.0"
+
+[package.extras]
+code-style = ["pre-commit"]
+rtd = ["myst-parser", "sphinx-book-theme"]
+testing = ["coverage", "pytest", "pytest-cov", "pytest-regressions"]
+
+[[package]]
 name = "mdurl"
 version = "0.1.2"
 description = "Markdown URL utilities"
@@ -985,6 +1004,32 @@ files = [
     {file = "mysqlclient-2.2.4-pp39-pypy39_pp73-win_amd64.whl", hash = "sha256:9d3310295cb682232cadc28abd172f406c718b9ada41d2371259098ae37779d3"},
     {file = "mysqlclient-2.2.4.tar.gz", hash = "sha256:33bc9fb3464e7d7c10b1eaf7336c5ff8f2a3d3b88bab432116ad2490beb3bf41"},
 ]
+
+[[package]]
+name = "myst-parser"
+version = "4.0.0"
+description = "An extended [CommonMark](https://spec.commonmark.org/) compliant parser,"
+optional = false
+python-versions = ">=3.10"
+files = [
+    {file = "myst_parser-4.0.0-py3-none-any.whl", hash = "sha256:b9317997552424448c6096c2558872fdb6f81d3ecb3a40ce84a7518798f3f28d"},
+    {file = "myst_parser-4.0.0.tar.gz", hash = "sha256:851c9dfb44e36e56d15d05e72f02b80da21a9e0d07cba96baf5e2d476bb91531"},
+]
+
+[package.dependencies]
+docutils = ">=0.19,<0.22"
+jinja2 = "*"
+markdown-it-py = ">=3.0,<4.0"
+mdit-py-plugins = ">=0.4.1,<1.0"
+pyyaml = "*"
+sphinx = ">=7,<9"
+
+[package.extras]
+code-style = ["pre-commit (>=3.0,<4.0)"]
+linkify = ["linkify-it-py (>=2.0,<3.0)"]
+rtd = ["ipython", "sphinx (>=7)", "sphinx-autodoc2 (>=0.5.0,<0.6.0)", "sphinx-book-theme (>=1.1,<2.0)", "sphinx-copybutton", "sphinx-design", "sphinx-pyscript", "sphinx-tippy (>=0.4.3)", "sphinx-togglebutton", "sphinxext-opengraph (>=0.9.0,<0.10.0)", "sphinxext-rediraffe (>=0.2.7,<0.3.0)"]
+testing = ["beautifulsoup4", "coverage[toml]", "defusedxml", "pytest (>=8,<9)", "pytest-cov", "pytest-param-files (>=0.6.0,<0.7.0)", "pytest-regressions", "sphinx-pytest"]
+testing-docutils = ["pygments", "pytest (>=8,<9)", "pytest-param-files (>=0.6.0,<0.7.0)"]
 
 [[package]]
 name = "packaging"
@@ -1529,6 +1574,28 @@ lint = ["flake8 (>=6.0)", "mypy (==1.11.0)", "pytest (>=6.0)", "ruff (==0.5.5)",
 test = ["cython (>=3.0)", "defusedxml (>=0.7.1)", "pytest (>=8.0)", "setuptools (>=70.0)", "typing_extensions (>=4.9)"]
 
 [[package]]
+name = "sphinx-autobuild"
+version = "2024.10.3"
+description = "Rebuild Sphinx documentation on changes, with hot reloading in the browser."
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "sphinx_autobuild-2024.10.3-py3-none-any.whl", hash = "sha256:158e16c36f9d633e613c9aaf81c19b0fc458ca78b112533b20dafcda430d60fa"},
+    {file = "sphinx_autobuild-2024.10.3.tar.gz", hash = "sha256:248150f8f333e825107b6d4b86113ab28fa51750e5f9ae63b59dc339be951fb1"},
+]
+
+[package.dependencies]
+colorama = ">=0.4.6"
+sphinx = "*"
+starlette = ">=0.35"
+uvicorn = ">=0.25"
+watchfiles = ">=0.20"
+websockets = ">=11"
+
+[package.extras]
+test = ["httpx", "pytest (>=6)"]
+
+[[package]]
 name = "sphinx-rtd-theme"
 version = "3.0.0"
 description = "Read the Docs theme for Sphinx"
@@ -1622,6 +1689,17 @@ files = [
 
 [package.extras]
 test = ["flake8", "mypy", "pytest"]
+
+[[package]]
+name = "sphinxcontrib-mermaid"
+version = "0.9.2"
+description = "Mermaid diagrams in yours Sphinx powered docs"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "sphinxcontrib-mermaid-0.9.2.tar.gz", hash = "sha256:252ef13dd23164b28f16d8b0205cf184b9d8e2b714a302274d9f59eb708e77af"},
+    {file = "sphinxcontrib_mermaid-0.9.2-py3-none-any.whl", hash = "sha256:6795a72037ca55e65663d2a2c1a043d636dc3d30d418e56dd6087d1459d98a5d"},
+]
 
 [[package]]
 name = "sphinxcontrib-qthelp"
@@ -2094,4 +2172,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "52c5cc198cf5410e81b37dfd2ea4423f726480db21f939a4f72a3d5210678f7a"
+content-hash = "19877bc36249c56e22b32b8645deed9ba412d043a1062ac23e73e5a0782beb00"

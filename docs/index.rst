@@ -5,14 +5,16 @@
 
 AIM documentation
 =================
-
 Add your content using ``reStructuredText`` syntax. See the
 `reStructuredText <https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html>`_
 documentation for details.
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 6
+   :titlesonly:
    :caption: Contents:
 
-   modules
+   digifeeds/index
+   future_projects/index
+   api/aim
