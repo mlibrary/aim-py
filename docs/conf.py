@@ -15,7 +15,7 @@ release = "0.0.1"
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = ["sphinx.ext.napoleon", "sphinx.ext.viewcode", "sphinx.ext.autosummary",
-              "sphinx.ext.autodoc", 'myst_parser', 'sphinxcontrib.mermaid']
+              "sphinx.ext.autodoc", 'myst_parser', 'sphinxcontrib.mermaid', "sphinx_toolbox.more_autodoc.autonamedtuple"]
 autosummary_generate = True
 
 mermaid_d3_zoom = True
