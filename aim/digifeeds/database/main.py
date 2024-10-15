@@ -52,7 +52,17 @@ def get_items(
     return db_items
 
 
-@app.get("/items/{barcode}", response_model_by_alias=False, tags=["Digifeeds Database"])
+@app.get(
+    "/items/{barcode}",
+    response_model_by_alias=False,
+    responses={
+        404: {
+            "description": "Bad request</br></br>The item doesn't exist",
+            "model": schemas.Response404,
+        }
+    },
+    tags=["Digifeeds Database"],
+)
 def get_item(
     barcode: str = Path(..., description="The barcode of the item"),
     db: Session = Depends(get_db),
@@ -78,7 +88,7 @@ def get_item(
             "model": schemas.Response400,
         }
     },
-    tags=["Digifeeds Database"]
+    tags=["Digifeeds Database"],
 )
 def create_item(
     barcode: str = Path(..., description="The barcode of the item"),
@@ -98,7 +108,17 @@ def create_item(
     return db_item
 
 
-@app.put("/items/{barcode}/status/{status_name}", response_model_by_alias=False, tags=["Digifeeds Database"])
+@app.put(
+    "/items/{barcode}/status/{status_name}",
+    response_model_by_alias=False,
+    responses={
+        404: {
+            "description": "Bad request</br></br>The item or status doesn't exist",
+            "model": schemas.Response404,
+        }
+    },
+    tags=["Digifeeds Database"],
+)
 def update_item(
     barcode: str, status_name: str, db: Session = Depends(get_db)
 ) -> schemas.Item:

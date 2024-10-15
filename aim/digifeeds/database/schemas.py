@@ -64,3 +64,14 @@ class Response400(Response):
             ]
         }
     )
+
+class Response404(Response):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "detail": "Item not found.",
+                }
+            ]
+        }
+    )
