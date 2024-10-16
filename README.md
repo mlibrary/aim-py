@@ -136,6 +136,18 @@ The other is `client`, which provides a `fastapi` `TestClient` that knows about 
 ### CLI tests
 The `typer` `CliRunner` works without special modification. This is a good place to put in some integration tests since this is the entrypoint for using the application. That said, it's ok to mock out things like database calls. 
 
+## Documentation
+
+Documentation lives in the `/docs` directory. 
+
+[Sphinx](https://www.sphinx-doc.org) is used to generate the documentation website. 
+
+The [documentation site](https://mlibrary.github.io/aim-py/) is built with a Github Action on each push to main.
+
+We are using [Google style docstrings](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings).
+
+In development the documentation should build automatically and be available at http://localhost:8888/
+
 ## Deployment
 
 ### Production Docker image
