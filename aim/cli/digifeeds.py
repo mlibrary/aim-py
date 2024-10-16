@@ -21,8 +21,8 @@ def add_to_db(
     Add a barcode to the *Digifeeds Database* and then to the Alma Digifeeds Set
 
     If the barcode is in the database fetch it and then try to add it to the
-    Digifeeds set in Alma. If the barcode isn't found in Alma, print an error.
-    Print whether or not the item is added to the digifeeds set.
+    Digifeeds set in Alma. Prints an error message if the barcode isn't found in Alma.
+    Prints the status of adding the item to the digifeeds set.
     """
     print(f'Adding barcode "{barcode}" to database')
     item = add_to_digifeeds_db(barcode)
@@ -31,7 +31,7 @@ def add_to_db(
     if item.has_status("added_to_digifeeds_set"):
         print("Item added to digifeeds set")
     else:
-        print("Item not added to digifeeds set")
+        print("Item NOT added to digifeeds set")
 
 
 @app.command()
@@ -46,6 +46,6 @@ def load_statuses():
 @app.command()
 def list_barcodes_in_input_bucket():
     """
-    List the barcodes currently in the input bucket.
+    List the barcodes currently in the input directory in the S3 bucket.
     """
     json.dump(list_barcodes_in_bucket(), sys.stdout)
