@@ -64,12 +64,14 @@ def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
 
     result = runner.invoke(app, ["digifeeds", "add-to-db", "some_barcode"])
     assert "Item not found in alma" in result.stdout
-    assert "Item not added to digifeeds set" in result.stdout
+    assert "Item NOT added to digifeeds set" in result.stdout
 
 
 def test_load_statuses(mocker):
-    session_local_mock = mocker.patch("aim.digifeeds.database.main.SessionLocal")
-    load_statuse_mock = mocker.patch("aim.digifeeds.database.models.load_statuses")
+    session_local_mock = mocker.patch(
+        "aim.digifeeds.database.main.SessionLocal")
+    load_statuse_mock = mocker.patch(
+        "aim.digifeeds.database.models.load_statuses")
     result = runner.invoke(app, ["digifeeds", "load-statuses"])
     assert session_local_mock.call_count == 1
     assert load_statuse_mock.call_count == 1
