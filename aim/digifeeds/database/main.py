@@ -57,7 +57,7 @@ def get_items(
     response_model_by_alias=False,
     responses={
         404: {
-            "description": "Bad request</br></br>The item doesn't exist",
+            "description": "Bad request: The item doesn't exist",
             "model": schemas.Response404,
         }
     },
@@ -84,7 +84,7 @@ def get_item(
     response_model_by_alias=False,
     responses={
         400: {
-            "description": "Bad request</br></br>The item already exists",
+            "description": "Bad request: The item already exists",
             "model": schemas.Response400,
         }
     },
@@ -107,13 +107,21 @@ def create_item(
     db_item = crud.add_item(item=item, db=db)
     return db_item
 
+desc_put_404 = """
+Bad request: The item or status doesn't exist<br><br>
+Possible reponses:
+<ul>
+  <li>Item not found</li>
+  <li>Status not found</li>
+</ul>
+"""
 
 @app.put(
     "/items/{barcode}/status/{status_name}",
     response_model_by_alias=False,
     responses={
         404: {
-            "description": "Bad request</br></br>The item or status doesn't exist",
+            "description": desc_put_404,
             "model": schemas.Response404,
         }
     },
@@ -125,7 +133,7 @@ def update_item(
     """
     Update a digifeeds item.
 
-    The item can be updated with the barcode of the item and the status.
+    This is how to add a status to an existing item.
     """
 
     db_status = crud.get_status(name=status_name, db=db)

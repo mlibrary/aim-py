@@ -59,7 +59,7 @@ class Response400(Response):
         json_schema_extra={
             "examples": [
                 {
-                    "detail": "Item already exists.",
+                    "detail": "Item already exists",
                 }
             ]
         }
@@ -70,7 +70,7 @@ class Response404(Response):
         json_schema_extra={
             "examples": [
                 {
-                    "detail": "Item not found.",
+                    "detail": "Item not found",
                 }
             ]
         }
