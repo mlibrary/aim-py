@@ -1,0 +1,4 @@
+input_directory="some/path/to/input/directory"
+processed_directory="some/path/to/processed/directory"
+work_directory="some/path/to/work/directory"
+log_directory="some/path/to/log/directory"

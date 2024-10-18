@@ -68,7 +68,18 @@ RUN poetry export --without dev -f requirements.txt --output requirements.txt
 # We want poetry on in development
 FROM poetry AS development
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-   git
+   git \
+   bats \
+   bats-assert \
+   bats-file\
+   wget\
+   zip\
+   unzip
+
+RUN wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash && \
+  chown ${UID}:${GID} /opt/shellmock.bash
+
+ENV SHELLMOCK_PATH=/opt/shellmock.bash
 
 # Switch to the non-root user "user"
 USER app
