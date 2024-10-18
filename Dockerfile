@@ -72,9 +72,14 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
    bats \
    bats-assert \
    bats-file\
+   wget\
    zip\
    unzip
 
+RUN wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash && \
+  chown ${UID}:${GID} /opt/shellmock.bash
+
+ENV SHELLMOCK_PATH=/opt/shellmock.bash
 
 # Switch to the non-root user "user"
 USER app

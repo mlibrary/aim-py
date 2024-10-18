@@ -1,4 +1,5 @@
-#! /bin/bash
+#! /bin/bash 
+set -e #exit on error
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
@@ -10,6 +11,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 # processed_directory: path to the directory  of processed files
 # work_directory: path to the directory to do the processing of files
 # log_directory: path to store log and metrics files
+# digifeeds_bucket: rclone remote for the digifeeds bucket
 #
 # timestamp: used for testing timestamps; should be ommited in production
 CONFIG_FILE=${1:-$SCRIPT_DIR/upload_to_s3.config}
@@ -42,9 +44,12 @@ done
 for barcode_path in "${barcode_directories[@]}"; do
      barcode=$(basename ${barcode_path%%/})
 
+    echo "hello"
      cd $work_directory/$barcode 
      ls | awk "$IMGAWK" | xargs zip -rq $work_directory/$barcode.zip
      cd -
+
+     rclone copy $workdirectory/$barcode.zip $digifeeds_bucket:$barcode.zip
 
      mv $work_directory/$barcode.zip $processed_directory/${TIMESTAMP}_${barcode}.zip
      mv $work_directory/$barcode $processed_directory/${TIMESTAMP}_${barcode}
