@@ -31,7 +31,7 @@ setup() {
   touch $INPUT_DIR/$BARCODE_1/01234567.jp2
   touch $INPUT_DIR/$BARCODE_1/checksum.md5
   touch $INPUT_DIR/$BARCODE_1/Thumbs.db
-  touch $INPUT_DIR/$BARCODE_1/some_other_file.txt
+  touch $INPUT_DIR/$BARCODE_1/some_other_file.tif
 
   mkdir $INPUT_DIR/$BARCODE_2
   touch $INPUT_DIR/$BARCODE_2/01234567.tif
@@ -62,11 +62,17 @@ teardown() {
   assert_dir_exists $PROCESSED_DIR/${TIMESTAMP}_${BARCODE_2}
 }
 
-# @test "It filters the appropriate files" {
-#   run $SUBJECT
-#   mv $PROCESSED_DIR/$BARCODE_1.zip $WORK_DIR/
-#   unzip $WORK_DIR/$BARCODE_1.zip 
-# }
+@test "It filters the appropriate files" {
+  run $SUBJECT
+  cd $BATS_TEST_TMPDIR
+  mv $PROCESSED_DIR/${TIMESTAMP}_${BARCODE_1}.zip ./
+  unzip -q  ${TIMESTAMP}_${BARCODE_1}.zip 
+  assert_file_exists '01234567.jp2'
+  assert_file_exists '01234567.tif'
+  assert_file_exists 'checksum.md5'
+  assert_file_not_exists 'Thumbs.db'
+  assert_file_not_exists 'some_other_file.tif'
+}
 
 # This test shows that `shopt -s  nullglob` in necessary`
 @test "Emtpy input directory works" {
