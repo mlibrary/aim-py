@@ -3,7 +3,7 @@ name: Run Tests
 on: push
 
 jobs:
-  test:
+  test-python:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,3 +27,21 @@ jobs:
         env:
           CI: "true"
         run: poetry run pytest 
+
+  test-bash:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Bats and bats libs
+        id: setup-bats
+        uses: bats-core/bats-action@3.0.0
+      - name: Setup Shell Mock
+        run: wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash 
+      - run: ls /opt
+      - name: Run tests
+        shell: bash
+        env:
+         BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+         SHELLMOCK_PATH: /opt/shellmock.bash
+         TERM: xterm
+        run: bats ./bin/**/*_test.sh
