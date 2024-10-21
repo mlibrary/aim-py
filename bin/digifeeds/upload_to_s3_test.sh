@@ -10,13 +10,13 @@ setup() {
   SCRATCH_PATH="/tmp/upload_to_s3"
   CONFIG_PATH=$SCRATCH_PATH/upload_to_s3.config
   SUBJECT="$BATS_TEST_DIRNAME/upload_to_s3.sh $CONFIG_PATH"
+  load "$BATS_TEST_DIRNAME/upload_to_s3_functions.sh"
+
 
   mkdir $SCRATCH_PATH
 
   INPUT_DIR=$SCRATCH_PATH/input
   PROCESSED_DIR=$SCRATCH_PATH/processed
-  LOG_DIR=$SCRATCH_PATH/log
-  WORK_DIR=$SCRATCH_PATH/work
 
   BARCODE_1="30123456789012"
   BARCODE_2="40123456789012"
@@ -24,8 +24,6 @@ setup() {
 
   mkdir $INPUT_DIR
   mkdir $PROCESSED_DIR
-  mkdir $LOG_DIR
-  mkdir $WORK_DIR
 
   mkdir $INPUT_DIR/$BARCODE_1
   touch $INPUT_DIR/$BARCODE_1/01234567.tif
@@ -40,23 +38,27 @@ setup() {
   cat <<EOF >$CONFIG_PATH
 input_directory="$INPUT_DIR"
 processed_directory="$PROCESSED_DIR"
-work_directory="$WORK_DIR"
-log_directory="$LOG_DIR"
 digifeeds_bucket="digifeeds_bucket"
 timestamp=$TIMESTAMP
+send_metrics="false"
 EOF
 
 }
 
 teardown() {
   rm -r $SCRATCH_PATH
+}
 
+@test "Back to Basics" {
+  run log_info "Hello"
+  assert_output --partial "Hello"
 }
 
 
 @test "It Works" {
   shellmock new rclone 
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:$INPUT_DIR regex-3:^digifeeds_bucket:
   run $SUBJECT
   
   assert_success
@@ -72,6 +74,7 @@ teardown() {
 @test "It filters the appropriate files" {
   shellmock new rclone 
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:$INPUT_DIR regex-3:^digifeeds_bucket:
 
   run $SUBJECT
   cd $BATS_TEST_TMPDIR
@@ -95,3 +98,62 @@ teardown() {
   assert_success
 }
 
+@test "Failed zip" {
+  shellmock new zip 
+  shellmock config zip 1 
+  run $SUBJECT
+  assert_output --partial "ERROR: Failed to zip $BARCODE_1"
+  assert_output --partial "ERROR: Failed to zip $BARCODE_2"
+  assert_output --partial "INFO: Total files processed:\t0"
+  assert_output --partial "INFO: Total errors:\t2"
+  assert_output --partial "INFO: Total errors uploading to S3:\t0"
+  shellmock assert expectations zip
+}
+
+@test "Failed copy records error and moves on" {
+  shellmock new rclone 
+  shellmock config rclone 1 1:copy regex-3:^digifeeds_bucket: <<< "Rclone error mock: Failed to copy"
+  run $SUBJECT
+  assert_output --partial "ERROR: Failed to copy $BARCODE_1"
+  assert_output --partial "ERROR: Failed to copy $BARCODE_2"
+  assert_output --partial "INFO: Total files processed:\t0"
+  assert_output --partial "INFO: Total errors:\t2"
+  assert_output --partial "INFO: Total errors uploading to S3:\t2"
+  shellmock assert expectations rclone
+}
+
+@test "Failed on S3 verification and moves on" {
+  shellmock new rclone 
+  shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
+  shellmock config rclone 1 1:check regex-2:$INPUT_DIR regex-3:^digifeeds_bucket:
+  run $SUBJECT
+  assert_output --partial "ERROR: $BARCODE_1 not found in S3"
+  assert_output --partial "ERROR: $BARCODE_2 not found in S3"
+  assert_output --partial "INFO: Total files processed:\t0"
+  assert_output --partial "INFO: Total errors:\t2"
+  assert_output --partial "INFO: Total errors uploading to S3:\t2"
+  shellmock assert expectations rclone
+}
+@test "print_metrics" {
+  shellmock new pushgateway_advanced
+  shellmock config pushgateway_advanced 0 <<< 5
+  run print_metrics 1 2 3
+  assert_output --partial "aim_digifeeds_upload_to_s3_files_processed_total 6"
+  assert_output --partial "aim_digifeeds_upload_to_s3_upload_errors_total 7"
+  assert_output --partial "aim_digifeeds_upload_to_s3_errors_total 8"
+  shellmock assert expectations pushgateway_advanced
+  
+}
+
+@test "verify_zip success" {
+   zip_it $INPUT_DIR/$BARCODE_1
+   run verify_zip $INPUT_DIR/$BARCODE_1
+   assert_success
+}
+
+@test "verify_zip fail" {
+   zip_it $INPUT_DIR/$BARCODE_2
+   mv $INPUT_DIR/$BARCODE_2.zip $INPUT_DIR/$BARCODE_1.zip
+   run verify_zip $INPUT_DIR/$BARCODE_1
+   assert_failure
+}
