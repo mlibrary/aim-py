@@ -9,8 +9,8 @@ setup() {
   load $SHELLMOCK_PATH
   SCRATCH_PATH="/tmp/upload_to_s3"
   CONFIG_PATH=$SCRATCH_PATH/upload_to_s3.config
-  SUBJECT="$BATS_TEST_DIRNAME/upload_to_s3.sh $CONFIG_PATH"
-  load "$BATS_TEST_DIRNAME/upload_to_s3_functions.sh"
+  #SUBJECT="$BATS_TEST_DIRNAME/upload_to_s3.sh $CONFIG_PATH"
+  SUBJECT=main
 
 
   mkdir $SCRATCH_PATH
@@ -35,25 +35,20 @@ setup() {
   mkdir $INPUT_DIR/$BARCODE_2
   touch $INPUT_DIR/$BARCODE_2/01234567.tif
 
-  cat <<EOF >$CONFIG_PATH
-input_directory="$INPUT_DIR"
-processed_directory="$PROCESSED_DIR"
-digifeeds_bucket="digifeeds_bucket"
-timestamp=$TIMESTAMP
-send_metrics="false"
-EOF
+  ## Config that's in main.
+  input_directory="$INPUT_DIR"
+  processed_directory="$PROCESSED_DIR"
+  digifeeds_bucket="digifeeds_bucket"
+  timestamp=$TIMESTAMP
+  send_metrics="false"
+  APP_ENV="test"
 
+  load "$BATS_TEST_DIRNAME/upload_to_s3.sh"
 }
 
 teardown() {
   rm -r $SCRATCH_PATH
 }
-
-@test "Back to Basics" {
-  run log_info "Hello"
-  assert_output --partial "Hello"
-}
-
 
 @test "It Works" {
   shellmock new rclone 
