@@ -109,6 +109,7 @@ main() {
 
     log_info "Copying $barcode"
 
+    log_info "Zipping $barcode"
     zip_it $input_directory/$barcode
     if [[ $? != 0 ]]; then
       log_error "Failed to zip $barcode"  
@@ -116,6 +117,7 @@ main() {
       continue 
     fi
 
+    log_info "Verifying zip of $barcode"
     verify_zip $input_directory/$barcode
     if [[ $? != 0 ]]; then
       log_error "$barcode.zip does not contain the correct files"  
@@ -123,8 +125,8 @@ main() {
       continue 
     fi
 
-
-    rclone copy $input_directory/$barcode.zip $digifeeds_bucket:$barcode.zip
+    log_info "Sending $barcode to S3"
+    rclone copy $input_directory/$barcode.zip $digifeeds_bucket:
     if [[ $? != 0 ]]; then
       log_error "Failed to copy $barcode"
       upload_errors_total=$((upload_errors_total + 1))
@@ -132,6 +134,7 @@ main() {
       continue
     fi
 
+    log_info "Verifying barcode in S3"
     rclone check $input_directory/$barcode.zip $digifeeds_bucket:
     if [[ $? != 0 ]]; then
       log_error "$barcode not found in S3"
