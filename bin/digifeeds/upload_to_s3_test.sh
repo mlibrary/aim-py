@@ -98,9 +98,9 @@ teardown() {
   run $SUBJECT
   assert_output --partial "ERROR: Failed to zip $BARCODE_1"
   assert_output --partial "ERROR: Failed to zip $BARCODE_2"
-  assert_output --partial "INFO: Total files processed:\t0"
-  assert_output --partial "INFO: Total errors:\t2"
-  assert_output --partial "INFO: Total errors uploading to S3:\t0"
+  assert_output --partial "INFO: Total files processed: 0"
+  assert_output --partial "INFO: Total errors: 2"
+  assert_output --partial "INFO: Total errors uploading to S3: 0"
   shellmock assert expectations zip
 }
 
@@ -110,9 +110,9 @@ teardown() {
   run $SUBJECT
   assert_output --partial "ERROR: Failed to copy $BARCODE_1"
   assert_output --partial "ERROR: Failed to copy $BARCODE_2"
-  assert_output --partial "INFO: Total files processed:\t0"
-  assert_output --partial "INFO: Total errors:\t2"
-  assert_output --partial "INFO: Total errors uploading to S3:\t2"
+  assert_output --partial "INFO: Total files processed: 0"
+  assert_output --partial "INFO: Total errors: 2"
+  assert_output --partial "INFO: Total errors uploading to S3: 2"
   shellmock assert expectations rclone
 }
 
@@ -123,9 +123,9 @@ teardown() {
   run $SUBJECT
   assert_output --partial "ERROR: $BARCODE_1 not found in S3"
   assert_output --partial "ERROR: $BARCODE_2 not found in S3"
-  assert_output --partial "INFO: Total files processed:\t0"
-  assert_output --partial "INFO: Total errors:\t2"
-  assert_output --partial "INFO: Total errors uploading to S3:\t2"
+  assert_output --partial "INFO: Total files processed: 0"
+  assert_output --partial "INFO: Total errors: 2"
+  assert_output --partial "INFO: Total errors uploading to S3: 2"
   shellmock assert expectations rclone
 }
 @test "print_metrics" {

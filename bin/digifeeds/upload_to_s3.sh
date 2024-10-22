@@ -149,9 +149,9 @@ main() {
     files_processed_total=$((files_processed_total + 1))
   done
 
-  log_info "Total files processed:\t$files_processed_total"
-  log_info "Total errors uploading to S3:\t$upload_errors_total"
-  log_info "Total errors:\t$errors_total"
+  log_info "Total files processed: $files_processed_total"
+  log_info "Total errors uploading to S3: $upload_errors_total"
+  log_info "Total errors: $errors_total"
 }
 
 
