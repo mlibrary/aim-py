@@ -9,7 +9,6 @@ setup() {
   load $SHELLMOCK_PATH
   SCRATCH_PATH="/tmp/upload_to_s3"
   CONFIG_PATH=$SCRATCH_PATH/upload_to_s3.config
-  #SUBJECT="$BATS_TEST_DIRNAME/upload_to_s3.sh $CONFIG_PATH"
   SUBJECT=main
 
 
@@ -133,9 +132,9 @@ teardown() {
   shellmock new pushgateway_advanced
   shellmock config pushgateway_advanced 0 <<< 5
   run print_metrics 1 2 3
-  assert_output --partial "aim_digifeeds_upload_to_s3_files_processed_total 6"
-  assert_output --partial "aim_digifeeds_upload_to_s3_upload_errors_total 7"
-  assert_output --partial "aim_digifeeds_upload_to_s3_errors_total 8"
+  assert_output --partial "aim_digifeeds_upload_to_aws_files_processed_total 6"
+  assert_output --partial "aim_digifeeds_upload_to_aws_upload_errors_total 7"
+  assert_output --partial "aim_digifeeds_upload_to_aws_errors_total 8"
   shellmock assert expectations pushgateway_advanced
   
 }

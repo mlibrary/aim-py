@@ -1,4 +1,4 @@
-#! /bin/bash
+# ! /bin/bash
 
 ###########
 # CONSTANTS
@@ -20,7 +20,7 @@ SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 IMGAWK='/^(0[0-9][0-9][0-9][0-9][0-9][0-9][0-9]\.(tif|jp2)|checksum\.md5)$/'
 
 # For push gateway
-JOB_NAME="aim_digifeeds_upload_to_s3"
+JOB_NAME="aim_digifeeds_upload_to_aws"
 
 ###########
 # FUNCTIONS
