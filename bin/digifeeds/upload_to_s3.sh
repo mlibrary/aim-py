@@ -21,6 +21,13 @@ IMGAWK='/^(0[0-9][0-9][0-9][0-9][0-9][0-9][0-9]\.(tif|jp2)|checksum\.md5)$/'
 
 # For push gateway
 JOB_NAME="aim_digifeeds_upload_to_aws"
+  
+###########
+# COUNTERS
+###########
+files_processed_total=0
+upload_errors_total=0
+errors_total=0
 
 ###########
 # FUNCTIONS
@@ -97,9 +104,6 @@ EOMETRICS
 
 main() {
   TIMESTAMP=${timestamp:-$(date +%F_%H-%M-%S)} #YYY-MM-DD_hh-mm-ss
-  local files_processed_total=0
-  local upload_errors_total=0
-  local errors_total=0
 
   #This is so that the script works on empty directories.
   shopt -s nullglob
@@ -174,7 +178,7 @@ if [[ $APP_ENV != "test" ]]; then
   main
 
   if [ "$send_metrics" != "false" ]; then
-    print_metrics | /usr/local/bin/pushgateway_advanced -j $JOB_NAME
+    print_metrics $files_processed_total $upload_errors_total $errors_total  | /usr/local/bin/pushgateway_advanced -j $JOB_NAME
     /usr/local/bin/pushgateway -j $JOB_NAME -b $START_TIME
    fi
   log_info "=====End $(date)====="
