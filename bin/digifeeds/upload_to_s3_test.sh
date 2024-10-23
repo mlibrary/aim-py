@@ -46,6 +46,22 @@ teardown() {
   rm -r "$SCRATCH_PATH"
 }
 
+@test "exits without input_directory" {
+  unset input_directory
+  run "${BATS_TEST_DIRNAME}/upload_to_s3.sh"
+  assert_failure
+}
+@test "exits without processed_directory" {
+  unset processed_directory
+  run "${BATS_TEST_DIRNAME}/upload_to_s3.sh"
+  assert_failure
+}
+@test "exits without digifeeds_bucket" {
+  unset digifeeds_bucket
+  run "${BATS_TEST_DIRNAME}/upload_to_s3.sh"
+  assert_failure
+}
+
 @test "It Works" {
   shellmock new rclone
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:

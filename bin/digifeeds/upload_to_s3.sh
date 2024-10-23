@@ -10,7 +10,8 @@ START_TIME=$(date '+%s')
 # Directory this script lives in
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
-${APP_ENV:-"production"}
+APP_ENV=${APP_ENV:-"production"}
+
 if [[ $APP_ENV != "test" ]]; then
   # CONFIG
   # Variables contained in the config file:
@@ -26,10 +27,10 @@ if [[ $APP_ENV != "test" ]]; then
   # shellcheck source=/dev/null
   source "$CONFIG_FILE"
 fi
-${input_directory:?}
-${processed_directory:?}
-${digifeeds_bucket:?}
-${send_metrics:-"true"}
+if ! input_directory=${input_directory:?}; then exit 1; fi
+if ! processed_directory=${processed_directory:?}; then exit 1; fi
+if ! digifeeds_bucket=${digifeeds_bucket:?}; then exit 1; fi
+send_metrics=${send_metrics:-"true"}
 
 # matches .tif and .jp2 files with 8 digit file names that start with 0 OR
 # checksum.md5 files
