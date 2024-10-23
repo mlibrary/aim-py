@@ -26,6 +26,7 @@ JOB_NAME="aim_digifeeds_upload_to_aws"
 # COUNTERS
 ###########
 files_processed_total=0
+image_order_errors_total=0
 upload_errors_total=0
 errors_total=0
 
@@ -45,6 +46,19 @@ log_error() {
 last_count() {
   local metric=$1
   pushgateway_advanced -j $JOB_NAME -q ${metric}
+}
+
+verify_image_order(){
+  #Sort the array
+  sorted=($(printf '%s\n' "$@" | sort ))
+
+  local cnt=0
+  for arg in "${sorted[@]}"; do
+    cnt=$((cnt+1))
+    int=${arg:0:8}
+    [ $((int)) != $cnt ] && return 1 
+  done
+  return 0
 }
 
 zip_it() {
@@ -74,16 +88,22 @@ verify_zip() {
 
 print_metrics() {
   local fp_current_total=$1
-  local upload_errors_current_total=$2
-  local errors_current_total=$3
+  local image_order_errors_current_total=$2
+  local upload_errors_current_total=$3
+  local errors_current_total=$4
 
   local fp_metric="${JOB_NAME}_files_processed_total"
   local fp_last=$(last_count $fp_metric)
   local fp_total=$((fp_last + fp_current_total))
 
+  local image_order_errors_metric="${JOB_NAME}_image_order_errors_total"
+  local image_order_errors_last=$(last_count  $image_order_errors_metric)
+  local image_order_errors_total=$((image_order_errors_last + image_order_errors_current_total))
+
   local upload_errors_metric="${JOB_NAME}_upload_errors_total"
   local upload_errors_last=$(last_count  $upload_errors_metric)
   local upload_errors_total=$((upload_errors_last + upload_errors_current_total))
+  
 
   local errors_metric="${JOB_NAME}_errors_total"
   local errors_last=$(last_count  $errors_metric)
@@ -93,6 +113,9 @@ print_metrics() {
 # HELP ${fp_metric} Count of digifeeds zip files sent to S3
 # TYPE ${fp_metric} counter
 $fp_metric $fp_total
+# HELP ${image_order_errors_metric} Count of folders where there are missing pages of images 
+# TYPE ${image_order_errors_metric} counter
+${image_order_errors_metric} $image_order_errors_total
 # HELP ${upload_errors_metric} Count of errors when uploading digifeeds zip files to S3
 # TYPE ${upload_errors_metric} counter
 ${upload_errors_metric} $upload_errors_total
@@ -112,6 +135,19 @@ main() {
     local barcode=$(basename ${barcode_path%%/})
 
     log_info "Copying $barcode"
+    
+    log_info "Verifying image order $barcode"
+    #8 digits, ends in .tif or .jp2
+    filter_regex='[[:digit:]]{8}\.tif$|[[:digit:]]{8}\.jp2$'
+    local image_list=$(cd $barcode_path && ls | egrep "$filter_regex")
+    verify_image_order $image_list
+    if [[ $? != 0 ]]; then
+      log_error "Image order incorrect for $barcode"  
+      image_order_errors_total=$((image_order_errors_total + 1))
+      errors_total=$((errors_total + 1))
+      continue 
+    fi
+    
 
     log_info "Zipping $barcode"
     zip_it $input_directory/$barcode
@@ -154,6 +190,7 @@ main() {
   done
 
   log_info "Total files processed: $files_processed_total"
+  log_info "Total errors image order: $image_order_errors_total "
   log_info "Total errors uploading to S3: $upload_errors_total"
   log_info "Total errors: $errors_total"
 }
@@ -178,7 +215,7 @@ if [[ $APP_ENV != "test" ]]; then
   main
 
   if [ "$send_metrics" != "false" ]; then
-    print_metrics $files_processed_total $upload_errors_total $errors_total  | /usr/local/bin/pushgateway_advanced -j $JOB_NAME
+    print_metrics $files_processed_total $image_order_errors_total $upload_errors_total $errors_total  | /usr/local/bin/pushgateway_advanced -j $JOB_NAME
     /usr/local/bin/pushgateway -j $JOB_NAME -b $START_TIME
    fi
   log_info "=====End $(date)====="
