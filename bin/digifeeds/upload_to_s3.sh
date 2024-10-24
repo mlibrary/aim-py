@@ -1,4 +1,8 @@
 #! /bin/bash
+############
+# This script is documented here:
+# https://mlit.atlassian.net/wiki/spaces/LSO/pages/10550640646/Upload+to+S3+cronjob+on+tang
+############
 
 ###########
 # CONSTANTS
