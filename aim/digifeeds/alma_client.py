@@ -16,6 +16,14 @@ class AlmaClient:
         self.digifeeds_set_id = S.digifeeds_set_id
 
     def add_barcode_to_digifeeds_set(self, barcode: str) -> None:
+        """Adds a barcode to the digifeeds set in Alma
+
+        Args:
+            barcode (str): Barcode of the item
+
+        Returns:
+            None: None
+        """
         url = self._url(f"conf/sets/{self.digifeeds_set_id}")
         query = {
             "id_type": "BARCODE",
