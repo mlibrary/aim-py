@@ -28,11 +28,11 @@ def get_items(db: Session, in_zephir: bool | None):
     Get Digifeed items from the database
 
     Args:
-        db (Session): _description_
-        in_zephir (bool | None): _description_
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        in_zephir (bool | None): Whether or not the items are in zephir
 
     Returns:
-        _type_: _description_
+        aim.digifeeds.database.models.Item: Item object
     """
     if in_zephir is True:
         return (
@@ -57,14 +57,14 @@ def get_items(db: Session, in_zephir: bool | None):
 
 
 def add_item(db: Session, item: schemas.ItemCreate):
-    """_summary_
+    """Add an item to the database. All you need is a barcode.
 
     Args:
-        db (Session): _description_
-        item (schemas.ItemCreate): _description_
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        item (schemas.ItemCreate): Item object with a barcode
 
     Returns:
-        _type_: _description_
+        aim.digifeeds.database.models.Item: Item object
     """
     db_item = models.Item(barcode=item.barcode)
     db.add(db_item)
@@ -74,14 +74,41 @@ def add_item(db: Session, item: schemas.ItemCreate):
 
 
 def get_status(db: Session, name: str):
+    """Gets a given status from the database based on the name
+
+    Args:
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        name (str): Name of the status
+
+    Returns:
+        aim.digifeeds.database.models.Status: Status object
+    """
     return db.query(models.Status).filter(models.Status.name == name).first()
 
 
 def get_statuses(db: Session):
+    """Gets statuses from the database
+
+    Args:
+        db (sqlalchemy.orm.Session): Digifeeds database session
+
+    Returns:
+        aim.digifeeds.database.models.Status: Status object
+    """
     return db.query(models.Status).all()
 
 
 def add_item_status(db: Session, item: models.Item, status: models.Status):
+    """Add a status to an item in the database
+
+    Args:
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        item (models.Item): Item object
+        status (models.Status): Status
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+    """
     db_item_status = models.ItemStatus(item=item, status=status)
     db.add(db_item_status)
     db.commit()
