@@ -5,6 +5,17 @@ from requests.exceptions import HTTPError
 
 
 def add_to_db(barcode: str):
+    """Add a barcode to the digifeeds database
+
+    Args:
+        barcode (str): Barcode of the item
+
+    Raises:
+        ext_inst: HTTPError
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+    """
     item = Item(DBClient().get_or_add_item(barcode))
     if not item.has_status("added_to_digifeeds_set"):
         try:
