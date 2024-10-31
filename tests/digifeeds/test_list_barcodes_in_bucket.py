@@ -14,11 +14,11 @@ def test_list_barcodes_in_bucket():
     conn.create_bucket(Bucket=S.digifeeds_s3_bucket)
 
     barcode1 = conn.Object(
-        S.digifeeds_s3_bucket, f"{S.digifeeds_s3_input_path}/barcode1/some_file.txt"
+        S.digifeeds_s3_bucket, f"{S.digifeeds_s3_input_path}/barcode1.zip"
     )
     barcode1.put(Body="some text")
     barcode2 = conn.Object(
-        S.digifeeds_s3_bucket, f"{S.digifeeds_s3_input_path}/barcode2/some_file.txt"
+        S.digifeeds_s3_bucket, f"{S.digifeeds_s3_input_path}/barcode2.zip"
     )
     barcode2.put(Body="some text")
 
