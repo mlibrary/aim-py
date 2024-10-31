@@ -59,7 +59,7 @@ def get_items(
     return {
         "limit": limit,
         "offset": offset,
-        "total": crud.get_item_total(in_zephir=in_zephir, db=db),
+        "total": crud.get_items_total(in_zephir=in_zephir, db=db),
         "items": db_items,
     }
 

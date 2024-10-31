@@ -5,6 +5,7 @@ from aim.digifeeds.database.crud import (
     get_status,
     get_statuses,
     add_item_status,
+    get_items_total,
 )
 from aim.digifeeds.database.schemas import ItemCreate
 
@@ -20,38 +21,44 @@ class TestCrud:
         item_in_db = get_item(barcode="does not exist", db=db_session)
         assert (item_in_db) is None
 
-    def test_get_items_all(self, db_session):
+    def test_get_items_and_total_any(self, db_session):
         item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
         items = get_items(db=db_session, in_zephir=None, limit=2, offset=0)
+        count = get_items_total(db=db_session, in_zephir=None)
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (items[0]) == item1
         assert (items[1]) == item2
+        assert (count) == 2
 
-    def test_get_items_in_zephir(self, db_session):
+    def test_get_items_and_total_in_zephir(self, db_session):
         item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
         items = get_items(db=db_session, in_zephir=True, limit=2, offset=0)
+        count = get_items_total(db=db_session, in_zephir=True)
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (len(items)) == 1
         assert (items[0]) == item1
+        assert count == 1
 
-    def test_get_items_not_in_zephir(self, db_session):
+    def test_get_items_and_total_not_in_zephir(self, db_session):
         item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
         items = get_items(db=db_session, in_zephir=False, limit=2, offset=0)
+        count = get_items_total(db=db_session, in_zephir=False)
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (len(items)) == 1
         assert (items[0]) == item2
+        assert count == 1
 
     def test_get_status_that_exists(self, db_session):
         status = get_status(db=db_session, name="in_zephir")

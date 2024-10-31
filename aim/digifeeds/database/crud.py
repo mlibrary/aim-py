@@ -24,25 +24,9 @@ def get_item(db: Session, barcode: str):
     return db.query(models.Item).filter(models.Item.barcode == barcode).first()
 
 
-def get_item_total(db: Session, in_zephir: bool | None):
-    if in_zephir is True:
-        return (
-            db.query(models.Item)
-            .filter(
-                models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
-            )
-            .count()
-        )
-    elif in_zephir is False:
-        return (
-            db.query(models.Item)
-            .filter(
-                ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
-            )
-            .count()
-        )
-
-    return db.query(models.Item).count()
+def get_items_total(db: Session, in_zephir: bool | None):
+    query = get_items_query(db=db, in_zephir=in_zephir)
+    return query.count()
 
 
 def get_items(db: Session, in_zephir: bool | None, limit: int, offset: int):
@@ -56,28 +40,21 @@ def get_items(db: Session, in_zephir: bool | None, limit: int, offset: int):
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
+    query = get_items_query(db=db, in_zephir=in_zephir)
+    return query.offset(offset).limit(limit).all()
+
+
+def get_items_query(db: Session, in_zephir: bool | None):
+    query = db.query(models.Item)
     if in_zephir is True:
-        return (
-            db.query(models.Item)
-            .filter(
-                models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
-            )
-            .offset(offset)
-            .limit(limit)
-            .all()
+        query = query.filter(
+            models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
     elif in_zephir is False:
-        return (
-            db.query(models.Item)
-            .filter(
-                ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
-            )
-            .offset(offset)
-            .limit(limit)
-            .all()
+        query = query.filter(
+            ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
-
-    return db.query(models.Item).offset(offset).limit(limit).all()
+    return query
 
 
 def add_item(db: Session, item: schemas.ItemCreate):
