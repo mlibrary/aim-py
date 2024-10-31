@@ -3,6 +3,7 @@
 
 Operations that act on the digifeeds database
 """
+
 from sqlalchemy.orm import Session
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
@@ -23,7 +24,28 @@ def get_item(db: Session, barcode: str):
     return db.query(models.Item).filter(models.Item.barcode == barcode).first()
 
 
-def get_items(db: Session, in_zephir: bool | None):
+def get_item_total(db: Session, in_zephir: bool | None):
+    if in_zephir is True:
+        return (
+            db.query(models.Item)
+            .filter(
+                models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
+            )
+            .count()
+        )
+    elif in_zephir is False:
+        return (
+            db.query(models.Item)
+            .filter(
+                ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
+            )
+            .count()
+        )
+
+    return db.query(models.Item).count()
+
+
+def get_items(db: Session, in_zephir: bool | None, limit: int, offset: int):
     """
     Get Digifeed items from the database
 
@@ -38,22 +60,24 @@ def get_items(db: Session, in_zephir: bool | None):
         return (
             db.query(models.Item)
             .filter(
-                models.Item.statuses.any(
-                    models.ItemStatus.status_name == "in_zephir")
+                models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
             )
+            .offset(offset)
+            .limit(limit)
             .all()
         )
     elif in_zephir is False:
         return (
             db.query(models.Item)
             .filter(
-                ~models.Item.statuses.any(
-                    models.ItemStatus.status_name == "in_zephir")
+                ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
             )
+            .offset(offset)
+            .limit(limit)
             .all()
         )
 
-    return db.query(models.Item).all()
+    return db.query(models.Item).offset(offset).limit(limit).all()
 
 
 def add_item(db: Session, item: schemas.ItemCreate):
