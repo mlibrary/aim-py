@@ -41,6 +41,9 @@ class Services(NamedTuple):
     #: The url in the s3 bucket for the digifeeds process
     digifeeds_s3_input_path: str
 
+    #: The zephir item bib api
+    zephir_bib_api_url: str
+
 
 S = Services(
     mysql_database=sa.engine.URL.create(
@@ -60,8 +63,8 @@ S = Services(
     or "digifeeds_s3_access_key",
     digifeeds_s3_secret_access_key=os.getenv("DIGIFEEDS_S3_SECRET_ACCESS_KEY")
     or "digifeeds_s3_secret_access_key",
-    digifeeds_s3_bucket=os.getenv(
-        "DIGIFEEDS_S3_BUCKET") or "digifeeds_s3_bucket",
+    digifeeds_s3_bucket=os.getenv("DIGIFEEDS_S3_BUCKET") or "digifeeds_s3_bucket",
     digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
     or "path_to_input_barcodes",
+    zephir_bib_api_url="http://zephir.cdlib.org/api/item",
 )
