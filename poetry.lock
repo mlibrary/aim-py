@@ -1690,6 +1690,20 @@ files = [
 ]
 
 [[package]]
+name = "rclone-python"
+version = "0.1.12"
+description = "A python wrapper for rclone."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "rclone-python-0.1.12.tar.gz", hash = "sha256:92a1d21c5e225574db438908a42522eff97e467f0bfeebd2007c83723a834a8b"},
+    {file = "rclone_python-0.1.12-py3-none-any.whl", hash = "sha256:09a2779831684ec49e7a99201f4bf5cc2eff5871ffed48b0925e6b492b27bb54"},
+]
+
+[package.dependencies]
+rich = "*"
+
+[[package]]
 name = "requests"
 version = "2.32.3"
 description = "Python HTTP for Humans."
@@ -2700,4 +2714,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "9f1a0d6ba054bb0e68ce11698f69f120b663045e7ea5a9b37f47cb1e3a7ce0f7"
+content-hash = "043a661dfac1a774264112597553529e933c6ac6521d3450ba6b0fbbb5b81231"

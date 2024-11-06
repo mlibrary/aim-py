@@ -29,6 +29,7 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   build-essential \ 
   pkg-config \
   default-mysql-client \
+  rclone\
   vim-tiny
 
 # Set the working directory to /app
@@ -46,17 +47,17 @@ RUN pip install poetry==${POETRY_VERSION}
 # Use this page as a reference for python and poetry environment variables: https://docs.python.org/3/using/cmdline.html#envvar-PYTHONUNBUFFERED
 # Ensure the stdout and stderr streams are sent straight to terminal, then you can see the output of your application
 ENV PYTHONUNBUFFERED=1\
-    # Avoid the generation of .pyc files during package install
-    # Disable pip's cache, then reduce the size of the image
-    PIP_NO_CACHE_DIR=off \
-    # Save runtime because it is not look for updating pip version
-    PIP_DISABLE_PIP_VERSION_CHECK=on \
-    PIP_DEFAULT_TIMEOUT=100 \
-    # Disable poetry interaction
-    POETRY_NO_INTERACTION=1 \
-    POETRY_VIRTUALENVS_CREATE=1 \
-    POETRY_VIRTUALENVS_IN_PROJECT=1 \
-    POETRY_CACHE_DIR=/tmp/poetry_cache
+  # Avoid the generation of .pyc files during package install
+  # Disable pip's cache, then reduce the size of the image
+  PIP_NO_CACHE_DIR=off \
+  # Save runtime because it is not look for updating pip version
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  # Disable poetry interaction
+  POETRY_NO_INTERACTION=1 \
+  POETRY_VIRTUALENVS_CREATE=1 \
+  POETRY_VIRTUALENVS_IN_PROJECT=1 \
+  POETRY_CACHE_DIR=/tmp/poetry_cache
 
 FROM poetry AS build
 # Just copy the files needed to install the dependencies
@@ -68,13 +69,13 @@ RUN poetry export --without dev -f requirements.txt --output requirements.txt
 # We want poetry on in development
 FROM poetry AS development
 RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
-   git \
-   bats \
-   bats-assert \
-   bats-file\
-   wget\
-   zip\
-   unzip
+  git \
+  bats \
+  bats-assert \
+  bats-file\
+  wget\
+  zip\
+  unzip
 
 RUN wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash && \
   chown ${UID}:${GID} /opt/shellmock.bash
