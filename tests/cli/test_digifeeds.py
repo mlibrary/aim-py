@@ -6,6 +6,7 @@ from typer.testing import CliRunner
 from aim.cli.main import app
 from aim.services import S
 from aim.digifeeds.item import Item
+import aim.cli.digifeeds as digifeeds_cli
 
 runner = CliRunner()
 
@@ -113,3 +114,28 @@ def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
     assert add_item_status.call_count == 0
     assert result.exit_code == 0
     assert "some_barcode is NOT in Zephir" in result.stdout
+
+
+def test_move_to_pickup_success(mocker, item_data):
+    item = Item(item_data)
+    move_volume_to_pickup_mock = mocker.patch.object(
+        digifeeds_cli, "move_volume_to_pickup", return_value=item
+    )
+
+    result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
+
+    move_volume_to_pickup_mock.assert_called_once()
+    assert "Item has been successfully moved to pickup" in result.stdout
+    assert result.exit_code == 0
+
+
+def test_move_to_pickup_where_not_in_zephir(mocker):
+    move_volume_to_pickup_mock = mocker.patch.object(
+        digifeeds_cli, "move_volume_to_pickup", return_value=None
+    )
+
+    result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
+
+    move_volume_to_pickup_mock.assert_called_once()
+    assert "Item has not been in zephir long enough" in result.stdout
+    assert result.exit_code == 0
