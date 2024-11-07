@@ -22,9 +22,11 @@ extensions = [
     "myst_parser",
     "sphinxcontrib.mermaid",
     "sphinx_toolbox.more_autodoc.autonamedtuple",
+    "sphinxcontrib.autodoc_pydantic",
 ]
 autodoc_mock_imports = ["sqlalchemy"]
 autosummary_generate = True
+autodoc_pydantic_model_show_config_summary = False
 
 mermaid_d3_zoom = True
 mermaid_version = "11.3.0"
