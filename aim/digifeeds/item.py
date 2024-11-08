@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+
+
 class Item:
     """A Digifeeds Item
 
@@ -34,3 +37,23 @@ class Item:
             str: The barcode.
         """
         return self.data["barcode"]
+
+    @property
+    def in_zephir_for_long_enough(self) -> bool:
+        waiting_period = 14  # days
+        in_zephir_status = next(
+            (
+                status
+                for status in self.data["statuses"]
+                if status["name"] == "in_zephir"
+            ),
+            None,
+        )
+        if in_zephir_status is None:
+            return False
+
+        created_at = datetime.fromisoformat(in_zephir_status["created_at"])
+        if created_at < (datetime.now() - timedelta(days=waiting_period)):
+            return True
+        else:
+            return False

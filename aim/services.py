@@ -43,6 +43,14 @@ class Services(NamedTuple):
 
     #: The zephir item bib api
     zephir_bib_api_url: str
+    #: The url in the s3 bucket for processed barcodes
+    digifeeds_s3_processed_path: str
+
+    #: The name of the rclone remote/bucket alias for the s3 input bucket
+    digifeeds_s3_rclone_remote: str
+
+    #: The name of the google drive rclone remote where google picks up items
+    digifeeds_gdrive_rclone_remote: str
 
 
 S = Services(
@@ -67,4 +75,10 @@ S = Services(
     digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
     or "path_to_input_barcodes",
     zephir_bib_api_url="http://zephir.cdlib.org/api/item",
+    digifeeds_s3_processed_path=os.getenv("DIGIFEEDS_S3_PROCESSED_PATH")
+    or "path_to_processed_barcodes",
+    digifeeds_s3_rclone_remote=os.getenv("DIGIFEEDS_S3_RCLONE_REMOTE")
+    or "digifeeds_bucket",
+    digifeeds_gdrive_rclone_remote=os.getenv("DIGIFEEDS_GDRIVE_RCLONE_REMOTE")
+    or "digifeeds_gdrive",
 )
