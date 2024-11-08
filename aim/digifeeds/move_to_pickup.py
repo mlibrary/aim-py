@@ -4,8 +4,6 @@ from aim.digifeeds.db_client import DBClient
 from aim.services import S
 from datetime import datetime
 
-print(rclone.is_installed())
-
 
 def move_to_pickup(barcode: str):
     raw_item = DBClient().get_item(barcode)
