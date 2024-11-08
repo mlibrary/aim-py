@@ -68,10 +68,8 @@ def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
 
 
 def test_load_statuses(mocker):
-    session_local_mock = mocker.patch(
-        "aim.digifeeds.database.main.SessionLocal")
-    load_statuse_mock = mocker.patch(
-        "aim.digifeeds.database.models.load_statuses")
+    session_local_mock = mocker.patch("aim.digifeeds.database.main.SessionLocal")
+    load_statuse_mock = mocker.patch("aim.digifeeds.database.models.load_statuses")
     result = runner.invoke(app, ["digifeeds", "load-statuses"])
     assert session_local_mock.call_count == 1
     assert load_statuse_mock.call_count == 1
@@ -87,3 +85,31 @@ def test_list_barcodes_in_input_bucket(mocker):
     assert list_barcodes_mock.call_count == 1
     assert result.exit_code == 0
     assert '["barcode1", "barcode2"]' == result.stdout
+
+
+@responses.activate
+def test_check_zephir_for_item_when_item_is_in_zephir(item_data):
+    db_url = f"{S.digifeeds_api_url}/items/some_barcode"
+    get_item = responses.get(db_url, json=item_data, status=200)
+    add_item_status = responses.put(
+        f"{db_url}/status/in_zephir", json=item_data, status=200
+    )
+    responses.get(f"{S.zephir_bib_api_url}/mdp.some_barcode", json={}, status=200)
+    result = runner.invoke(app, ["digifeeds", "check-zephir", "some_barcode"])
+    assert get_item.call_count == 1
+    assert add_item_status.call_count == 1
+    assert result.exit_code == 0
+    assert "some_barcode is in Zephir" in result.stdout
+
+
+@responses.activate
+def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
+    db_url = f"{S.digifeeds_api_url}/items/some_barcode"
+    get_item = responses.get(db_url, json=item_data, status=200)
+    add_item_status = responses.put(f"{db_url}/status/in_zephir")
+    responses.get(f"{S.zephir_bib_api_url}/mdp.some_barcode", json={}, status=404)
+    result = runner.invoke(app, ["digifeeds", "check-zephir", "some_barcode"])
+    assert get_item.call_count == 1
+    assert add_item_status.call_count == 0
+    assert result.exit_code == 0
+    assert "some_barcode is NOT in Zephir" in result.stdout

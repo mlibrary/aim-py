@@ -1,10 +1,12 @@
 """Digifeeds CLI
 ====================
 """
+
 import typer
 from typing_extensions import Annotated
 from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
 from aim.digifeeds.list_barcodes_in_bucket import list_barcodes_in_bucket
+from aim.digifeeds.check_zephir import check_zephir as check_zephir_for_barcode
 from aim.digifeeds.database import models, main
 import json
 import sys
@@ -38,6 +40,27 @@ def add_to_db(
         print("Item added to digifeeds set")
     else:
         print("Item NOT added to digifeeds set")
+
+
+@app.command()
+def check_zephir(
+    barcode: Annotated[
+        str,
+        typer.Argument(
+            help="The barcode to check in zephir. It should NOT have mdp prefix. The barcode must already exist in the digifeeds database."
+        ),
+    ],
+):
+    """
+    Check if barcode has metadata in Zephir
+    """
+
+    print(f"Checking Zephir for {barcode}")
+    item = check_zephir_for_barcode(barcode)
+    if item:
+        print(f"{barcode} is in Zephir")
+    else:
+        print(f"{barcode} is NOT in Zephir")
 
 
 @app.command()
