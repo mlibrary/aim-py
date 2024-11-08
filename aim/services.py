@@ -52,9 +52,6 @@ class Services(NamedTuple):
     #: The name of the google drive rclone remote where google picks up items
     digifeeds_gdrive_rclone_remote: str
 
-    #: The path to the temporary/scratch directory
-    tmp_dir: str
-
 
 S = Services(
     mysql_database=sa.engine.URL.create(
@@ -84,5 +81,4 @@ S = Services(
     or "digifeeds_bucket",
     digifeeds_gdrive_rclone_remote=os.getenv("DIGIFEEDS_GDRIVE_RCLONE_REMOTE")
     or "digifeeds_gdrive",
-    tmp_dir="/app/tmp",
 )
