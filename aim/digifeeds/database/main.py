@@ -13,7 +13,7 @@ from aim.services import S
 if S.ci_on:  # pragma: no cover
     engine = create_engine(S.test_database)
 else:  # pragma: no cover
-    engine = create_engine(S.mysql_database)
+    engine = create_engine(S.mysql_database, pool_recycle=3600)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
@@ -112,6 +112,7 @@ def create_item(
     db_item = crud.add_item(item=item, db=db)
     return db_item
 
+
 desc_put_404 = """
 Bad request: The item or status doesn't exist<br><br>
 Possible reponses:
@@ -120,6 +121,7 @@ Possible reponses:
   <li>Status not found</li>
 </ul>
 """
+
 
 @app.put(
     "/items/{barcode}/status/{status_name}",

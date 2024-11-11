@@ -30,6 +30,11 @@ def add_to_db(barcode: str):
                         )
                     )
                 return item
+            elif any(e["errorCode"] == "60115" for e in errorList):
+                # 60115 means the barcode is already in the set. That means the
+                # db entry from this barcdoe needs to have
+                # added_to_digifeeds_set
+                pass
             else:
                 raise ext_inst
         item = Item(
