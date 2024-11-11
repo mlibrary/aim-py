@@ -40,6 +40,15 @@ class Item:
 
     @property
     def in_zephir_for_long_enough(self) -> bool:
+        """
+        Returns whether or not the item has had metadata in zephir for more than
+        14 days. The production database saves timestamps in Eastern Time. K8s
+        runs in UTC. Because this is checking days, this function doesn't set the
+        timezone because it's not close enough to matter.
+
+        Returns:
+            bool: whether or not the item's metadata has been in zephir for more than 14 days.
+        """
         waiting_period = 14  # days
         in_zephir_status = next(
             (
