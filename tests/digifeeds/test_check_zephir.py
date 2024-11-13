@@ -21,7 +21,7 @@ def barcode():
 @responses.activate
 def test_barcode_is_in_zephir(mocker, item_data, barcode):
     get_item_mock = mocker.patch.object(
-        functions.DBClient, "get_item", return_value=item_data
+        functions.DBClient, "get_or_add_item", return_value=item_data
     )
     add_status_mock = mocker.patch.object(
         functions.DBClient, "add_item_status", return_value=item_data
@@ -37,7 +37,7 @@ def test_barcode_is_in_zephir(mocker, item_data, barcode):
 def test_barcode_already_has_in_zephir_status(mocker, item_data, barcode):
     item_data["statuses"][0]["name"] = "in_zephir"
     get_item_mock = mocker.patch.object(
-        functions.DBClient, "get_item", return_value=item_data
+        functions.DBClient, "get_or_add_item", return_value=item_data
     )
 
     add_status_mock = mocker.patch.object(
@@ -53,7 +53,7 @@ def test_barcode_already_has_in_zephir_status(mocker, item_data, barcode):
 @responses.activate
 def test_barcode_not_in_zephir(mocker, item_data, barcode):
     get_item_mock = mocker.patch.object(
-        functions.DBClient, "get_item", return_value=item_data
+        functions.DBClient, "get_or_add_item", return_value=item_data
     )
 
     add_status_mock = mocker.patch.object(
@@ -65,10 +65,3 @@ def test_barcode_not_in_zephir(mocker, item_data, barcode):
     get_item_mock.assert_called_once()
     add_status_mock.assert_not_called()
     assert result is None
-
-
-def test_barcdoe_is_not_in_db(mocker, barcode):
-    mocker.patch.object(functions.DBClient, "get_item", return_value=None)
-    with pytest.raises(Exception) as exc_info:
-        check_zephir(barcode)
-    assert exc_info.type is Exception

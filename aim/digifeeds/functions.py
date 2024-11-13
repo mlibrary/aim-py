@@ -54,11 +54,7 @@ def add_to_digifeeds_set(barcode: str):
 
 
 def move_to_pickup(barcode: str):
-    raw_item = DBClient().get_item(barcode)
-    if raw_item is None:
-        raise Exception("Item not found in database")
-
-    item = Item(raw_item)
+    item = Item(DBClient().get_or_add_item(barcode))
 
     if not item.in_zephir_for_long_enough:
         return None
@@ -94,12 +90,7 @@ def list_barcodes_in_input_bucket():
 
 
 def check_zephir(barcode: str):
-    raw_item = DBClient().get_item(barcode)
-    if raw_item is None:
-        raise Exception("Item not found in database")
-
-    item = Item(raw_item)
-
+    item = Item(DBClient().get_or_add_item(barcode))
     if item.has_status("in_zephir"):
         return item
 

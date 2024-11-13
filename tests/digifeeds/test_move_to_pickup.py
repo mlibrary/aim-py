@@ -30,7 +30,7 @@ def test_move_to_pickup_success(mocker, item_in_zephir_for_long_enough):
     rclone_moveto_mock = mocker.patch.object(rclone, "moveto")
     get_item_mock = mocker.patch.object(
         DBClient,
-        "get_item",
+        "get_or_add_item",
         return_value=item_in_zephir_for_long_enough,
     )
     add_status_mock = mocker.patch.object(
@@ -48,19 +48,10 @@ def test_move_to_pickup_success(mocker, item_in_zephir_for_long_enough):
     assert result is not None
 
 
-def test_move_to_pickup_no_item(mocker):
-    get_item_mock = mocker.patch.object(DBClient, "get_item", return_value=None)
-    with pytest.raises(Exception) as exc_info:
-        move_to_pickup("some_barcode")
-
-    get_item_mock.assert_called_once()
-    assert str(exc_info.value) == "Item not found in database"
-
-
 def test_move_to_pickup_item_too_recent(mocker, item_in_zephir_too_recent):
     get_item_mock = mocker.patch.object(
         DBClient,
-        "get_item",
+        "get_or_add_item",
         return_value=item_in_zephir_too_recent,
     )
     result = move_to_pickup(item_in_zephir_too_recent["barcode"])
