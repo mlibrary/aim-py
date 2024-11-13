@@ -1,4 +1,4 @@
-from aim.digifeeds.move_to_pickup import move_to_pickup, rclone, DBClient
+from aim.digifeeds.functions import move_to_pickup, rclone, DBClient
 import json
 import pytest
 from datetime import datetime

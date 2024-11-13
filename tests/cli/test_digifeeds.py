@@ -7,7 +7,6 @@ from aim.cli.main import app
 from aim.services import S
 from aim.digifeeds.item import Item
 from aim.digifeeds import functions
-import aim.cli.digifeeds as digifeeds_cli
 
 runner = CliRunner()
 
@@ -121,7 +120,7 @@ def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
 def test_move_to_pickup_success(mocker, item_data):
     item = Item(item_data)
     move_volume_to_pickup_mock = mocker.patch.object(
-        digifeeds_cli, "move_volume_to_pickup", return_value=item
+        functions, "move_to_pickup", return_value=item
     )
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
@@ -133,7 +132,7 @@ def test_move_to_pickup_success(mocker, item_data):
 
 def test_move_to_pickup_where_not_in_zephir(mocker):
     move_volume_to_pickup_mock = mocker.patch.object(
-        digifeeds_cli, "move_volume_to_pickup", return_value=None
+        functions, "move_to_pickup", return_value=None
     )
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])

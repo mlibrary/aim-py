@@ -5,7 +5,6 @@
 import typer
 from typing_extensions import Annotated
 from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
-from aim.digifeeds.move_to_pickup import move_to_pickup as move_volume_to_pickup
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
 
@@ -94,7 +93,7 @@ def move_to_pickup(
     folder in the bucket and prefixed with the date and time.
     """
     print(f'Moving barcode "{barcode}" from the s3 bucket to the google drive')
-    item = move_volume_to_pickup(barcode)
+    item = functions.move_to_pickup(barcode)
     if item is None:
         print("Item has not been in zephir long enough")
     else:
