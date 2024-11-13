@@ -1,7 +1,7 @@
 import boto3
 from moto import mock_aws
 from aim.services import S
-from aim.digifeeds.list_barcodes_in_bucket import list_barcodes_in_bucket
+from aim.digifeeds.functions import list_barcodes_in_input_bucket
 
 
 @mock_aws
@@ -22,5 +22,5 @@ def test_list_barcodes_in_bucket():
     )
     barcode2.put(Body="some text")
 
-    result = list_barcodes_in_bucket()
+    result = list_barcodes_in_input_bucket()
     assert result == ["barcode1", "barcode2"]

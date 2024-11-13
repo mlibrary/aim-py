@@ -6,7 +6,7 @@ from typer.testing import CliRunner
 from aim.cli.main import app
 from aim.services import S
 from aim.digifeeds.item import Item
-import aim.cli.digifeeds as digifeeds_cli
+from aim.digifeeds import functions
 
 runner = CliRunner()
 
@@ -38,7 +38,7 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
         "fail_on_invalid_id": "true",
     }
     add_to_digifeeds_body = {"members": {"member": [{"id": "some_barcode"}]}}
-    add_to_digifeeds_set = responses.post(
+    add_to_digifeeds_set_stub = responses.post(
         add_to_digifeeds_url,
         match=[
             matchers.query_param_matcher(add_to_digifeeds_query),
@@ -48,10 +48,10 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
         status=200,
     )
 
-    result = runner.invoke(app, ["digifeeds", "add-to-db", "some_barcode"])
+    result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
     assert get_item.call_count == 1
     assert post_item.call_count == 1
-    assert add_to_digifeeds_set.call_count == 1
+    assert add_to_digifeeds_set_stub.call_count == 1
     assert add_item_status.call_count == 1
     assert result.exit_code == 0
     assert 'Adding barcode "some_barcode" to database' in result.stdout
@@ -61,9 +61,9 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
 def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
     item_data["statuses"][0]["name"] = "not_found_in_alma"
     item = Item(item_data)
-    mocker.patch("aim.cli.digifeeds.add_to_digifeeds_db", return_value=item)
+    mocker.patch.object(functions, "add_to_digifeeds_set", return_value=item)
 
-    result = runner.invoke(app, ["digifeeds", "add-to-db", "some_barcode"])
+    result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
     assert "Item not found in alma" in result.stdout
     assert "Item NOT added to digifeeds set" in result.stdout
 
@@ -78,8 +78,9 @@ def test_load_statuses(mocker):
 
 
 def test_list_barcodes_in_input_bucket(mocker):
-    list_barcodes_mock = mocker.patch(
-        "aim.cli.digifeeds.list_barcodes_in_bucket",
+    list_barcodes_mock = mocker.patch.object(
+        functions,
+        "list_barcodes_in_input_bucket",
         return_value=["barcode1", "barcode2"],
     )
     result = runner.invoke(app, ["digifeeds", "list-barcodes-in-input-bucket"])
@@ -119,7 +120,7 @@ def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
 def test_move_to_pickup_success(mocker, item_data):
     item = Item(item_data)
     move_volume_to_pickup_mock = mocker.patch.object(
-        digifeeds_cli, "move_volume_to_pickup", return_value=item
+        functions, "move_to_pickup", return_value=item
     )
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
@@ -131,7 +132,7 @@ def test_move_to_pickup_success(mocker, item_data):
 
 def test_move_to_pickup_where_not_in_zephir(mocker):
     move_volume_to_pickup_mock = mocker.patch.object(
-        digifeeds_cli, "move_volume_to_pickup", return_value=None
+        functions, "move_to_pickup", return_value=None
     )
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])

@@ -20,10 +20,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   aim.digifeeds.add_to_db
    aim.digifeeds.alma_client
-   aim.digifeeds.check_zephir
    aim.digifeeds.db_client
+   aim.digifeeds.functions
    aim.digifeeds.item
-   aim.digifeeds.list_barcodes_in_bucket
-   aim.digifeeds.move_to_pickup
