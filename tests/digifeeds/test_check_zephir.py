@@ -2,7 +2,8 @@ import pytest
 import responses
 import json
 from aim.services import S
-from aim.digifeeds.check_zephir import check_zephir
+from aim.digifeeds import functions
+from aim.digifeeds.functions import check_zephir
 
 
 @pytest.fixture
@@ -19,11 +20,11 @@ def barcode():
 
 @responses.activate
 def test_barcode_is_in_zephir(mocker, item_data, barcode):
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.check_zephir.DBClient.get_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        functions.DBClient, "get_item", return_value=item_data
     )
-    add_status_mock = mocker.patch(
-        "aim.digifeeds.check_zephir.DBClient.add_item_status", return_value=item_data
+    add_status_mock = mocker.patch.object(
+        functions.DBClient, "add_item_status", return_value=item_data
     )
 
     responses.get(f"{S.zephir_bib_api_url}/mdp.{barcode}", json={}, status=200)
@@ -35,12 +36,12 @@ def test_barcode_is_in_zephir(mocker, item_data, barcode):
 
 def test_barcode_already_has_in_zephir_status(mocker, item_data, barcode):
     item_data["statuses"][0]["name"] = "in_zephir"
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.check_zephir.DBClient.get_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        functions.DBClient, "get_item", return_value=item_data
     )
 
-    add_status_mock = mocker.patch(
-        "aim.digifeeds.check_zephir.DBClient.add_item_status", return_value=item_data
+    add_status_mock = mocker.patch.object(
+        functions.DBClient, "add_item_status", return_value=item_data
     )
 
     result = check_zephir(barcode)
@@ -51,11 +52,12 @@ def test_barcode_already_has_in_zephir_status(mocker, item_data, barcode):
 
 @responses.activate
 def test_barcode_not_in_zephir(mocker, item_data, barcode):
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.check_zephir.DBClient.get_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        functions.DBClient, "get_item", return_value=item_data
     )
-    add_status_mock = mocker.patch(
-        "aim.digifeeds.check_zephir.DBClient.add_item_status", return_value=item_data
+
+    add_status_mock = mocker.patch.object(
+        functions.DBClient, "add_item_status", return_value=item_data
     )
 
     responses.get(f"{S.zephir_bib_api_url}/mdp.{barcode}", json={}, status=404)
@@ -66,7 +68,7 @@ def test_barcode_not_in_zephir(mocker, item_data, barcode):
 
 
 def test_barcdoe_is_not_in_db(mocker, barcode):
-    mocker.patch("aim.digifeeds.check_zephir.DBClient.get_item", return_value=None)
+    mocker.patch.object(functions.DBClient, "get_item", return_value=None)
     with pytest.raises(Exception) as exc_info:
         check_zephir(barcode)
     assert exc_info.type is Exception
