@@ -5,9 +5,6 @@
 import typer
 from typing_extensions import Annotated
 from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
-from aim.digifeeds.list_barcodes_in_bucket import list_barcodes_in_bucket
-
-# from aim.digifeeds.check_zephir import check_zephir as check_zephir_for_barcode
 from aim.digifeeds.move_to_pickup import move_to_pickup as move_volume_to_pickup
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
@@ -81,7 +78,7 @@ def list_barcodes_in_input_bucket():
     """
     List the barcodes currently in the input directory in the S3 bucket.
     """
-    json.dump(list_barcodes_in_bucket(), sys.stdout)
+    json.dump(functions.list_barcodes_in_input_bucket(), sys.stdout)
 
 
 @app.command()

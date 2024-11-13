@@ -6,6 +6,7 @@ from typer.testing import CliRunner
 from aim.cli.main import app
 from aim.services import S
 from aim.digifeeds.item import Item
+from aim.digifeeds import functions
 import aim.cli.digifeeds as digifeeds_cli
 
 runner = CliRunner()
@@ -78,8 +79,9 @@ def test_load_statuses(mocker):
 
 
 def test_list_barcodes_in_input_bucket(mocker):
-    list_barcodes_mock = mocker.patch(
-        "aim.cli.digifeeds.list_barcodes_in_bucket",
+    list_barcodes_mock = mocker.patch.object(
+        functions,
+        "list_barcodes_in_input_bucket",
         return_value=["barcode1", "barcode2"],
     )
     result = runner.invoke(app, ["digifeeds", "list-barcodes-in-input-bucket"])

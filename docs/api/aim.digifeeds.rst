@@ -25,5 +25,4 @@ Submodules
    aim.digifeeds.db_client
    aim.digifeeds.functions
    aim.digifeeds.item
-   aim.digifeeds.list_barcodes_in_bucket
    aim.digifeeds.move_to_pickup
