@@ -15,6 +15,10 @@ class Base(DeclarativeBase):
 
 
 class Item(Base):
+    """
+    A representation of a digifeeds item. It has a barcode and statuses.
+    """
+
     __tablename__ = "items"
 
     barcode: Mapped[str] = mapped_column(String(256), unique=True, primary_key=True)
@@ -25,6 +29,10 @@ class Item(Base):
 
 
 class Status(Base):
+    """
+    A representation of a digifeeds status. It has a name and a description.
+    """
+
     __tablename__ = "statuses"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(String(256))
@@ -36,10 +44,16 @@ class Status(Base):
 
 
 class ItemStatus(Base):
+    """
+    An association table for items and statuses. It includes the timestamp at
+    which the status for an item was created.
+    """
+
     __tablename__ = "item_statuses"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     item_barcode: Mapped[int] = mapped_column(ForeignKey("items.barcode"))
     status_id: Mapped[int] = mapped_column(ForeignKey("statuses.id"))
+
     # https://docs.sqlalchemy.org/en/20/core/functions.html#sqlalchemy.sql.functions.now Tell the db to set the date.
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -56,6 +70,12 @@ class ItemStatus(Base):
 
 
 def load_statuses(session: Session):
+    """
+    Takes the list of statuses in the function and loads them into the digifeeds database.
+
+    Args:
+        session (Session): A SqlAlchemy session object
+    """
     statuses = [
         {"name": "in_zephir", "description": "Item is in zephir"},
         {
