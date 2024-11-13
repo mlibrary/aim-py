@@ -10,8 +10,12 @@ from aim.digifeeds.alma_client import AlmaClient
 from requests.exceptions import HTTPError
 
 
-def add_to_db(barcode: str):
-    """Add a barcode to the digifeeds database
+def add_to_digifeeds_set(barcode: str):
+    """
+    Adds a barcode to the digifeeds set and to the digifeeds database if it
+    doesn't already exist. If the barcode is in the digifeeds set already but
+    doesn't have an added_to_digifeeds_set status in the digifeeds db, that
+    status gets added.
 
     Args:
         barcode (str): Barcode of the item

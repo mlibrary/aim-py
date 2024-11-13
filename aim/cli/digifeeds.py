@@ -15,7 +15,7 @@ app = typer.Typer()
 
 
 @app.command()
-def add_to_db(
+def add_to_digifeeds_set(
     barcode: Annotated[
         str,
         typer.Argument(help="The barcode to be added to the database"),
@@ -32,7 +32,7 @@ def add_to_db(
         barcode (str): Barcode of item
     """
     print(f'Adding barcode "{barcode}" to database')
-    item = functions.add_to_db(barcode)
+    item = functions.add_to_digifeeds_set(barcode)
     if item.has_status("not_found_in_alma"):
         print("Item not found in alma.")
     if item.has_status("added_to_digifeeds_set"):
