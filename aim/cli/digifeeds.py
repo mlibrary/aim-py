@@ -4,7 +4,6 @@
 
 import typer
 from typing_extensions import Annotated
-from aim.digifeeds.add_to_db import add_to_db as add_to_digifeeds_db
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
 
@@ -33,7 +32,7 @@ def add_to_db(
         barcode (str): Barcode of item
     """
     print(f'Adding barcode "{barcode}" to database')
-    item = add_to_digifeeds_db(barcode)
+    item = functions.add_to_db(barcode)
     if item.has_status("not_found_in_alma"):
         print("Item not found in alma.")
     if item.has_status("added_to_digifeeds_set"):

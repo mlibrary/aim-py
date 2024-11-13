@@ -3,7 +3,9 @@
 import json
 import pytest
 import responses
-from aim.digifeeds.add_to_db import add_to_db
+from aim.digifeeds.functions import add_to_db
+from aim.digifeeds.alma_client import AlmaClient
+from aim.digifeeds.db_client import DBClient
 from requests.exceptions import HTTPError
 from aim.services import S
 
@@ -16,8 +18,8 @@ def item_data():
 
 
 def test_add_to_db_barcode_thats_in_the_digifeeds_set(mocker, item_data):
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        DBClient, "get_or_add_item", return_value=item_data
     )
     result = add_to_db("my_barcode")
     get_item_mock.assert_called_once()
@@ -29,11 +31,11 @@ def test_add_to_db_barcode_thats_in_the_digifeeds_set_but_doesnt_have_status(
     mocker, item_data
 ):
     item_data["statuses"][0]["name"] = "some_other_status"
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        DBClient, "get_or_add_item", return_value=item_data
     )
-    add_status_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.add_item_status", return_value=item_data
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
     )
     error_body = {
         "errorsExist": True,
@@ -65,14 +67,15 @@ def test_add_to_db_barcode_thats_in_the_digifeeds_set_but_doesnt_have_status(
 
 def test_add_to_db_barcode_thats_not_in_the_digifeeds_set(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.add_to_db.DBClient.get_or_add_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        DBClient, "get_or_add_item", return_value=item_data
     )
-    add_status_mock = mocker.patch(
-        "aim.digifeeds.add_to_db.DBClient.add_item_status", return_value=item_data
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
     )
-    add_to_digifeeds_set_mock = mocker.patch(
-        "aim.digifeeds.add_to_db.AlmaClient.add_barcode_to_digifeeds_set",
+    add_to_digifeeds_set_mock = mocker.patch.object(
+        AlmaClient,
+        "add_barcode_to_digifeeds_set",
         return_value=item_data,
     )
     result = add_to_db("some_barcode")
@@ -85,11 +88,11 @@ def test_add_to_db_barcode_thats_not_in_the_digifeeds_set(mocker, item_data):
 @responses.activate
 def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        DBClient, "get_or_add_item", return_value=item_data
     )
-    add_status_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.add_item_status", return_value=item_data
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
     )
     error_body = {
         "errorsExist": True,
@@ -122,10 +125,10 @@ def test_add_to_db_barcode_that_is_not_in_alma(mocker, item_data):
 @responses.activate
 def test_add_to_db_barcode_that_causes_alma_error(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
-    get_item_mock = mocker.patch(
-        "aim.digifeeds.db_client.DBClient.get_or_add_item", return_value=item_data
+    get_item_mock = mocker.patch.object(
+        DBClient, "get_or_add_item", return_value=item_data
     )
-    add_status_mock = mocker.patch("aim.digifeeds.db_client.DBClient.add_item_status")
+    add_status_mock = mocker.patch.object(DBClient, "add_item_status")
     error_body = {
         "errorsExist": True,
         "errorList": {

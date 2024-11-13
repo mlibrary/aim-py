@@ -61,7 +61,7 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
 def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
     item_data["statuses"][0]["name"] = "not_found_in_alma"
     item = Item(item_data)
-    mocker.patch("aim.cli.digifeeds.add_to_digifeeds_db", return_value=item)
+    mocker.patch.object(functions, "add_to_db", return_value=item)
 
     result = runner.invoke(app, ["digifeeds", "add-to-db", "some_barcode"])
     assert "Item not found in alma" in result.stdout
