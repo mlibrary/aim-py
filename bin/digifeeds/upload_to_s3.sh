@@ -90,7 +90,7 @@ verify_image_order() {
   for arg in "${sorted[@]}"; do
     cnt=$((cnt + 1))
     int=${arg:0:8}
-    [ $((10#$int)) != $cnt ] && return 1
+    [ $(( 10#$int )) != $cnt ] && return 1
   done
   return 0
 }
