@@ -12,6 +12,7 @@ setup() {
   mkdir $SCRATCH_PATH
 
   INPUT_DIR=$SCRATCH_PATH/input
+  WORKING_DIR=$SCRATCH_PATH/working
   PROCESSED_DIR=$SCRATCH_PATH/processed
 
   BARCODE_1="30000000189012"
@@ -20,6 +21,7 @@ setup() {
 
   mkdir $INPUT_DIR
   mkdir $PROCESSED_DIR
+  mkdir $WORKING_DIR
 
   mkdir $INPUT_DIR/$BARCODE_1
   touch $INPUT_DIR/$BARCODE_1/00000001.tif
@@ -34,6 +36,7 @@ setup() {
   ## Config that's in main.
   export input_directory="$INPUT_DIR"
   export processed_directory="$PROCESSED_DIR"
+  export working_directory="$WORKING_DIR"
   export digifeeds_bucket="digifeeds_bucket"
   export timestamp=$TIMESTAMP
   export send_metrics="false"
@@ -65,7 +68,7 @@ teardown() {
 @test "It Works" {
   shellmock new rclone
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
-  shellmock config rclone 0 1:check regex-2:"$INPUT_DIR" regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:"$WORKING_DIR" regex-3:^digifeeds_bucket:
   run $SUBJECT
 
   assert_success
@@ -81,7 +84,7 @@ teardown() {
 @test "It filters the appropriate files" {
   shellmock new rclone
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
-  shellmock config rclone 0 1:check regex-2:"$INPUT_DIR" regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:"$WORKING_DIR" regex-3:^digifeeds_bucket:
 
   run $SUBJECT
   cd "$BATS_TEST_TMPDIR"
@@ -118,7 +121,7 @@ teardown() {
 @test "Failed image order" {
   shellmock new rclone
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
-  shellmock config rclone 0 1:check regex-2:"$INPUT_DIR" regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:"$WORKING_DIR" regex-3:^digifeeds_bucket:
   touch "$INPUT_DIR"/"$BARCODE_1"/00000004.jp2
   run $SUBJECT
   assert_output --partial "ERROR: Image order incorrect for $BARCODE_1"
@@ -158,7 +161,7 @@ teardown() {
 @test "Failed on S3 verification and moves on" {
   shellmock new rclone
   shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
-  shellmock config rclone 1 1:check regex-2:"$INPUT_DIR" regex-3:^digifeeds_bucket:
+  shellmock config rclone 1 1:check regex-2:"$WORKING_DIR" regex-3:^digifeeds_bucket:
   run $SUBJECT
   assert_output --partial "ERROR: $BARCODE_1 not found in S3"
   assert_output --partial "ERROR: $BARCODE_2 not found in S3"
@@ -168,6 +171,57 @@ teardown() {
   assert_output --partial "INFO: Total errors uploading to S3: 2"
   shellmock assert expectations rclone
 }
+@test "Fails on copying barcode folder to working directory and moves on" {
+  shellmock new cp
+  shellmock config cp 1 regex-2:"$INPUT_DIR" <<<"Error"
+  run $SUBJECT
+  assert_output --partial "ERROR: Copying $BARCODE_1 to working directory failed"
+  assert_output --partial "ERROR: Copying $BARCODE_2 to working directory failed"
+  assert_output --partial "INFO: Total files processed: 0"
+  assert_output --partial "INFO: Total errors image order: 0"
+  assert_output --partial "INFO: Total errors: 2"
+  assert_output --partial "INFO: Total errors uploading to S3: 0"
+  shellmock assert expectations cp
+}
+
+@test "Fails on copying zip to processed directory and moves on" {
+  shellmock new rclone
+  shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:"$WORKING_DIR" regex-3:^digifeeds_bucket:
+  cp -r "$INPUT_DIR"/* "$WORKING_DIR"
+  shellmock new cp
+  shellmock config cp 0 regex-2:"$INPUT_DIR"
+  shellmock config cp 1 regex-2:.zip <<<"Error"
+  run $SUBJECT
+  assert_output --partial "ERROR: Failed to copy ${BARCODE_1}.zip to processed"
+  assert_output --partial "ERROR: Failed to copy ${BARCODE_2}.zip to processed"
+  assert_output --partial "INFO: Total files processed: 0"
+  assert_output --partial "INFO: Total errors image order: 0"
+  assert_output --partial "INFO: Total errors: 2"
+  assert_output --partial "INFO: Total errors uploading to S3: 0"
+  shellmock assert expectations cp
+  shellmock assert expectations rclone
+}
+@test "Fails on copying working folder to processed directory and moves on" {
+  shellmock new rclone
+  shellmock config rclone 0 1:copy regex-3:^digifeeds_bucket:
+  shellmock config rclone 0 1:check regex-2:"$WORKING_DIR" regex-3:^digifeeds_bucket:
+  cp -r "$INPUT_DIR"/* "$WORKING_DIR"
+  shellmock new cp
+  shellmock config cp 0 regex-2:"$INPUT_DIR"
+  shellmock config cp 0 regex-2:.zip
+  shellmock config cp 1 <<<"Error"
+  run $SUBJECT
+  assert_output --partial "ERROR: Failed to copy ${BARCODE_1} to processed"
+  assert_output --partial "ERROR: Failed to copy ${BARCODE_2} to processed"
+  assert_output --partial "INFO: Total files processed: 0"
+  assert_output --partial "INFO: Total errors image order: 0"
+  assert_output --partial "INFO: Total errors: 2"
+  assert_output --partial "INFO: Total errors uploading to S3: 0"
+  shellmock assert expectations cp
+  shellmock assert expectations rclone
+}
+
 @test "print_metrics" {
   shellmock new pushgateway_advanced
   shellmock config pushgateway_advanced 0 <<<5

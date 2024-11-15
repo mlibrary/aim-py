@@ -21,6 +21,7 @@ if [[ $APP_ENV != "test" ]]; then
   # Variables contained in the config file:
   #
   # input_directory: path to the input directory
+  # working directory: path to nfs directory for doing the zipping and sending
   # processed_directory: path to the directory  of processed files+%
   # digifeeds_bucket: rclone remote for the digifeeds bucket
   #
@@ -33,6 +34,7 @@ if [[ $APP_ENV != "test" ]]; then
 fi
 if ! input_directory=${input_directory:?}; then exit 1; fi
 if ! processed_directory=${processed_directory:?}; then exit 1; fi
+if ! working_directory=${working_directory:?}; then exit 1; fi
 if ! digifeeds_bucket=${digifeeds_bucket:?}; then exit 1; fi
 send_metrics=${send_metrics:-"true"}
 
@@ -90,7 +92,7 @@ verify_image_order() {
   for arg in "${sorted[@]}"; do
     cnt=$((cnt + 1))
     int=${arg:0:8}
-    [ $(( 10#$int )) != $cnt ] && return 1
+    [ $((10#$int)) != $cnt ] && return 1
   done
   return 0
 }
@@ -175,14 +177,23 @@ main() {
   for barcode_path in "${input_directory}"/*/; do
     local barcode
     barcode=$(basename "${barcode_path%%/}")
+    working_barcode_path="${working_directory}/$barcode"
 
-    log_info "Copying $barcode"
+    log_info "Processing $barcode"
+
+    log_debug "Copying $barcode to working directory"
+
+    if ! cp -r "$barcode_path" "$working_barcode_path"; then
+      log_error "Copying $barcode to working directory failed"
+      errors_total=$((errors_total + 1))
+      continue
+    fi
 
     log_debug "Verifying image order $barcode"
     #8 digits, ends in .tif or .jp2
     filter_regex='[[:digit:]]{8}\.tif$|[[:digit:]]{8}\.jp2$'
     local image_list
-    image_list=$(list_files "$barcode_path" | grep -E "$filter_regex")
+    image_list=$(list_files "$working_barcode_path" | grep -E "$filter_regex")
     if ! verify_image_order "$image_list"; then
       log_error "Image order incorrect for $barcode"
       image_order_errors_total=$((image_order_errors_total + 1))
@@ -191,21 +202,21 @@ main() {
     fi
 
     log_debug "Zipping $barcode"
-    if ! zip_it "$input_directory"/"$barcode"; then
+    if ! zip_it "$working_barcode_path"; then
       log_error "Failed to zip $barcode"
       errors_total=$((errors_total + 1))
       continue
     fi
 
     log_debug "Verifying zip of $barcode"
-    if ! verify_zip "$input_directory"/"$barcode"; then
+    if ! verify_zip "$working_barcode_path"; then
       log_error "$barcode.zip does not contain the correct files"
       errors_total=$((errors_total + 1))
       continue
     fi
 
     log_debug "Sending $barcode to S3"
-    if ! rclone copy "$input_directory"/"$barcode".zip "$digifeeds_bucket":; then
+    if ! rclone copy "$working_barcode_path".zip "$digifeeds_bucket":; then
       log_error "Failed to copy $barcode"
       upload_errors_total=$((upload_errors_total + 1))
       errors_total=$((errors_total + 1))
@@ -213,7 +224,7 @@ main() {
     fi
 
     log_debug "Verifying barcode in S3"
-    if ! rclone check "$input_directory"/"$barcode".zip "$digifeeds_bucket":; then
+    if ! rclone check "$working_barcode_path".zip "$digifeeds_bucket":; then
       log_error "$barcode not found in S3"
       upload_errors_total=$((upload_errors_total + 1))
       errors_total=$((errors_total + 1))
@@ -221,8 +232,28 @@ main() {
     fi
 
     log_info "Moving $barcode to processed"
-    mv "$input_directory"/"$barcode".zip "$processed_directory"/"${TIMESTAMP}"_"${barcode}".zip
-    mv "$input_directory"/"$barcode" "$processed_directory"/"${TIMESTAMP}"_"${barcode}"
+    log_debug "Copying ${barcode}.zip to processed"
+    if ! cp "$working_barcode_path".zip "$processed_directory"/"${TIMESTAMP}"_"${barcode}".zip; then
+      log_error "Failed to copy $barcode.zip to processed"
+      errors_total=$((errors_total + 1))
+      continue
+    fi
+
+    log_debug "Deleting ${working_barcode_path}.zip"
+    rm "$working_barcode_path".zip
+
+    log_debug "Copying ${barcode} to processed"
+    if ! cp -r "$working_barcode_path" "$processed_directory"/"${TIMESTAMP}"_"${barcode}"; then
+      log_error "Failed to copy $barcode to processed"
+      errors_total=$((errors_total + 1))
+      continue
+    fi
+
+    log_debug "Deleting ${working_barcode_path}"
+    rm -r "$working_barcode_path"
+    log_debug "Deleting ${barcode_path}"
+    rm -r "$barcode_path"
+
     files_processed_total=$((files_processed_total + 1))
   done
 
