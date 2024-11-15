@@ -1,12 +1,44 @@
 from typing import NamedTuple
 import os
 import sqlalchemy as sa
+import structlog
+import sys
+
+# Configuring the Logger
+shared_processors = [
+    # Processors that have nothing to do with output,
+    # e.g., add timestamps or log level names.
+    structlog.processors.add_log_level,
+]
+
+if sys.stderr.isatty():
+    # Pretty printing when we run in a terminal session.
+    # Automatically prints pretty tracebacks when "rich" is installed
+
+    processors = shared_processors + [
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.dev.ConsoleRenderer(),
+    ]
+
+else:
+    # Print JSON when we run, e.g., in a Docker container.
+    # Also print structured tracebacks.
+
+    processors = shared_processors + [
+        structlog.processors.dict_tracebacks,
+        structlog.processors.JSONRenderer(),
+    ]
+
+structlog.configure(processors)
 
 
 class Services(NamedTuple):
     """
     Global Configuration Services
     """
+
+    #: The structured logger
+    logger: structlog.stdlib.BoundLogger
 
     #: The Digifeeds MySQL database
     mysql_database: sa.engine.URL
@@ -54,6 +86,7 @@ class Services(NamedTuple):
 
 
 S = Services(
+    logger=structlog.get_logger(),
     mysql_database=sa.engine.URL.create(
         drivername="mysql+mysqldb",
         username=os.environ["MARIADB_USER"],
