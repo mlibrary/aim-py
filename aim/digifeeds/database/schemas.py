@@ -44,7 +44,7 @@ class PageOfItems(BaseModel):
     items: list[Item]
     limit: int = 10
     offset: int = 0
-    total: int = 15
+    total: int = 1
 
 
 class ItemCreate(ItemBase):
