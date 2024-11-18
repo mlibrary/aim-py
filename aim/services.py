@@ -11,7 +11,7 @@ shared_processors = [
     structlog.processors.add_log_level,
 ]
 
-if sys.stderr.isatty():
+if sys.stderr.isatty():  # pragma: no cover
     # Pretty printing when we run in a terminal session.
     # Automatically prints pretty tracebacks when "rich" is installed
 

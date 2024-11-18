@@ -26,8 +26,8 @@ class TestCrud:
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
-        items = get_items(db=db_session, in_zephir=None, limit=2, offset=0)
-        count = get_items_total(db=db_session, in_zephir=None)
+        items = get_items(db=db_session, filter=None, limit=2, offset=0)
+        count = get_items_total(db=db_session, filter=None)
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (items[0]) == item1
@@ -39,8 +39,8 @@ class TestCrud:
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
-        items = get_items(db=db_session, in_zephir=True, limit=2, offset=0)
-        count = get_items_total(db=db_session, in_zephir=True)
+        items = get_items(db=db_session, filter="in_zephir", limit=2, offset=0)
+        count = get_items_total(db=db_session, filter="in_zephir")
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (len(items)) == 1
@@ -52,12 +52,53 @@ class TestCrud:
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
-        items = get_items(db=db_session, in_zephir=False, limit=2, offset=0)
-        count = get_items_total(db=db_session, in_zephir=False)
+        items = get_items(db=db_session, filter="not_in_zephir", limit=2, offset=0)
+        count = get_items_total(db=db_session, filter="not_in_zephir")
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (len(items)) == 1
         assert (items[0]) == item2
+        assert count == 1
+
+    def test_get_items_and_total_pending_deletion(self, db_session):
+        item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
+        item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
+        status = get_status(db=db_session, name="pending_deletion")
+        add_item_status(db=db_session, item=item1, status=status)
+        items = get_items(db=db_session, filter="pending_deletion", limit=2, offset=0)
+        count = get_items_total(db=db_session, filter="pending_deletion")
+        db_session.refresh(item1)
+        db_session.refresh(item2)
+        assert (len(items)) == 1
+        assert (items[0]) == item1
+        assert count == 1
+
+    def test_get_items_and_total_not_pending_deletion(self, db_session):
+        item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
+        item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
+        status = get_status(db=db_session, name="pending_deletion")
+        add_item_status(db=db_session, item=item1, status=status)
+        items = get_items(
+            db=db_session, filter="not_pending_deletion", limit=2, offset=0
+        )
+        count = get_items_total(db=db_session, filter="pending_deletion")
+        db_session.refresh(item1)
+        db_session.refresh(item2)
+        assert (len(items)) == 1
+        assert (items[0]) == item2
+        assert count == 1
+
+    def test_get_items_and_total_not_found_in_alma(self, db_session):
+        item1 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
+        item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
+        status = get_status(db=db_session, name="not_found_in_alma")
+        add_item_status(db=db_session, item=item1, status=status)
+        items = get_items(db=db_session, filter="not_found_in_alma", limit=2, offset=0)
+        count = get_items_total(db=db_session, filter="not_found_in_alma")
+        db_session.refresh(item1)
+        db_session.refresh(item2)
+        assert (len(items)) == 1
+        assert (items[0]) == item1
         assert count == 1
 
     def test_get_status_that_exists(self, db_session):
