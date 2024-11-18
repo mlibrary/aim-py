@@ -54,8 +54,8 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
     assert add_to_digifeeds_set_stub.call_count == 1
     assert add_item_status.call_count == 1
     assert result.exit_code == 0
-    assert 'Adding barcode "some_barcode" to database' in result.stdout
-    assert "Item added to digifeeds set" in result.stdout
+    assert "add_to_digifeeds_set_start" in result.stdout
+    assert "added_to_digifeeds_set" in result.stdout
 
 
 def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
@@ -64,8 +64,8 @@ def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
     mocker.patch.object(functions, "add_to_digifeeds_set", return_value=item)
 
     result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
-    assert "Item not found in alma" in result.stdout
-    assert "Item NOT added to digifeeds set" in result.stdout
+    assert "not_found_in_alma" in result.stdout
+    assert "not_added_to_digifeeds_set" in result.stdout
 
 
 def test_load_statuses(mocker):
@@ -101,7 +101,7 @@ def test_check_zephir_for_item_when_item_is_in_zephir(item_data):
     assert get_item.call_count == 1
     assert add_item_status.call_count == 1
     assert result.exit_code == 0
-    assert "some_barcode is in Zephir" in result.stdout
+    assert "in_zephir" in result.stdout
 
 
 @responses.activate
@@ -114,7 +114,7 @@ def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
     assert get_item.call_count == 1
     assert add_item_status.call_count == 0
     assert result.exit_code == 0
-    assert "some_barcode is NOT in Zephir" in result.stdout
+    assert "not_in_zephir" in result.stdout
 
 
 def test_move_to_pickup_success(mocker, item_data):
@@ -126,7 +126,7 @@ def test_move_to_pickup_success(mocker, item_data):
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
     move_volume_to_pickup_mock.assert_called_once()
-    assert "Item has been successfully moved to pickup" in result.stdout
+    assert "move_to_pickup_success" in result.stdout
     assert result.exit_code == 0
 
 
@@ -138,5 +138,5 @@ def test_move_to_pickup_where_not_in_zephir(mocker):
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
     move_volume_to_pickup_mock.assert_called_once()
-    assert "Item has not been in zephir long enough" in result.stdout
+    assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0

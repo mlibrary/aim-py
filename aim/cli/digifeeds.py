@@ -6,6 +6,7 @@ import typer
 from typing_extensions import Annotated
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
+from aim.services import S
 
 import json
 import sys
@@ -31,14 +32,28 @@ def add_to_digifeeds_set(
     Args:
         barcode (str): Barcode of item
     """
-    print(f'Adding barcode "{barcode}" to database')
+    S.logger.info(
+        "add_to_digifeeds_set_start",
+        message="Start adding item to digifeeds set",
+        barcode=barcode,
+    )
     item = functions.add_to_digifeeds_set(barcode)
     if item.has_status("not_found_in_alma"):
-        print("Item not found in alma.")
+        S.logger.info(
+            "not_found_in_alma", message="Item not found in alma.", barcode=barcode
+        )
     if item.has_status("added_to_digifeeds_set"):
-        print("Item added to digifeeds set")
+        S.logger.info(
+            "added_to_digifeeds_set",
+            message="Item added to digifeeds set",
+            barcode=barcode,
+        )
     else:
-        print("Item NOT added to digifeeds set")
+        S.logger.error(
+            "not_added_to_digifeeds_set",
+            message="Item NOT added to digifeeds set",
+            barcode=barcode,
+        )
 
 
 @app.command()
@@ -57,9 +72,9 @@ def check_zephir(
     print(f"Checking Zephir for {barcode}")
     item = functions.check_zephir(barcode)
     if item:
-        print(f"{barcode} is in Zephir")
+        S.logger.info("in_zephir", message="Item is in zephir", barcode=barcode)
     else:
-        print(f"{barcode} is NOT in Zephir")
+        S.logger.info("not_in_zephir", message="Item is NOT in zephir", barcode=barcode)
 
 
 @app.command()
@@ -91,9 +106,21 @@ def move_to_pickup(
     pickup from google. When it's finished, the volume is moved to the processed
     folder in the bucket and prefixed with the date and time.
     """
-    print(f'Moving barcode "{barcode}" from the s3 bucket to the google drive')
+    S.logger.info(
+        "move_to_pickup_start",
+        message="Start moving item from s3 bucket to pickup google drive",
+        barcode=barcode,
+    )
     item = functions.move_to_pickup(barcode)
     if item is None:
-        print("Item has not been in zephir long enough")
+        S.logger.info(
+            "not_in_zephir_long_enough",
+            message="Item has not been in zephir long enough",
+            barcode=barcode,
+        )
     else:
-        print("Item has been successfully moved to pickup")
+        S.logger.info(
+            "move_to_pickup_success",
+            message="Item has been successfully moved to pickup",
+            barcode=barcode,
+        )
