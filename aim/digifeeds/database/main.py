@@ -7,6 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, Path, Query
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from aim.digifeeds.database import crud, schemas
+from aim.digifeeds.database.crud import NotFoundError
 from aim.services import S
 
 # This is here so SessionLocal won't have a problem in tests in github
@@ -158,6 +159,27 @@ def update_item(
     if db_item is None:
         raise HTTPException(status_code=404, detail="Item not found")
     return crud.add_item_status(db=db, item=db_item, status=db_status)
+
+
+# TODO this doesn't properly show the list of statuses upon deletion. I probably don't care.
+@app.delete(
+    "/items/{barcode}",
+    response_model_by_alias=False,
+    responses={
+        404: {
+            "description": "Bad request: The item doesn't exist",
+            "model": schemas.Response404,
+        }
+    },
+    tags=["Digifeeds Database"],
+)
+def delete_item(barcode: str, db: Session = Depends(get_db)) -> schemas.Item:
+    try:
+        db_item = crud.delete_item(db=db, barcode=barcode)
+    except NotFoundError:
+        raise HTTPException(status_code=404, detail="Item not found")
+    S.logger.info(db_item)
+    return db_item
 
 
 @app.get("/statuses", tags=["Digifeeds Database"])

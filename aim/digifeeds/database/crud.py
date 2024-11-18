@@ -4,9 +4,15 @@
 Operations that act on the digifeeds database
 """
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
+from aim.services import S
+
+
+class NotFoundError(Exception):
+    pass
 
 
 def get_item(db: Session, barcode: str):
@@ -21,7 +27,16 @@ def get_item(db: Session, barcode: str):
         aim.digifeeds.database.models.Item: Item object
 
     """
-    return db.query(models.Item).filter(models.Item.barcode == barcode).first()
+    stmnt = (
+        select(models.Item)
+        .filter_by(barcode=barcode)
+        .options(
+            # this is here so when we delete the barcode the statuses show up in the output
+            joinedload(models.Item.statuses)
+        )
+    )
+
+    return db.scalars(stmnt).first()
 
 
 def get_items_total(db: Session, filter: schemas.ItemFilters = None):
@@ -138,4 +153,15 @@ def add_item_status(db: Session, item: models.Item, status: models.Status):
     db.add(db_item_status)
     db.commit()
     db.refresh(item)
+    return item
+
+
+def delete_item(db: Session, barcode: str):
+    db_item = get_item(db=db, barcode=barcode)
+    if db_item is None:
+        raise NotFoundError()
+    # need to load this now so the statuses show up in the return
+    item = schemas.Item(**db_item.__dict__)
+    db.delete(db_item)
+    db.commit()
     return item

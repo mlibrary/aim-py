@@ -21,7 +21,7 @@ class Item(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
-    statuses: Mapped[list["ItemStatus"]] = relationship()
+    statuses: Mapped[list["ItemStatus"]] = relationship(cascade="all, delete")
 
 
 class Status(Base):

@@ -6,8 +6,10 @@ from aim.digifeeds.database.crud import (
     get_statuses,
     add_item_status,
     get_items_total,
+    delete_item,
 )
 from aim.digifeeds.database.schemas import ItemCreate
+from aim.digifeeds.database.models import ItemStatus
 
 
 class TestCrud:
@@ -113,3 +115,13 @@ class TestCrud:
         statuses = get_statuses(db=db_session)
         assert (len(statuses)) > 1
         assert (statuses[0].name) == "in_zephir"
+
+    def test_delete_item(self, db_session):
+        item = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
+        status = get_status(db=db_session, name="in_zephir")
+        add_item_status(db=db_session, item=item, status=status)
+        delete_item(db=db_session, barcode=item.barcode)
+        item_result = get_item(db=db_session, barcode=item.barcode)
+        item_statuses = db_session.query(ItemStatus).all()
+        assert item_result is None
+        assert item_statuses == []
