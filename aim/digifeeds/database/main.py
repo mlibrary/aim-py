@@ -43,23 +43,24 @@ def get_db():  # pragma: no cover
 def get_items(
     offset: int = Query(0, ge=0, description="Requested offset from the list of pages"),
     limit: int = Query(50, ge=1, description="Requested number of items per page"),
-    in_zephir: bool | None = Query(
-        None, description="Filter for items that do or do not have metadata in Zephir"
+    filter: schemas.ItemFilters = Query(
+        None, description="Filters on the items in the database"
     ),
     db: Session = Depends(get_db),
 ) -> schemas.PageOfItems:  # list[schemas.Item]:
     """
     Get the digifeeds items.
 
-    These items can be filtered by whether or not their metadata is in Zephir or
-    all of them can be fetched.
+    These items can be filtered by whether or not their metadata is in Zephir,
+    whether or not they are pending deletion, if they are not in alma, or all of
+    them can be fetched.
     """
 
-    db_items = crud.get_items(in_zephir=in_zephir, db=db, offset=offset, limit=limit)
+    db_items = crud.get_items(filter=filter, db=db, offset=offset, limit=limit)
     return {
         "limit": limit,
         "offset": offset,
-        "total": crud.get_items_total(in_zephir=in_zephir, db=db),
+        "total": crud.get_items_total(filter=filter, db=db),
         "items": db_items,
     }
 

@@ -26,8 +26,8 @@ class TestCrud:
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
-        items = get_items(db=db_session, in_zephir=None, limit=2, offset=0)
-        count = get_items_total(db=db_session, in_zephir=None)
+        items = get_items(db=db_session, filter=None, limit=2, offset=0)
+        count = get_items_total(db=db_session, filter=None)
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (items[0]) == item1
@@ -39,8 +39,8 @@ class TestCrud:
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
-        items = get_items(db=db_session, in_zephir=True, limit=2, offset=0)
-        count = get_items_total(db=db_session, in_zephir=True)
+        items = get_items(db=db_session, filter="in_zephir", limit=2, offset=0)
+        count = get_items_total(db=db_session, filter="in_zephir")
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (len(items)) == 1
@@ -52,8 +52,8 @@ class TestCrud:
         item2 = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
         status = get_status(db=db_session, name="in_zephir")
         add_item_status(db=db_session, item=item1, status=status)
-        items = get_items(db=db_session, in_zephir=False, limit=2, offset=0)
-        count = get_items_total(db=db_session, in_zephir=False)
+        items = get_items(db=db_session, filter="not_in_zephir", limit=2, offset=0)
+        count = get_items_total(db=db_session, filter="not_in_zephir")
         db_session.refresh(item1)
         db_session.refresh(item2)
         assert (len(items)) == 1

@@ -33,7 +33,7 @@ def test_get_items(client, valid_item, valid_in_zephir_item, db_session):
 def test_get_items_with_in_zephir_true(client, valid_item, valid_in_zephir_item):
     valid_item
     valid_in_zephir_item
-    response = client.get("/items", params={"in_zephir": True})
+    response = client.get("/items", params={"filter": "in_zephir"})
     assert response.status_code == 200, response.text
     assert len(response.json()["items"]) == 1
     assert response.json()["items"][0]["barcode"] == valid_in_zephir_item.barcode
@@ -42,7 +42,7 @@ def test_get_items_with_in_zephir_true(client, valid_item, valid_in_zephir_item)
 def test_get_items_with_in_zephir_false(client, valid_item, valid_in_zephir_item):
     valid_item
     valid_in_zephir_item
-    response = client.get("/items", params={"in_zephir": False})
+    response = client.get("/items", params={"filter": "not_in_zephir"})
     assert response.status_code == 200, response.text
     assert len(response.json()["items"]) == 1
     assert response.json()["items"][0]["barcode"] == valid_item.barcode

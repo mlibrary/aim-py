@@ -24,33 +24,39 @@ def get_item(db: Session, barcode: str):
     return db.query(models.Item).filter(models.Item.barcode == barcode).first()
 
 
-def get_items_total(db: Session, in_zephir: bool | None):
-    query = get_items_query(db=db, in_zephir=in_zephir)
+def get_items_total(db: Session, filter: schemas.ItemFilters = None):
+    query = get_items_query(db=db, filter=filter)
     return query.count()
 
 
-def get_items(db: Session, in_zephir: bool | None, limit: int, offset: int):
+def get_items(
+    db: Session,
+    limit: int,
+    offset: int,
+    filter: schemas.ItemFilters = None,
+):
     """
     Get Digifeed items from the database
 
     Args:
         db (sqlalchemy.orm.Session): Digifeeds database session
-        in_zephir (bool | None): Whether or not the items are in zephir
+        filter (schemas.ItemFilters | None): filter to apply to the list of items.
 
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
-    query = get_items_query(db=db, in_zephir=in_zephir)
+    query = get_items_query(db=db, filter=filter)
     return query.offset(offset).limit(limit).all()
 
 
-def get_items_query(db: Session, in_zephir: bool | None):
+def get_items_query(db: Session, filter: schemas.ItemFilters = None):
     query = db.query(models.Item)
-    if in_zephir is True:
+
+    if filter == "in_zephir":
         query = query.filter(
             models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
-    elif in_zephir is False:
+    elif filter == "not_in_zephir":
         query = query.filter(
             ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
