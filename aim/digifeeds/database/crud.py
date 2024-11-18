@@ -60,6 +60,24 @@ def get_items_query(db: Session, filter: schemas.ItemFilters = None):
         query = query.filter(
             ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
+    elif filter == "pending_deletion":
+        query = query.filter(
+            models.Item.statuses.any(
+                models.ItemStatus.status_name == "pending_deletion"
+            )
+        )
+    elif filter == "not_pending_deletion":
+        query = query.filter(
+            ~models.Item.statuses.any(
+                models.ItemStatus.status_name == "pending_deletion"
+            )
+        )
+    elif filter == "not_found_in_alma":
+        query = query.filter(
+            models.Item.statuses.any(
+                models.ItemStatus.status_name == "not_found_in_alma"
+            )
+        )
     return query
 
 

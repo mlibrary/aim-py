@@ -53,7 +53,7 @@ class ItemFilters(str, Enum):
     not_in_zephir = "not_in_zephir"
     pending_deletion = "pending_deletion"
     not_pending_deletion = "not_pending_deletion"
-    not_in_alma = "not_in_alma"
+    not_found_in_alma = "not_found_in_alma"
 
 
 class ItemCreate(ItemBase):
