@@ -41,11 +41,13 @@ def get_db():  # pragma: no cover
 
 @app.get("/items/", response_model_by_alias=False, tags=["Digifeeds Database"])
 def get_items(
+    offset: int = Query(0, ge=0, description="Requested offset from the list of pages"),
+    limit: int = Query(50, ge=1, description="Requested number of items per page"),
     in_zephir: bool | None = Query(
         None, description="Filter for items that do or do not have metadata in Zephir"
     ),
     db: Session = Depends(get_db),
-) -> list[schemas.Item]:
+) -> schemas.PageOfItems:  # list[schemas.Item]:
     """
     Get the digifeeds items.
 
@@ -53,8 +55,13 @@ def get_items(
     all of them can be fetched.
     """
 
-    db_items = crud.get_items(in_zephir=in_zephir, db=db)
-    return db_items
+    db_items = crud.get_items(in_zephir=in_zephir, db=db, offset=offset, limit=limit)
+    return {
+        "limit": limit,
+        "offset": offset,
+        "total": crud.get_items_total(in_zephir=in_zephir, db=db),
+        "items": db_items,
+    }
 
 
 @app.get(

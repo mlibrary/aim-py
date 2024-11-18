@@ -1,4 +1,5 @@
 """Digifeeds Pydantic Models"""
+
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 
@@ -39,6 +40,12 @@ class Item(ItemBase):
     )
 
 
+class PageOfItems(BaseModel):
+    items: list[Item]
+    limit: int = 10
+    offset: int = 0
+    total: int = 1
+
 
 class ItemCreate(ItemBase):
     pass
@@ -66,6 +73,7 @@ class Response400(Response):
             ]
         }
     )
+
 
 class Response404(Response):
     model_config = ConfigDict(

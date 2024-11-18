@@ -14,8 +14,15 @@ release = "0.0.1"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = ["sphinx.ext.napoleon", "sphinx.ext.viewcode", "sphinx.ext.autosummary",
-              "sphinx.ext.autodoc", 'myst_parser', 'sphinxcontrib.mermaid', "sphinx_toolbox.more_autodoc.autonamedtuple"]
+extensions = [
+    "sphinx.ext.napoleon",
+    "sphinx.ext.viewcode",
+    "sphinx.ext.autosummary",
+    "sphinx.ext.autodoc",
+    "myst_parser",
+    "sphinxcontrib.mermaid",
+    "sphinx_toolbox.more_autodoc.autonamedtuple",
+]
 autosummary_generate = True
 
 mermaid_d3_zoom = True
@@ -33,5 +40,5 @@ html_static_path = ["_static"]
 html_theme_options = {
     "navigation_depth": 5,
     "collapse_navigation": False,
-    "titles_only": True
+    "titles_only": True,
 }

@@ -68,5 +68,34 @@ class DBClient:
             response.raise_for_status()
         return response.json()
 
+    def get_items(self, limit: int = 50, in_zephir: bool | None = None):
+        items = []
+        url = self._url("items")
+        params = {
+            "limit": limit,
+            "offset": 0,
+        }
+        if in_zephir is not None:
+            params["in_zephir"] = in_zephir
+
+        response = requests.get(url, params=params)
+        if response.status_code != 200:
+            response.raise_for_status()
+
+        first_page = response.json()
+        total = first_page["total"]
+        for item in first_page["items"]:
+            items.append(item)
+
+        for offset in list(range(limit, total, limit)):
+            params["offset"] = offset
+            response = requests.get(url, params=params)
+            if response.status_code != 200:
+                response.raise_for_status()
+            for item in response.json()["items"]:
+                items.append(item)
+
+        return items
+
     def _url(self, path) -> str:
         return f"{self.base_url}/{path}"
