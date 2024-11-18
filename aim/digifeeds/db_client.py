@@ -70,12 +70,12 @@ class DBClient:
 
     def get_items(self, limit: int = 50, in_zephir: bool | None = None):
         items = []
-        url = self._url(f"items")
+        url = self._url("items")
         params = {
             "limit": limit,
             "offset": 0,
         }
-        if in_zephir != None:
+        if in_zephir is not None:
             params["in_zephir"] = in_zephir
 
         response = requests.get(url, params=params)

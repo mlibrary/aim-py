@@ -3,6 +3,7 @@
 
 This hooks up the AIM CLI application. Nothing exciting happening here.
 """
+
 import typer
 import aim.cli.digifeeds as digifeeds
 

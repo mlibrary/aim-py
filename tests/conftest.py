@@ -10,8 +10,10 @@ from aim.services import S
 
 engine = create_engine(
     S.test_database,
-    connect_args={ "check_same_thread": False,},
-    poolclass=StaticPool
+    connect_args={
+        "check_same_thread": False,
+    },
+    poolclass=StaticPool,
 )
 
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -25,10 +27,11 @@ load_statuses(session)
 session.close()
 connection.close()
 
+
 # From: https://stackoverflow.com/questions/67255653/how-to-set-up-and-tear-down-a-database-between-tests-in-fastapi
 # These two event listeners are only needed for sqlite for proper
 # SAVEPOINT / nested transaction support. Other databases like postgres
-# don't need them. 
+# don't need them.
 # From: https://docs.sqlalchemy.org/en/14/dialects/sqlite.html#serializable-isolation-savepoints-transactional-ddl
 @sa.event.listens_for(engine, "connect")
 def do_connect(dbapi_connection, connection_record):
@@ -42,13 +45,13 @@ def do_begin(conn):
     # emit our own BEGIN
     conn.exec_driver_sql("BEGIN")
 
+
 # Handles rolling back the db after every test
 @pytest.fixture()
 def db_session(scope="module"):
     connection = engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
-
 
     # Begin a nested transaction (using SAVEPOINT).
     nested = connection.begin_nested()
@@ -67,6 +70,7 @@ def db_session(scope="module"):
     session.close()
     transaction.rollback()
     connection.close()
+
 
 # A fixture for the fastapi test client which depends on the
 # previous session fixture. Instead of creating a new session in the
