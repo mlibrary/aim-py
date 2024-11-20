@@ -8,7 +8,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
-from aim.services import S
 
 
 class NotFoundError(Exception):
@@ -36,7 +35,11 @@ def get_item(db: Session, barcode: str):
         )
     )
 
-    return db.scalars(stmnt).first()
+    item = db.scalars(stmnt).first()
+    if item is None:
+        raise NotFoundError()
+    else:
+        return item
 
 
 def get_items_total(db: Session, filter: schemas.ItemFilters = None):
@@ -123,7 +126,13 @@ def get_status(db: Session, name: str):
     Returns:
         aim.digifeeds.database.models.Status: Status object
     """
-    return db.query(models.Status).filter(models.Status.name == name).first()
+    stmnt = select(models.Status).filter_by(name=name)
+
+    status = db.scalars(stmnt).first()
+    if status is None:
+        raise NotFoundError()
+    else:
+        return status
 
 
 def get_statuses(db: Session):
@@ -158,8 +167,6 @@ def add_item_status(db: Session, item: models.Item, status: models.Status):
 
 def delete_item(db: Session, barcode: str):
     db_item = get_item(db=db, barcode=barcode)
-    if db_item is None:
-        raise NotFoundError()
     # need to load this now so the statuses show up in the return
     item = schemas.Item(**db_item.__dict__)
     db.delete(db_item)

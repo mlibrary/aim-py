@@ -87,3 +87,14 @@ def test_update_existing_item_with_nonexistent_status(client, valid_item):
     response = client.put(f"/items/{valid_item.barcode}/status/non_existent_status")
     assert response.status_code == 404
     assert response.json() == {"detail": "Status not found"}
+
+
+def test_delete_item(client, valid_item):
+    response = client.delete(f"/items/{valid_item.barcode}")
+    assert response.status_code == 200, response.text
+
+
+def test_delete_not_existent_item(client):
+    response = client.delete("/items/barcode_does_not_exist")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Item not found"}

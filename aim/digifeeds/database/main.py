@@ -87,8 +87,9 @@ def get_item(
     The item can be fetched by the barcode of the item.
     """
 
-    db_item = crud.get_item(barcode=barcode, db=db)
-    if db_item is None:
+    try:
+        db_item = crud.get_item(barcode=barcode, db=db)
+    except NotFoundError:
         raise HTTPException(status_code=404, detail="Item not found")
     return db_item
 
@@ -115,11 +116,13 @@ def create_item(
     """
 
     item = schemas.ItemCreate(barcode=barcode)
-    db_item = crud.get_item(barcode=item.barcode, db=db)
-    if db_item:
+    try:
+        crud.get_item(barcode=item.barcode, db=db)
+    except NotFoundError:
+        db_item = crud.add_item(item=item, db=db)
+        return db_item
+    else:
         raise HTTPException(status_code=400, detail="Item already exists")
-    db_item = crud.add_item(item=item, db=db)
-    return db_item
 
 
 desc_put_404 = """
@@ -152,16 +155,19 @@ def update_item(
     This is how to add a status to an existing item.
     """
 
-    db_status = crud.get_status(name=status_name, db=db)
-    if db_status is None:
+    try:
+        db_status = crud.get_status(name=status_name, db=db)
+    except NotFoundError:
         raise HTTPException(status_code=404, detail="Status not found")
-    db_item = crud.get_item(barcode=barcode, db=db)
-    if db_item is None:
+
+    try:
+        db_item = crud.get_item(barcode=barcode, db=db)
+    except NotFoundError:
         raise HTTPException(status_code=404, detail="Item not found")
+
     return crud.add_item_status(db=db, item=db_item, status=db_status)
 
 
-# TODO this doesn't properly show the list of statuses upon deletion. I probably don't care.
 @app.delete(
     "/items/{barcode}",
     response_model_by_alias=False,
