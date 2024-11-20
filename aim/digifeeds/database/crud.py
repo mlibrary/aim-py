@@ -4,9 +4,14 @@
 Operations that act on the digifeeds database
 """
 
-from sqlalchemy.orm import Session
+from sqlalchemy import select, func
+from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
+
+
+class NotFoundError(Exception):
+    pass
 
 
 def get_item(db: Session, barcode: str):
@@ -21,12 +26,25 @@ def get_item(db: Session, barcode: str):
         aim.digifeeds.database.models.Item: Item object
 
     """
-    return db.query(models.Item).filter(models.Item.barcode == barcode).first()
+    stmnt = (
+        select(models.Item)
+        .filter_by(barcode=barcode)
+        .options(
+            # this is here so when we delete the barcode the statuses show up in the output
+            joinedload(models.Item.statuses)
+        )
+    )
+
+    item = db.scalars(stmnt).first()
+    if item is None:
+        raise NotFoundError()
+    else:
+        return item
 
 
 def get_items_total(db: Session, filter: schemas.ItemFilters = None):
-    query = get_items_query(db=db, filter=filter)
-    return query.count()
+    stmnt = get_items_statement(filter=filter)
+    return db.execute(select(func.count()).select_from(stmnt.subquery())).scalar_one()
 
 
 def get_items(
@@ -45,40 +63,40 @@ def get_items(
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
-    query = get_items_query(db=db, filter=filter)
-    return query.offset(offset).limit(limit).all()
+    stmnt = get_items_statement(filter=filter).offset(offset).limit(limit)
+    return db.scalars(stmnt).all()
 
 
-def get_items_query(db: Session, filter: schemas.ItemFilters = None):
-    query = db.query(models.Item)
+def get_items_statement(filter: schemas.ItemFilters = None):
+    stmnt = select(models.Item)
 
     if filter == "in_zephir":
-        query = query.filter(
+        stmnt = stmnt.where(
             models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
     elif filter == "not_in_zephir":
-        query = query.filter(
+        stmnt = stmnt.where(
             ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
     elif filter == "pending_deletion":
-        query = query.filter(
+        stmnt = stmnt.where(
             models.Item.statuses.any(
                 models.ItemStatus.status_name == "pending_deletion"
             )
         )
     elif filter == "not_pending_deletion":
-        query = query.filter(
+        stmnt = stmnt.where(
             ~models.Item.statuses.any(
                 models.ItemStatus.status_name == "pending_deletion"
             )
         )
     elif filter == "not_found_in_alma":
-        query = query.filter(
+        stmnt = stmnt.where(
             models.Item.statuses.any(
                 models.ItemStatus.status_name == "not_found_in_alma"
             )
         )
-    return query
+    return stmnt
 
 
 def add_item(db: Session, item: schemas.ItemCreate):
@@ -108,7 +126,13 @@ def get_status(db: Session, name: str):
     Returns:
         aim.digifeeds.database.models.Status: Status object
     """
-    return db.query(models.Status).filter(models.Status.name == name).first()
+    stmnt = select(models.Status).filter_by(name=name)
+
+    status = db.scalars(stmnt).first()
+    if status is None:
+        raise NotFoundError()
+    else:
+        return status
 
 
 def get_statuses(db: Session):
@@ -120,7 +144,7 @@ def get_statuses(db: Session):
     Returns:
         aim.digifeeds.database.models.Status: Status object
     """
-    return db.query(models.Status).all()
+    return db.scalars(select(models.Status)).all()
 
 
 def add_item_status(db: Session, item: models.Item, status: models.Status):
@@ -138,4 +162,13 @@ def add_item_status(db: Session, item: models.Item, status: models.Status):
     db.add(db_item_status)
     db.commit()
     db.refresh(item)
+    return item
+
+
+def delete_item(db: Session, barcode: str):
+    db_item = get_item(db=db, barcode=barcode)
+    # need to load this now so the statuses show up in the return
+    item = schemas.Item(**db_item.__dict__)
+    db.delete(db_item)
+    db.commit()
     return item
