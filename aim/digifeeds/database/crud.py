@@ -14,6 +14,10 @@ class NotFoundError(Exception):
     pass
 
 
+class AlreadyExistsError(Exception):
+    pass
+
+
 def get_item(db: Session, barcode: str):
     """
     Get item from the database
@@ -69,33 +73,33 @@ def get_items(
 
 def get_items_statement(filter: schemas.ItemFilters = None):
     stmnt = select(models.Item)
-
-    if filter == "in_zephir":
-        stmnt = stmnt.where(
-            models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
-        )
-    elif filter == "not_in_zephir":
-        stmnt = stmnt.where(
-            ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
-        )
-    elif filter == "pending_deletion":
-        stmnt = stmnt.where(
-            models.Item.statuses.any(
-                models.ItemStatus.status_name == "pending_deletion"
+    match filter:
+        case "in_zephir":
+            stmnt = stmnt.where(
+                models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
             )
-        )
-    elif filter == "not_pending_deletion":
-        stmnt = stmnt.where(
-            ~models.Item.statuses.any(
-                models.ItemStatus.status_name == "pending_deletion"
+        case "not_in_zephir":
+            stmnt = stmnt.where(
+                ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
             )
-        )
-    elif filter == "not_found_in_alma":
-        stmnt = stmnt.where(
-            models.Item.statuses.any(
-                models.ItemStatus.status_name == "not_found_in_alma"
+        case "pending_deletion":
+            stmnt = stmnt.where(
+                models.Item.statuses.any(
+                    models.ItemStatus.status_name == "pending_deletion"
+                )
             )
-        )
+        case "not_pending_deletion":
+            stmnt = stmnt.where(
+                ~models.Item.statuses.any(
+                    models.ItemStatus.status_name == "pending_deletion"
+                )
+            )
+        case "not_found_in_alma":
+            stmnt = stmnt.where(
+                models.Item.statuses.any(
+                    models.ItemStatus.status_name == "not_found_in_alma"
+                )
+            )
     return stmnt
 
 
@@ -110,6 +114,13 @@ def add_item(db: Session, item: schemas.ItemCreate):
         aim.digifeeds.database.models.Item: Item object
     """
     db_item = models.Item(barcode=item.barcode)
+
+    stmnt = select(models.Item).filter_by(barcode=item.barcode)
+    already_in_db_item = db.scalars(stmnt).first()
+
+    if already_in_db_item is not None:
+        raise AlreadyExistsError()
+
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
