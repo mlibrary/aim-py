@@ -4,7 +4,7 @@
 Operations that act on the digifeeds database
 """
 
-from sqlalchemy import select
+from sqlalchemy import select, func
 from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
@@ -43,8 +43,8 @@ def get_item(db: Session, barcode: str):
 
 
 def get_items_total(db: Session, filter: schemas.ItemFilters = None):
-    query = get_items_query(db=db, filter=filter)
-    return query.count()
+    stmnt = get_items_statement(filter=filter)
+    return db.execute(select(func.count()).select_from(stmnt.subquery())).scalar_one()
 
 
 def get_items(
@@ -63,40 +63,40 @@ def get_items(
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
-    query = get_items_query(db=db, filter=filter)
-    return query.offset(offset).limit(limit).all()
+    stmnt = get_items_statement(filter=filter).offset(offset).limit(limit)
+    return db.scalars(stmnt).all()
 
 
-def get_items_query(db: Session, filter: schemas.ItemFilters = None):
-    query = db.query(models.Item)
+def get_items_statement(filter: schemas.ItemFilters = None):
+    stmnt = select(models.Item)
 
     if filter == "in_zephir":
-        query = query.filter(
+        stmnt = stmnt.where(
             models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
     elif filter == "not_in_zephir":
-        query = query.filter(
+        stmnt = stmnt.where(
             ~models.Item.statuses.any(models.ItemStatus.status_name == "in_zephir")
         )
     elif filter == "pending_deletion":
-        query = query.filter(
+        stmnt = stmnt.where(
             models.Item.statuses.any(
                 models.ItemStatus.status_name == "pending_deletion"
             )
         )
     elif filter == "not_pending_deletion":
-        query = query.filter(
+        stmnt = stmnt.where(
             ~models.Item.statuses.any(
                 models.ItemStatus.status_name == "pending_deletion"
             )
         )
     elif filter == "not_found_in_alma":
-        query = query.filter(
+        stmnt = stmnt.where(
             models.Item.statuses.any(
                 models.ItemStatus.status_name == "not_found_in_alma"
             )
         )
-    return query
+    return stmnt
 
 
 def add_item(db: Session, item: schemas.ItemCreate):
