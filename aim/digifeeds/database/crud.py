@@ -144,7 +144,7 @@ def get_statuses(db: Session):
     Returns:
         aim.digifeeds.database.models.Status: Status object
     """
-    return db.query(models.Status).all()
+    return db.scalars(select(models.Status)).all()
 
 
 def add_item_status(db: Session, item: models.Item, status: models.Status):
