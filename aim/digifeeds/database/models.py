@@ -4,7 +4,7 @@ Digifeeds Models
 """
 
 from sqlalchemy import String, ForeignKey, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy.sql import func, select
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship, Session
 from sqlalchemy.ext.associationproxy import association_proxy
 import datetime
@@ -78,7 +78,8 @@ def load_statuses(session: Session):
     ]
     objects = []
     for status in statuses:
-        sts = session.query(Status).filter_by(name=status["name"]).first()
+        stmnt = select(Status).filter_by(name=status["name"])
+        sts = session.scalars(stmnt).first()
         if sts is None:
             objects.append(Status(**status))
 
