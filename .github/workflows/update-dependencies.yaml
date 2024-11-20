@@ -1,0 +1,77 @@
+name: Update dependencies
+
+on: 
+  push:
+  workflow_dispatch:
+  schedule:
+    - cron:  '0 8 1 * *' #8AM first of the month
+
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    outputs: 
+      sha: ${{ steps.cpr.outputs.pull-request-head-sha }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create .env file
+        run: cat env.* > .env
+      - name: Load .env file
+        uses: xom9ikk/dotenv@v2.3.0
+      - name: Install poetry
+        run: | 
+          echo "/root/.local/bin" >> $GITHUB_PATH
+          pipx install poetry
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'poetry'
+      - run: poetry install
+      - name: Get python packages to update
+        #continue-on-error: true
+        run: poetry show -o > /tmp/poetry_summary.txt
+      - run: cat /tmp/poetry_summary.txt
+      - name: Update packages
+        run: poetry update
+      - name: Run tests
+        env:
+          CI: "true"
+        run: poetry run pytest 
+      - name: generate pr body
+        run: |
+          sed $'/POETRY_SUMMARY/{r /tmp/poetry_summary.txt\nd}' .github/update_dependencies_template.md > /tmp/pr_body.md
+      - name: print summary
+        run: cat /tmp/pr_body.md
+      - name: Get PR title
+        run: echo "PR_TITLE=$(date +'%B %Y') dependency updates" >> $GITHUB_ENV
+      - name: Create Pull Request
+        id: cpr
+        uses: peter-evans/create-pull-request@v6
+        with: 
+          branch: update-dependencies
+          commit-message: "Update dependencies"
+          title: ${{ env.PR_TITLE }}
+          body-path: /tmp/pr_body.md
+          reviewers: niquerio, dfulmer
+
+  build-unstable:
+    needs: update
+    name: Build unstable ${{ needs.update.outputs.sha }}
+    uses: mlibrary/platform-engineering-workflows/.github/workflows/build-unstable.yml@v1
+    with:
+      image_name: ${{ vars.IMAGE_NAME }}
+      tag: ${{ needs.update.outputs.sha}}
+      dockerfile: Dockerfile
+    secrets: inherit
+      
+  deploy-unstable:
+    needs: build-unstable
+    name: Deploy to workshop
+    uses: mlibrary/platform-engineering-workflows/.github/workflows/deploy.yml@v1
+    with:
+      image: ${{ needs.build-unstable.outputs.image }}
+      file: environments/digifeeds/workshop/app-image.txt
+      CONFIG_REPO_RW_APP_ID: ${{ vars.CONFIG_REPO_RW_APP_ID }}
+      CONFIG_REPO_FULL_NAME: ${{ vars.CONFIG_REPO_FULL_NAME }}
+    secrets: inherit
