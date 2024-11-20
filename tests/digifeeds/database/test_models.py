@@ -1,4 +1,5 @@
 from aim.digifeeds.database.models import Item, Status, ItemStatus
+from sqlalchemy import select
 
 
 class TestItem:
@@ -6,7 +7,8 @@ class TestItem:
         valid_item = Item(barcode="valid_barcode")
         db_session.add(valid_item)
         db_session.commit()
-        item = db_session.query(Item).filter_by(barcode="valid_barcode").first()
+        stmnt = select(Item).filter_by(barcode="valid_barcode")
+        item = db_session.scalars(stmnt).first()
         assert item.barcode == "valid_barcode"
         assert item.created_at
 
@@ -14,7 +16,8 @@ class TestItem:
         item = Item(barcode="valid_barcode")
         db_session.add(item)
         db_session.commit()
-        status = db_session.query(Status).filter_by(name="in_zephir").first()
+        stmnt = select(Status).filter_by(name="in_zephir")
+        status = db_session.scalars(stmnt).first()
         db_session.refresh(item)
         assert (len(item.statuses)) == 0
 
