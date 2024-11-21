@@ -1,4 +1,5 @@
-from typing import NamedTuple
+# from typing import NamedTuple
+from dataclasses import dataclass
 import os
 import sqlalchemy as sa
 import structlog
@@ -32,7 +33,8 @@ else:
 structlog.configure(processors)
 
 
-class Services(NamedTuple):
+@dataclass(frozen=True)
+class Services:
     """
     Global Configuration Services
     """
