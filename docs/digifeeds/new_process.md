@@ -1,5 +1,7 @@
 # Proposed Digifeeds Process
+
 ## Overview
+
 ```mermaid
 flowchart TD
     A[Folder with Scans]
@@ -32,7 +34,9 @@ flowchart TD
     R -- No --> S[Do nothing]
     R --Yes --> T[Remove from digifeeds set]
 ```
+
 ## Database tables
+
 ```mermaid
 erDiagram
     ITEM ||--o{ ITEM_STATUS : has_many
@@ -55,7 +59,8 @@ erDiagram
 ```
 
 ## CLI scripts
-```
+
+```bash
 aim digifeeds check_zephir
 aim digifeeds zip_and_move_to_pickup
 aim digifeeds add_to_db BARCODE

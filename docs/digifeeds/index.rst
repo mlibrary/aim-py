@@ -1,5 +1,6 @@
 Digifeeds
 =================
 .. toctree::
+    overview
     new_process
-    current_digifeeds_process
+    old_digifeeds_process
