@@ -21,7 +21,6 @@ extensions = [
     "sphinx.ext.autodoc",
     "myst_parser",
     "sphinxcontrib.mermaid",
-    "sphinx_toolbox.more_autodoc.autonamedtuple",
 ]
 autosummary_generate = True
 

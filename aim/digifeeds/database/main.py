@@ -7,7 +7,7 @@ from fastapi import Depends, FastAPI, HTTPException, Path, Query
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from aim.digifeeds.database import crud, schemas
-from aim.digifeeds.database.crud import NotFoundError
+from aim.digifeeds.database.crud import NotFoundError, AlreadyExistsError
 from aim.services import S
 
 # This is here so SessionLocal won't have a problem in tests in github
@@ -117,12 +117,11 @@ def create_item(
 
     item = schemas.ItemCreate(barcode=barcode)
     try:
-        crud.get_item(barcode=item.barcode, db=db)
-    except NotFoundError:
         db_item = crud.add_item(item=item, db=db)
-        return db_item
-    else:
+    except AlreadyExistsError:
         raise HTTPException(status_code=400, detail="Item already exists")
+    else:
+        return db_item
 
 
 desc_put_404 = """
