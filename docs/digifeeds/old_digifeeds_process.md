@@ -1,5 +1,10 @@
-# Current Digifeeds Process
+# Old Digifeeds Process
+
+This is what the digifeeds process was before we switched to the one handled in
+by this application.
+
 ## Overall Process
+
 ```mermaid
 flowchart LR
     A[Scanner] -->|creates scans and puts them in| B[Holding Folder]
@@ -15,7 +20,9 @@ flowchart LR
 
     H --> |checks| J[HathiTrust Bib API]
 ```
+
 ## Verifier Script
+
 ```mermaid
 flowchart TD
     A[Check Barcode List with HathiTrust Bib API ] --> B{Is each item in zephir?}
