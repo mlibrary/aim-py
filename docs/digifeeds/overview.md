@@ -119,6 +119,72 @@ sequenceDiagram
     Workflow->>+Prometheus Pushgateway: Sends metrics
 ```
 
+## Add to Alma Set
+
+```mermaidjs
+sequenceDiagram
+      Workflow ->> Digifeeds DB: Get or add item for the given Barcode
+      Digifeeds DB ->> Workflow: Returns Item information
+      alt Item has added_to_digifeeds_set status
+        Workflow ->> Workflow: Succeed and continue
+      else Item does not have added_to_digifeeds_set status
+        critical Add Barcode to digifeeds Alma Set
+          Workflow->>Alma API: Add Barcode to Alma Set
+        option Barcode Doesn't exist
+          Alma API ->> Workflow: Returns Barcode not found error
+          Workflow ->> Digifeeds DB: Add not_found_in_alma status to Item
+          Workflow ->> Workflow: Error and exit for this barcode
+        option Barcode is already there
+          Alma API ->> Workflow: Returns Barcode already exists in set error
+          Workflow ->> Digifeeds DB: Adds added_to_digifeeds_set status to Item
+        option Success
+          Alma API ->> Workflow: Successfully added to set
+          Workflow->>Digifeeds DB: Adss added_to_digifeeds_set status to item
+        end
+      end 
+```
+
+## Check Zephir
+
+```meramidjs
+sequenceDiagram
+    Workflow ->> Digifeeds DB: Get or add item for the given Barcode
+    Digifeeds DB -->> Workflow: Returns Item information
+    Workflow ->> Workflow: Does item have in_zephir status?
+    alt Item has in_zephir status
+      Workflow ->> Workflow: Exit successfully 
+    else It does not 
+      Workflow ->> Zephir Bib API: Does Zephir have a corresponding record for the Barcode?
+      alt It does not
+        Zephir Bib API -->> Workflow: 404 or some other error
+        Workflow ->> Workflow: Log that the Item is not in Zephir.<br>Exit successfully 
+      else It does
+        Zephir Bib API -->> Workflow: 200 Success
+        Workflow ->> Digifeeds DB: add in_zephir status to Item
+        Workflow ->> Workflow: Exit successfully 
+      end
+    end
+```
+
+## Send to Pickup
+
+```mermaidjs
+sequenceDiagram
+    Workflow ->> Digifeeds DB: Get or add item for the given Barcode
+    Digifeeds DB -->> Workflow: Returns Item information
+    Workflow ->> Workflow: Has the item had an in_zephir<br> status for more than 2 weeks?
+
+    alt It does not meet those conditions
+        Workflow ->> Workflow: Log that the Item is not in Zephir.<br> Exit successfully
+      else It does meet those conditions
+        Workflow ->> Digifeeds DB: Add copying_start status to Item
+        Workflow ->> Google Drive: Copy the corresponding zip from S3 to the Google Drive
+        Workflow ->> Digifeeds DB: Add copying_end status to Item
+        Workflow ->> Input S3 Folder: Move the corresponding zip<br> to the Processed Folder in the bucket
+        Workflow ->> Digifeeds DB: Add pending_deletion status to Item
+      end
+```
+
 ## Process Barcodes High Level Overview
 
 ```mermaidjs
