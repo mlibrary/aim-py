@@ -1,4 +1,7 @@
 from datetime import datetime, timedelta
+from aim.digifeeds.alma_client import AlmaClient
+from aim.digifeeds.db_client import DBClient
+from requests.exceptions import HTTPError
 
 
 class Item:
@@ -28,6 +31,36 @@ class Item:
             bool: True if Digifeeds item has a status, Fales if Digifeeds item does not have a status.
         """
         return any(s["name"] == status for s in self.data["statuses"])
+
+    def add_to_digifeeds_set(self):
+        if self.has_status("added_to_digifeeds_set"):
+            return self
+
+        try:
+            AlmaClient().add_barcode_to_digifeeds_set(self.barcode)
+        except HTTPError as ext_inst:
+            errorList = ext_inst.response.json()["errorList"]["error"]
+            if any(e["errorCode"] == "60120" for e in errorList):
+                if not self.has_status("not_found_in_alma"):
+                    item = Item(
+                        DBClient().add_item_status(
+                            barcode=self.barcode, status="not_found_in_alma"
+                        )
+                    )
+                return item
+            elif any(e["errorCode"] == "60115" for e in errorList):
+                # 60115 means the barcode is already in the set. That means the
+                # db entry from this barcdoe needs to have
+                # added_to_digifeeds_set
+                pass
+            else:
+                raise ext_inst
+        item = Item(
+            DBClient().add_item_status(
+                barcode=self.barcode, status="added_to_digifeeds_set"
+            )
+        )
+        return item
 
     @property
     def barcode(self) -> str:
