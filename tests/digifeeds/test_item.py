@@ -15,6 +15,11 @@ def item_data():
     return output
 
 
+@pytest.fixture
+def barcode():
+    return "some_barcode"
+
+
 def test_has_status_is_true(item_data):
     result = Item(item_data).has_status("added_to_digifeeds_set")
     assert result is True
@@ -177,3 +182,42 @@ def test_add_to_digifeeds_set_barcode_that_causes_alma_error(mocker, item_data):
     assert exc_info.type is HTTPError
     assert add_to_digifeeds_set_stub.call_count == 1
     add_status_mock.assert_not_called()
+
+
+@responses.activate
+def test_barcode_is_in_zephir(mocker, item_data, barcode):
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
+    )
+
+    responses.get(f"{S.zephir_bib_api_url}/mdp.{barcode}", json={}, status=200)
+    item = Item(item_data)
+    result = item.check_zephir()
+    add_status_mock.assert_called_once()
+    assert result.barcode == barcode
+
+
+def test_barcode_already_has_in_zephir_status(mocker, item_data):
+    item_data["statuses"][0]["name"] = "in_zephir"
+
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
+    )
+
+    item = Item(item_data)
+    result = item.check_zephir()
+    add_status_mock.assert_not_called()
+    assert result.barcode == item.barcode
+
+
+@responses.activate
+def test_barcode_not_in_zephir(mocker, item_data, barcode):
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
+    )
+    responses.get(f"{S.zephir_bib_api_url}/mdp.{barcode}", json={}, status=404)
+
+    item = Item(item_data)
+    result = item.check_zephir()
+    add_status_mock.assert_not_called()
+    assert result is None

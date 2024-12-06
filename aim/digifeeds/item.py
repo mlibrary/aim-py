@@ -1,6 +1,8 @@
+import requests
 from datetime import datetime, timedelta
 from aim.digifeeds.alma_client import AlmaClient
 from aim.digifeeds.db_client import DBClient
+from aim.services import S
 from requests.exceptions import HTTPError
 
 
@@ -62,6 +64,19 @@ class Item:
         )
         return item
 
+    def check_zephir(self):
+        if self.has_status("in_zephir"):
+            return self
+
+        response = requests.get(f"{S.zephir_bib_api_url}/mdp.{self.barcode}")
+        if response.status_code == 200:
+            db_resp = DBClient().add_item_status(
+                barcode=self.barcode, status="in_zephir"
+            )
+            return Item(db_resp)
+        else:
+            return None
+
     @property
     def barcode(self) -> str:
         """The barcode of the Digifeeds item.
@@ -101,6 +116,5 @@ class Item:
             return False
 
 
-# TODO
 def get_item(barcode: str) -> Item:
     return Item(DBClient().get_or_add_item(barcode))
