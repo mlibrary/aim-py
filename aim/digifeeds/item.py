@@ -1,4 +1,5 @@
 import requests
+from rclone_python import rclone
 from datetime import datetime, timedelta
 from aim.digifeeds.alma_client import AlmaClient
 from aim.digifeeds.db_client import DBClient
@@ -76,6 +77,27 @@ class Item:
             return Item(db_resp)
         else:
             return None
+
+    def move_to_pickup(self):
+        if not self.in_zephir_for_long_enough:
+            return None
+
+        DBClient().add_item_status(barcode=self.barcode, status="copying_start")
+        rclone.copyto(
+            f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_input_path}/{self.barcode}.zip",
+            f"{S.digifeeds_gdrive_rclone_remote}:{self.barcode}.zip",
+        )
+        DBClient().add_item_status(barcode=self.barcode, status="copying_end")
+        timestamp = datetime.now().strftime("%F_%H-%M-%S")
+        rclone.moveto(
+            f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_input_path}/{self.barcode}.zip",
+            f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_processed_path}/{timestamp}_{self.barcode}.zip",
+        )
+        db_resp = DBClient().add_item_status(
+            barcode=self.barcode, status="pending_deletion"
+        )
+
+        return Item(db_resp)
 
     @property
     def barcode(self) -> str:

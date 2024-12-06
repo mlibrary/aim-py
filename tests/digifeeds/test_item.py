@@ -2,8 +2,7 @@ import pytest
 import json
 import responses
 from datetime import datetime, timedelta
-from aim.digifeeds.item import Item
-from aim.digifeeds.db_client import DBClient
+from aim.digifeeds.item import Item, rclone, DBClient
 from requests.exceptions import HTTPError
 from aim.services import S
 
@@ -13,6 +12,20 @@ def item_data():
     with open("tests/fixtures/digifeeds/item.json") as f:
         output = json.load(f)
     return output
+
+
+@pytest.fixture
+def item_in_zephir_for_long_enough(item_data):
+    item_data["statuses"][0]["name"] = "in_zephir"
+    return item_data
+
+
+@pytest.fixture
+def item_in_zephir_too_recent(item_in_zephir_for_long_enough):
+    item_in_zephir_for_long_enough["statuses"][0]["created_at"] = (
+        datetime.now().isoformat(timespec="seconds")
+    )
+    return item_in_zephir_for_long_enough
 
 
 @pytest.fixture
@@ -220,4 +233,29 @@ def test_barcode_not_in_zephir(mocker, item_data, barcode):
     item = Item(item_data)
     result = item.check_zephir()
     add_status_mock.assert_not_called()
+    assert result is None
+
+
+def test_move_to_pickup_success(mocker, item_in_zephir_for_long_enough):
+    rclone_copyto_mock = mocker.patch.object(rclone, "copyto")
+    rclone_moveto_mock = mocker.patch.object(rclone, "moveto")
+    add_status_mock = mocker.patch.object(
+        DBClient,
+        "add_item_status",
+        return_value=item_in_zephir_for_long_enough,
+    )
+
+    item = Item(item_in_zephir_for_long_enough)
+    result = item.move_to_pickup()
+
+    rclone_copyto_mock.assert_called_once()
+    rclone_moveto_mock.assert_called_once()
+    assert add_status_mock.call_count == 3
+    assert result is not None
+
+
+def test_move_to_pickup_item_too_recent(item_in_zephir_too_recent):
+    item = Item(item_in_zephir_too_recent)
+    result = item.move_to_pickup()
+
     assert result is None
