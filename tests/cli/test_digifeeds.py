@@ -7,6 +7,7 @@ from aim.cli.main import app
 from aim.services import S
 from aim.digifeeds.item import Item
 from aim.digifeeds import functions
+from datetime import datetime
 
 runner = CliRunner()
 
@@ -16,6 +17,17 @@ def item_data():
     with open("tests/fixtures/digifeeds/item.json") as f:
         output = json.load(f)
     return output
+
+
+@pytest.fixture
+def item_in_zephir_too_recent(item_data):
+    zephir_status = {
+        "name": "in_zephir",
+        "description": "Item is in zephir",
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    item_data["statuses"].append(zephir_status)
+    return item_data
 
 
 @responses.activate
@@ -140,5 +152,18 @@ def test_move_to_pickup_where_not_in_zephir(mocker):
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
+    assert "not_in_zephir_long_enough" in result.stdout
+    assert result.exit_code == 0
+
+
+def test_process_barcode(mocker, item_in_zephir_too_recent):
+    item = Item(item_in_zephir_too_recent)
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item)
+
+    result = runner.invoke(app, ["digifeeds", "process-barcode", "some_barcode"])
+
+    assert "add_to_digifeeds_set_start" in result.stdout
+    assert "added_to_digifeeds_set" in result.stdout
+    assert "in_zephir" in result.stdout
     assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0

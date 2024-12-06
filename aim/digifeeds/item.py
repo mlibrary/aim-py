@@ -142,7 +142,7 @@ class Item:
             return False
 
 
-def get_item(barcode: str) -> Item:
+def get_item(barcode: str) -> None:
     return Item(DBClient().get_or_add_item(barcode))
 
 
