@@ -121,24 +121,24 @@ def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
 
 def test_move_to_pickup_success(mocker, item_data):
     item = Item(item_data)
-    move_volume_to_pickup_mock = mocker.patch.object(
-        functions, "move_to_pickup", return_value=item
-    )
+    item_mock = mocker.MagicMock(Item)
+    item_mock.move_to_pickup.return_value = item
+
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item_mock)
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
-    move_volume_to_pickup_mock.assert_called_once()
     assert "move_to_pickup_success" in result.stdout
     assert result.exit_code == 0
 
 
 def test_move_to_pickup_where_not_in_zephir(mocker):
-    move_volume_to_pickup_mock = mocker.patch.object(
-        functions, "move_to_pickup", return_value=None
-    )
+    item_mock = mocker.MagicMock(Item)
+    item_mock.move_to_pickup.return_value = None
+
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item_mock)
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
-    move_volume_to_pickup_mock.assert_called_once()
     assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0

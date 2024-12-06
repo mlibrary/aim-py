@@ -116,8 +116,9 @@ def move_to_pickup(
         message="Start moving item from s3 bucket to pickup google drive",
         barcode=barcode,
     )
-    item = functions.move_to_pickup(barcode)
-    if item is None:
+    item = get_item(barcode)
+    result = item.move_to_pickup()
+    if result is None:
         S.logger.info(
             "not_in_zephir_long_enough",
             message="Item has not been in zephir long enough",
