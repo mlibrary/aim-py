@@ -59,9 +59,11 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
 
 
 def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
-    item_data["statuses"][0]["name"] = "not_found_in_alma"
-    item = Item(item_data)
-    mocker.patch.object(functions, "add_to_digifeeds_set", return_value=item)
+    item_mock = mocker.MagicMock(Item)
+    item_mock.has_status.side_effect = [True, False]
+    item_mock.add_to_digifeeds_set.return_value = item_mock
+
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item_mock)
 
     result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
     assert "not_found_in_alma" in result.stdout

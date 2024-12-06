@@ -99,3 +99,8 @@ class Item:
             return True
         else:
             return False
+
+
+# TODO
+def get_item(barcode: str) -> Item:
+    return Item(DBClient().get_or_add_item(barcode))
