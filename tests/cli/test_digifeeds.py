@@ -58,7 +58,7 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
     assert "added_to_digifeeds_set" in result.stdout
 
 
-def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
+def test_add_to_db_where_item_is_not_in_alma(mocker):
     item_mock = mocker.MagicMock(Item)
     item_mock.has_status.side_effect = [True, False]
     item_mock.add_to_digifeeds_set.return_value = item_mock

@@ -74,8 +74,9 @@ def check_zephir(
     """
 
     print(f"Checking Zephir for {barcode}")
-    item = functions.check_zephir(barcode)
-    if item:
+    item = get_item(barcode)
+    result = item.check_zephir()
+    if result:
         S.logger.info("in_zephir", message="Item is in zephir", barcode=barcode)
     else:
         S.logger.info("not_in_zephir", message="Item is NOT in zephir", barcode=barcode)

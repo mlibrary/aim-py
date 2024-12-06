@@ -44,16 +44,3 @@ def list_barcodes_in_input_bucket():
     response = s3.list_objects_v2(Bucket=S.digifeeds_s3_bucket, Prefix=prefix)
     barcodes = [Path(object["Key"]).stem for object in response["Contents"]]
     return barcodes
-
-
-def check_zephir(barcode: str):
-    item = Item(DBClient().get_or_add_item(barcode))
-    if item.has_status("in_zephir"):
-        return item
-
-    response = requests.get(f"{S.zephir_bib_api_url}/mdp.{barcode}")
-    if response.status_code == 200:
-        DBClient().add_item_status(barcode=barcode, status="in_zephir")
-        return item
-    else:
-        return None
