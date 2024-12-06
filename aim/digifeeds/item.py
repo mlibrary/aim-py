@@ -1,4 +1,10 @@
+import requests
+from rclone_python import rclone
 from datetime import datetime, timedelta
+from aim.digifeeds.alma_client import AlmaClient
+from aim.digifeeds.db_client import DBClient
+from aim.services import S
+from requests.exceptions import HTTPError
 
 
 class Item:
@@ -28,6 +34,70 @@ class Item:
             bool: True if Digifeeds item has a status, Fales if Digifeeds item does not have a status.
         """
         return any(s["name"] == status for s in self.data["statuses"])
+
+    def add_to_digifeeds_set(self):
+        if self.has_status("added_to_digifeeds_set"):
+            return self
+
+        try:
+            AlmaClient().add_barcode_to_digifeeds_set(self.barcode)
+        except HTTPError as ext_inst:
+            errorList = ext_inst.response.json()["errorList"]["error"]
+            if any(e["errorCode"] == "60120" for e in errorList):
+                if not self.has_status("not_found_in_alma"):
+                    item = Item(
+                        DBClient().add_item_status(
+                            barcode=self.barcode, status="not_found_in_alma"
+                        )
+                    )
+                return item
+            elif any(e["errorCode"] == "60115" for e in errorList):
+                # 60115 means the barcode is already in the set. That means the
+                # db entry from this barcdoe needs to have
+                # added_to_digifeeds_set
+                pass
+            else:
+                raise ext_inst
+        item = Item(
+            DBClient().add_item_status(
+                barcode=self.barcode, status="added_to_digifeeds_set"
+            )
+        )
+        return item
+
+    def check_zephir(self):
+        if self.has_status("in_zephir"):
+            return self
+
+        response = requests.get(f"{S.zephir_bib_api_url}/mdp.{self.barcode}")
+        if response.status_code == 200:
+            db_resp = DBClient().add_item_status(
+                barcode=self.barcode, status="in_zephir"
+            )
+            return Item(db_resp)
+        else:
+            return None
+
+    def move_to_pickup(self):
+        if not self.in_zephir_for_long_enough:
+            return None
+
+        DBClient().add_item_status(barcode=self.barcode, status="copying_start")
+        rclone.copyto(
+            f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_input_path}/{self.barcode}.zip",
+            f"{S.digifeeds_gdrive_rclone_remote}:{self.barcode}.zip",
+        )
+        DBClient().add_item_status(barcode=self.barcode, status="copying_end")
+        timestamp = datetime.now().strftime("%F_%H-%M-%S")
+        rclone.moveto(
+            f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_input_path}/{self.barcode}.zip",
+            f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_processed_path}/{timestamp}_{self.barcode}.zip",
+        )
+        db_resp = DBClient().add_item_status(
+            barcode=self.barcode, status="pending_deletion"
+        )
+
+        return Item(db_resp)
 
     @property
     def barcode(self) -> str:
@@ -66,3 +136,7 @@ class Item:
             return True
         else:
             return False
+
+
+def get_item(barcode: str) -> Item:
+    return Item(DBClient().get_or_add_item(barcode))

@@ -58,10 +58,12 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
     assert "added_to_digifeeds_set" in result.stdout
 
 
-def test_add_to_db_where_item_is_not_in_alma(item_data, mocker):
-    item_data["statuses"][0]["name"] = "not_found_in_alma"
-    item = Item(item_data)
-    mocker.patch.object(functions, "add_to_digifeeds_set", return_value=item)
+def test_add_to_db_where_item_is_not_in_alma(mocker):
+    item_mock = mocker.MagicMock(Item)
+    item_mock.has_status.side_effect = [True, False]
+    item_mock.add_to_digifeeds_set.return_value = item_mock
+
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item_mock)
 
     result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
     assert "not_found_in_alma" in result.stdout
@@ -119,24 +121,24 @@ def test_check_zephir_for_item_when_item_is_not_in_zephir(item_data):
 
 def test_move_to_pickup_success(mocker, item_data):
     item = Item(item_data)
-    move_volume_to_pickup_mock = mocker.patch.object(
-        functions, "move_to_pickup", return_value=item
-    )
+    item_mock = mocker.MagicMock(Item)
+    item_mock.move_to_pickup.return_value = item
+
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item_mock)
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
-    move_volume_to_pickup_mock.assert_called_once()
     assert "move_to_pickup_success" in result.stdout
     assert result.exit_code == 0
 
 
 def test_move_to_pickup_where_not_in_zephir(mocker):
-    move_volume_to_pickup_mock = mocker.patch.object(
-        functions, "move_to_pickup", return_value=None
-    )
+    item_mock = mocker.MagicMock(Item)
+    item_mock.move_to_pickup.return_value = None
+
+    mocker.patch("aim.cli.digifeeds.get_item", return_value=item_mock)
 
     result = runner.invoke(app, ["digifeeds", "move-to-pickup", "some_barcode"])
 
-    move_volume_to_pickup_mock.assert_called_once()
     assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0

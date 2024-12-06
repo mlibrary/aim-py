@@ -6,6 +6,7 @@ import typer
 from typing_extensions import Annotated
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
+from aim.digifeeds.item import get_item
 from aim.services import S
 
 import json
@@ -37,12 +38,15 @@ def add_to_digifeeds_set(
         message="Start adding item to digifeeds set",
         barcode=barcode,
     )
-    item = functions.add_to_digifeeds_set(barcode)
-    if item.has_status("not_found_in_alma"):
+    item = get_item(barcode)
+    result = item.add_to_digifeeds_set()
+
+    if result.has_status("not_found_in_alma"):
         S.logger.info(
             "not_found_in_alma", message="Item not found in alma.", barcode=barcode
         )
-    if item.has_status("added_to_digifeeds_set"):
+
+    if result.has_status("added_to_digifeeds_set"):
         S.logger.info(
             "added_to_digifeeds_set",
             message="Item added to digifeeds set",
@@ -70,8 +74,9 @@ def check_zephir(
     """
 
     print(f"Checking Zephir for {barcode}")
-    item = functions.check_zephir(barcode)
-    if item:
+    item = get_item(barcode)
+    result = item.check_zephir()
+    if result:
         S.logger.info("in_zephir", message="Item is in zephir", barcode=barcode)
     else:
         S.logger.info("not_in_zephir", message="Item is NOT in zephir", barcode=barcode)
@@ -111,8 +116,9 @@ def move_to_pickup(
         message="Start moving item from s3 bucket to pickup google drive",
         barcode=barcode,
     )
-    item = functions.move_to_pickup(barcode)
-    if item is None:
+    item = get_item(barcode)
+    result = item.move_to_pickup()
+    if result is None:
         S.logger.info(
             "not_in_zephir_long_enough",
             message="Item has not been in zephir long enough",
