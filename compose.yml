@@ -71,5 +71,17 @@ services:
     stdin_open: true
     command: [ "poetry", "run", "sphinx-autobuild", "--watch", "aim", "--port", "8888", "--host", "0.0.0.0", "--pre-build", "/app/prebuild.sh", "docs", "docs/_build/html" ]
 
+  hathifiles-db:
+    image: mariadb
+    volumes:
+      - hathifiles:/var/lib/mysql
+      - ./hathifiles/umich_small.sql:/docker-entrypoint-initdb.d/umich_small.sql
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=password
+      - MARIADB_DATABASE=database
+
 volumes:
   database:
+  hathifiles:
