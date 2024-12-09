@@ -167,3 +167,24 @@ def test_process_barcode(mocker, item_in_zephir_too_recent):
     assert "in_zephir" in result.stdout
     assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0
+
+
+def test_process_barcodes(mocker, item_in_zephir_too_recent):
+    item1 = Item(item_in_zephir_too_recent)
+    data2 = item_in_zephir_too_recent.copy()
+    data2["barcode"] = "other_barcode"
+    item2 = Item(data2)
+
+    mocker.patch("aim.cli.digifeeds.get_item", side_effect=[item1, item2])
+
+    result = runner.invoke(
+        app, ["digifeeds", "process-barcodes", "some_barcode", "other_barcode"]
+    )
+
+    assert "add_to_digifeeds_set_start" in result.stdout
+    assert "added_to_digifeeds_set" in result.stdout
+    assert "in_zephir" in result.stdout
+    assert "not_in_zephir_long_enough" in result.stdout
+    assert "some_barcode" in result.stdout
+    assert "other_barcode" in result.stdout
+    assert result.exit_code == 0

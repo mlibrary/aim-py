@@ -4,6 +4,7 @@
 
 import typer
 from typing_extensions import Annotated
+from typing import List
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
 from aim.digifeeds.item import get_item, process_item
@@ -146,3 +147,20 @@ def process_barcode(
 
     item = get_item(barcode)
     process_item(item)
+
+
+@app.command()
+def process_barcodes(
+    barcodes: Annotated[
+        List[str],
+        typer.Argument(help="The list of barcodes to run the digifeeds process on"),
+    ],
+):
+    """
+    Runs through the whole process for each of the given barcodes: adding it to
+    the digifeeds set, checking zephir, and moving the item to the pickup google
+    drive.
+    """
+    for barcode in barcodes:
+        item = get_item(barcode)
+        process_item(item)
