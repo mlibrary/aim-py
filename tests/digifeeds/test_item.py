@@ -2,7 +2,13 @@ import pytest
 import json
 import responses
 from datetime import datetime, timedelta
-from aim.digifeeds.item import Item, rclone, DBClient
+from aim.digifeeds.item import (
+    Item,
+    process_item,
+    rclone,
+    DBClient,
+    NotAddedToDigifeedsSetError,
+)
 from requests.exceptions import HTTPError
 from aim.services import S
 
@@ -16,13 +22,18 @@ def item_data():
 
 @pytest.fixture
 def item_in_zephir_for_long_enough(item_data):
-    item_data["statuses"][0]["name"] = "in_zephir"
+    zephir_status = {
+        "name": "in_zephir",
+        "description": "Item is in zephir",
+        "created_at": "2024-09-25T17:13:28",
+    }
+    item_data["statuses"].append(zephir_status)
     return item_data
 
 
 @pytest.fixture
 def item_in_zephir_too_recent(item_in_zephir_for_long_enough):
-    item_in_zephir_for_long_enough["statuses"][0]["created_at"] = (
+    item_in_zephir_for_long_enough["statuses"][1]["created_at"] = (
         datetime.now().isoformat(timespec="seconds")
     )
     return item_in_zephir_for_long_enough
@@ -258,4 +269,46 @@ def test_move_to_pickup_item_too_recent(item_in_zephir_too_recent):
     item = Item(item_in_zephir_too_recent)
     result = item.move_to_pickup()
 
+    assert result is None
+
+
+def test_process_item_not_added_to_digifeeds_set_and_not_found_in_alma(
+    mocker, item_data
+):
+    item_data["statuses"][0]["name"] = "not_found_in_alma"
+    item = Item(item_data)
+
+    item_mock = mocker.MagicMock(Item)
+    item_mock.barcode.return_value = "some_barcode"
+    item_mock.add_to_digifeeds_set.return_value = item
+
+    with pytest.raises(Exception) as exc_info:
+        process_item(item_mock)
+    assert exc_info.type is NotAddedToDigifeedsSetError
+
+
+def test_process_item_not_in_zephir_long_enough(item_in_zephir_too_recent):
+    item = Item(item_in_zephir_too_recent)
+    result = process_item(item)
+    assert result is None
+
+
+def test_process_item_not_in_zephir(mocker):
+    item_mock = mocker.MagicMock(Item)
+    item_mock.barcode.return_value = "some_barcode"
+    item_mock.add_to_digifeeds_set.return_value = item_mock
+    item_mock.check_zephir.return_value = None
+
+    result = process_item(item_mock)
+    assert result is None
+
+
+def test_process_item_move_to_pickup(mocker):
+    item_mock = mocker.MagicMock(Item)
+    item_mock.barcode.return_value = "some_barcode"
+    item_mock.add_to_digifeeds_set.return_value = item_mock
+    item_mock.check_zephir.return_value = item_mock
+    item_mock.move_to_pickup.return_value = item_mock
+
+    result = process_item(item_mock)
     assert result is None

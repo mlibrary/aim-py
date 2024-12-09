@@ -6,7 +6,7 @@ import typer
 from typing_extensions import Annotated
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
-from aim.digifeeds.item import get_item
+from aim.digifeeds.item import get_item, process_item
 from aim.services import S
 
 import json
@@ -130,3 +130,19 @@ def move_to_pickup(
             message="Item has been successfully moved to pickup",
             barcode=barcode,
         )
+
+
+@app.command()
+def process_barcode(
+    barcode: Annotated[
+        str,
+        typer.Argument(help="The barcode to run the digifeeds process on"),
+    ],
+):
+    """
+    Runs through the whole process for a barcode: adding it to the digifeeds set,
+    checking zephir, and moving the item to the pickup google drive.
+    """
+
+    item = get_item(barcode)
+    process_item(item)

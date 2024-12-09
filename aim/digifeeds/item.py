@@ -7,6 +7,10 @@ from aim.services import S
 from requests.exceptions import HTTPError
 
 
+class NotAddedToDigifeedsSetError(Exception):
+    pass
+
+
 class Item:
     """A Digifeeds Item
 
@@ -138,5 +142,54 @@ class Item:
             return False
 
 
-def get_item(barcode: str) -> Item:
+def get_item(barcode: str) -> None:
     return Item(DBClient().get_or_add_item(barcode))
+
+
+def process_item(item: Item) -> Item:
+    barcode = item.barcode
+    S.logger.info(
+        "add_to_digifeeds_set_start",
+        message="Start adding item to digifeeds set",
+        barcode=barcode,
+    )
+    add_to_set_item = item.add_to_digifeeds_set()
+    if add_to_set_item.has_status("not_found_in_alma"):
+        S.logger.info(
+            "not_found_in_alma", message="Item not found in alma.", barcode=barcode
+        )
+
+    if add_to_set_item.has_status("added_to_digifeeds_set"):
+        S.logger.info(
+            "added_to_digifeeds_set",
+            message="Item added to digifeeds set",
+            barcode=barcode,
+        )
+    else:
+        S.logger.error(
+            "not_added_to_digifeeds_set",
+            message="Item NOT added to digifeeds set",
+            barcode=barcode,
+        )
+        raise NotAddedToDigifeedsSetError()
+
+    check_zephir_item = add_to_set_item.check_zephir()
+    if check_zephir_item:
+        S.logger.info("in_zephir", message="Item is in zephir", barcode=barcode)
+    else:
+        S.logger.info("not_in_zephir", message="Item is NOT in zephir", barcode=barcode)
+        return check_zephir_item
+
+    move_to_pickup_item = check_zephir_item.move_to_pickup()
+    if move_to_pickup_item is None:
+        S.logger.info(
+            "not_in_zephir_long_enough",
+            message="Item has not been in zephir long enough",
+            barcode=barcode,
+        )
+    else:
+        S.logger.info(
+            "move_to_pickup_success",
+            message="Item has been successfully moved to pickup",
+            barcode=barcode,
+        )
