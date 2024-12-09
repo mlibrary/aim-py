@@ -14,7 +14,7 @@ from aim.services import S
 if S.ci_on:  # pragma: no cover
     engine = create_engine(S.test_database)
 else:  # pragma: no cover
-    engine = create_engine(S.mysql_database, pool_recycle=1800)
+    engine = create_engine(S.mysql_database, pool_pre_ping=True)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
