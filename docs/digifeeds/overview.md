@@ -187,31 +187,42 @@ sequenceDiagram
 
 ## Process Barcodes High Level Overview
 
-```mermaidjs
+```meramaidjs
 flowchart TD
   A(Get list of barcodes from zips in S3 Bucket) 
-  B1(Add Barcode to Digifeeds Alma Set)
-  B2(Check Zephir for Barcode)
-  B3(Move zip from S3 to Google Drive if Ready)
+  B(Divide barcodes into batches of 50 barcodes)
+  
+  C1{Is there another barcode in the list?} 
+  C2(Add Barcode to Digifeeds Alma Set)
+  C3(Check Zephir for Barcode)
+  C4(Move zip from S3 to Google Drive if Ready)
 
-  C1(Add Barcode to Digifeeds Alma Set)
-  C2(Check Zephir for Barcode)
-  C3(Move zip from S3 to Google Drive if Ready)
+  D1{Is there another barcode in the list?}
+  D2(Add Barcode to Digifeeds Alma Set)
+  D3(Check Zephir for Barcode)
+  D4(Move zip from S3 to Google Drive if Ready)
 
-  D(Send metrics to Prometheus)
+  Z(Send metrics to Prometheus)
+  
+  A --> B
+  B --> C1
+  B --> D1
 
-  A --> B1
-  A --> C1
-  subgraph "barcode 1"
-    B1 --> B2
-    B2 --> B3
-  end
-  subgraph "barcode 2"
-    C1 --> C2
+  subgraph "batch of 50 barcodes"
+    C1 -- yes --> C2
     C2 --> C3
+    C3 --> C4
+    C4 --> C1
+  end
+  
+
+  subgraph "batch of 50 barcodes"
+    D1 -- yes --> D2
+    D2 --> D3
+    D3 --> D4
+    D4 --> D1
   end
 
-  B3 --> D
-  C3 --> D
-
+C1 -- no --> Z
+D1 -- no --> Z
 ```
