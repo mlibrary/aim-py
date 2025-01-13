@@ -14,3 +14,11 @@ secret_access_key = YOUR_SECRET_ACCESS_KEY
 [digifeeds_bucket]
 type = alias
 remote = digifeeds_s3:YOUR_BUCKET_NAME
+
+[digifeeds_reports]
+type = alias
+remote = digifeeds_dropbox:YOUR_REPORTS_FOLDER
+
+[digifeeds_dropbox]
+type = dropbox
+token = {"access_token":"YOUR_ACCESS_TOKEN","token_type":"bearer","expiry":"0001-01-01T00:00:00Z"}

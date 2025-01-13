@@ -86,6 +86,9 @@ class Services:
     #: The name of the google drive rclone remote where google picks up items
     digifeeds_gdrive_rclone_remote: str
 
+    #: The name of the rclone remote where reports from digifeeds are sent
+    digifeeds_reports_rclone_remote: str
+
 
 S = Services(
     logger=structlog.get_logger(),
@@ -116,4 +119,6 @@ S = Services(
     or "digifeeds_bucket",
     digifeeds_gdrive_rclone_remote=os.getenv("DIGIFEEDS_GDRIVE_RCLONE_REMOTE")
     or "digifeeds_gdrive",
+    digifeeds_reports_rclone_remote=os.getenv("DIGIFEEDS_REPORTS_RCLONE_REMOTE")
+    or "digifeeds_reports",
 )
