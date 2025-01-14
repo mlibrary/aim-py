@@ -83,8 +83,8 @@ class Services:
     #: The name of the rclone remote/bucket alias for the s3 input bucket
     digifeeds_s3_rclone_remote: str
 
-    #: The name of the google drive rclone remote where google picks up items
-    digifeeds_gdrive_rclone_remote: str
+    #: The name of the rclone remote for the place where google pickups up the digifeeds files
+    digifeeds_pickup_rclone_remote: str
 
 
 S = Services(
@@ -114,6 +114,6 @@ S = Services(
     or "path_to_processed_barcodes",
     digifeeds_s3_rclone_remote=os.getenv("DIGIFEEDS_S3_RCLONE_REMOTE")
     or "digifeeds_bucket",
-    digifeeds_gdrive_rclone_remote=os.getenv("DIGIFEEDS_GDRIVE_RCLONE_REMOTE")
-    or "digifeeds_gdrive",
+    digifeeds_pickup_rclone_remote=os.getenv("DIGIFEEDS_PICKUP_RCLONE_REMOTE")
+    or "digifeeds_pickup",
 )

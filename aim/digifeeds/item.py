@@ -89,7 +89,7 @@ class Item:
         DBClient().add_item_status(barcode=self.barcode, status="copying_start")
         rclone.copyto(
             f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_input_path}/{self.barcode}.zip",
-            f"{S.digifeeds_gdrive_rclone_remote}:{self.barcode}.zip",
+            f"{S.digifeeds_pickup_rclone_remote}:{self.barcode}.zip",
         )
         DBClient().add_item_status(barcode=self.barcode, status="copying_end")
         timestamp = datetime.now().strftime("%F_%H-%M-%S")
