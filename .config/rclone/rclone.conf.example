@@ -14,3 +14,11 @@ secret_access_key = YOUR_SECRET_ACCESS_KEY
 [digifeeds_bucket]
 type = alias
 remote = digifeeds_s3:YOUR_BUCKET_NAME
+
+[digifeeds_pickup]
+type = sftp
+host = YOUR_HOST
+user = YOUR_USERNAME
+port = YOUR_PORT
+pass =  YOUR_ENCRYPTED_HASH
+shell_type = cmd

@@ -108,13 +108,13 @@ def move_to_pickup(
     ],
 ):
     """
-    Moves the zipped volume from the s3 bucket to the google drive folder for
-    pickup from google. When it's finished, the volume is moved to the processed
-    folder in the bucket and prefixed with the date and time.
+    Moves the zipped volume from the s3 bucket to the pickup location for
+    google. When it's finished, the volume is moved to the processed folder in
+    the bucket and prefixed with the date and time.
     """
     S.logger.info(
         "move_to_pickup_start",
-        message="Start moving item from s3 bucket to pickup google drive",
+        message="Start moving item from s3 bucket to google pickup location",
         barcode=barcode,
     )
     item = get_item(barcode)
