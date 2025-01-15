@@ -272,6 +272,12 @@ def test_move_to_pickup_item_too_recent(item_in_zephir_too_recent):
     assert result is None
 
 
+def test_process_item_that_has_already_been_processed(mocker, item_data):
+    item_data["statuses"][0]["name"] = "pending_deletion"
+    item = Item(item_data)
+    assert process_item(item) is None
+
+
 def test_process_item_not_added_to_digifeeds_set_and_not_found_in_alma(
     mocker, item_data
 ):
@@ -281,6 +287,8 @@ def test_process_item_not_added_to_digifeeds_set_and_not_found_in_alma(
     item_mock = mocker.MagicMock(Item)
     item_mock.barcode.return_value = "some_barcode"
     item_mock.add_to_digifeeds_set.return_value = item
+
+    item_mock.has_status.return_value = False
 
     with pytest.raises(Exception) as exc_info:
         process_item(item_mock)
@@ -294,21 +302,31 @@ def test_process_item_not_in_zephir_long_enough(item_in_zephir_too_recent):
 
 
 def test_process_item_not_in_zephir(mocker):
+    not_pending_deletion_mock = mocker.MagicMock(Item)
+    not_pending_deletion_mock.has_status.return_value = False
+    not_pending_deletion_mock.barcode.return_value = "some_barcode"
+
     item_mock = mocker.MagicMock(Item)
     item_mock.barcode.return_value = "some_barcode"
-    item_mock.add_to_digifeeds_set.return_value = item_mock
+
+    not_pending_deletion_mock.add_to_digifeeds_set.return_value = item_mock
     item_mock.check_zephir.return_value = None
 
-    result = process_item(item_mock)
+    result = process_item(not_pending_deletion_mock)
     assert result is None
 
 
 def test_process_item_move_to_pickup(mocker):
+    not_pending_deletion_mock = mocker.MagicMock(Item)
+    not_pending_deletion_mock.has_status.return_value = False
+    not_pending_deletion_mock.barcode.return_value = "some_barcode"
+
     item_mock = mocker.MagicMock(Item)
     item_mock.barcode.return_value = "some_barcode"
-    item_mock.add_to_digifeeds_set.return_value = item_mock
+
+    not_pending_deletion_mock.add_to_digifeeds_set.return_value = item_mock
     item_mock.check_zephir.return_value = item_mock
     item_mock.move_to_pickup.return_value = item_mock
 
-    result = process_item(item_mock)
+    result = process_item(not_pending_deletion_mock)
     assert result is None
