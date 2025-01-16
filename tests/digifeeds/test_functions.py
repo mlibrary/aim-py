@@ -1,19 +1,33 @@
+from datetime import datetime
 import json
 from aim.digifeeds.functions import (
     rclone,
     barcodes_added_in_last_two_weeks,
     write_barcodes_added_in_last_two_weeks_report,
     generate_barcodes_added_in_last_two_weeks_report,
+    last_two_weeks_rclone_filter,
 )
 from io import StringIO
+
+
+def test_last_two_weeks_rclone_filter():
+    filters = last_two_weeks_rclone_filter(
+        start_date=datetime.strptime("2025-01-02", "%Y-%m-%d")
+    )
+    expected_filter_string = (
+        "{2025-01-02*,2025-01-01*,2024-12-31*,2024-12-30*,2024-12-29*"
+        ",2024-12-28*,2024-12-27*,2024-12-26*,2024-12-25*,2024-12-24*"
+        ",2024-12-23*,2024-12-22*,2024-12-21*,2024-12-20*}"
+    )
+    assert filters == expected_filter_string
 
 
 def test_barcodes_added_in_last_two_weeks(mocker):
     ls_data_raw = """
     [
       {
-        "Path": "35112203951670.zip",
-        "Name": "35112203951670.zip",
+        "Path": "2024-12-01_07-10-02_35112203951670.zip",
+        "Name": "2024-12-01_07-10-02_35112203951670.zip",
         "Size": 554562627,
         "MimeType": "application/zip",
         "ModTime": "2024-12-14T02:01:05.093051502-05:00",
@@ -21,8 +35,8 @@ def test_barcodes_added_in_last_two_weeks(mocker):
         "Tier": "STANDARD"
       },
       {
-        "Path": "39015004707009.zip",
-        "Name": "39015004707009.zip",
+        "Path": "2024-12-01_07-10-02_39015004707009.zip",
+        "Name": "2024-12-01_07-10-02_39015004707009.zip",
         "Size": 232895588,
         "MimeType": "application/zip",
         "ModTime": "2024-12-14T02:02:29.111076546-05:00",
@@ -34,8 +48,8 @@ def test_barcodes_added_in_last_two_weeks(mocker):
     mocker.patch.object(rclone, "ls", return_value=json.loads(ls_data_raw))
     output = barcodes_added_in_last_two_weeks()
     assert output == [
-        ["2024-12-14", "35112203951670"],
-        ["2024-12-14", "39015004707009"],
+        ["2024-12-01", "35112203951670"],
+        ["2024-12-01", "39015004707009"],
     ]
 
 
