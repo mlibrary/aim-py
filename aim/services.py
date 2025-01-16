@@ -86,6 +86,9 @@ class Services:
     #: The name of the rclone remote for the place where google pickups up the digifeeds files
     digifeeds_pickup_rclone_remote: str
 
+    #: The name of the rclone remote where reports from digifeeds are sent
+    digifeeds_reports_rclone_remote: str
+
 
 S = Services(
     logger=structlog.get_logger(),
@@ -116,4 +119,6 @@ S = Services(
     or "digifeeds_bucket",
     digifeeds_pickup_rclone_remote=os.getenv("DIGIFEEDS_PICKUP_RCLONE_REMOTE")
     or "digifeeds_pickup",
+    digifeeds_reports_rclone_remote=os.getenv("DIGIFEEDS_REPORTS_RCLONE_REMOTE")
+    or "digifeeds_reports",
 )

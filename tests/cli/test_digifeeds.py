@@ -188,3 +188,15 @@ def test_process_barcodes(mocker, item_in_zephir_too_recent):
     assert "some_barcode" in result.stdout
     assert "other_barcode" in result.stdout
     assert result.exit_code == 0
+
+
+def test_generate_barcodes_in_s3_report(mocker):
+    generate_report_mock = mocker.patch.object(
+        functions, "generate_barcodes_added_in_last_two_weeks_report"
+    )
+
+    result = runner.invoke(app, ["digifeeds", "generate-barcodes-in-s3-report"])
+
+    generate_report_mock.assert_called()
+
+    assert result.exit_code == 0
