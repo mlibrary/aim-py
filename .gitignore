@@ -19,3 +19,6 @@ docs/_build
 bin/digifeeds/*.config
 .config/rclone/rclone.conf
 .config/rclone/*.json
+
+tmp/*
+!tmp/.keep

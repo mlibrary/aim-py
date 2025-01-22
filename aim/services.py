@@ -89,6 +89,9 @@ class Services:
     #: The name of the rclone remote where reports from digifeeds are sent
     digifeeds_reports_rclone_remote: str
 
+    #: file path to store of the hathi_file_list update items
+    hathifiles_store_path: str
+
 
 S = Services(
     logger=structlog.get_logger(),
@@ -121,4 +124,6 @@ S = Services(
     or "digifeeds_pickup",
     digifeeds_reports_rclone_remote=os.getenv("DIGIFEEDS_REPORTS_RCLONE_REMOTE")
     or "digifeeds_reports",
+    hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
+    or "tmp/hathi_file_list_store.json",
 )
