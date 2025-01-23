@@ -92,6 +92,9 @@ class Services:
     #: file path to store of the hathi_file_list update items
     hathifiles_store_path: str
 
+    #: url to argo events webhook for triggering the update of the hathifiles database
+    hathifiles_webhook_url: str
+
 
 S = Services(
     logger=structlog.get_logger(),
@@ -126,4 +129,6 @@ S = Services(
     or "digifeeds_reports",
     hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
     or "tmp/hathi_file_list_store.json",
+    hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")
+    or "http://localhost:1200/new_hathifile",
 )
