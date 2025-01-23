@@ -10,7 +10,7 @@ from aim.hathifiles.poll import (
     get_latest_update_files,
     get_store,
     create_store_file,
-    check_for_new_files,
+    check_for_new_update_files,
     NewFileHandler,
 )
 
@@ -76,7 +76,7 @@ class FakeNewFileHandler(NewFileHandler):
 
 def test_check_for_new_files_when_no_new_files():
     with capture_logs() as cap_logs:
-        check_for_new_files(
+        check_for_new_update_files(
             latest_update_files=["file1"],
             store=["other_file", "file1"],
             new_file_handler_klass=FakeNewFileHandler,
@@ -86,7 +86,7 @@ def test_check_for_new_files_when_no_new_files():
 
 def test_check_for_new_files_when_there_are_new_files():
     with capture_logs() as cap_logs:
-        check_for_new_files(
+        check_for_new_update_files(
             latest_update_files=["file1", "file2", "file3"],
             store=["other_file", "file1"],
             new_file_handler_klass=FakeNewFileHandler,

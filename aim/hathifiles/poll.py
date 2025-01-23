@@ -59,10 +59,10 @@ class NewFileHandler:
         S.logger.info("Update store SUCCESS")
 
 
-def check_for_new_files(
+def check_for_new_update_files(
     latest_update_files: list | None = None,
     store: list | None = None,
-    new_file_handler_klass: type[NewFileHandler] = NewFileHandler,
+    new_file_handler_klass: Type[NewFileHandler] = NewFileHandler,
 ):
     if latest_update_files is None:  # pragma: no cover
         latest_update_files = get_latest_update_files()

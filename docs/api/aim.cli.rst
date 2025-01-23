@@ -13,4 +13,5 @@ Submodules
    :maxdepth: 4
 
    aim.cli.digifeeds
+   aim.cli.hathifiles
    aim.cli.main
