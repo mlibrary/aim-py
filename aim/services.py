@@ -39,6 +39,9 @@ class Services:
     Global Configuration Services
     """
 
+    #: The application name
+    app_name: str
+
     #: The structured logger
     logger: structlog.stdlib.BoundLogger
 
@@ -97,6 +100,7 @@ class Services:
 
 
 S = Services(
+    app_name=os.getenv("APP_NAME") or "aim",
     logger=structlog.get_logger(),
     mysql_database=sa.engine.URL.create(
         drivername="mysql+mysqldb",
