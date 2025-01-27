@@ -39,6 +39,9 @@ class Services:
     Global Configuration Services
     """
 
+    #: The application name
+    app_name: str
+
     #: The structured logger
     logger: structlog.stdlib.BoundLogger
 
@@ -89,15 +92,22 @@ class Services:
     #: The name of the rclone remote where reports from digifeeds are sent
     digifeeds_reports_rclone_remote: str
 
+    #: file path to store of the hathi_file_list update items
+    hathifiles_store_path: str
+
+    #: url to argo events webhook for triggering the update of the hathifiles database
+    hathifiles_webhook_url: str
+
 
 S = Services(
+    app_name=os.getenv("APP_NAME") or "aim",
     logger=structlog.get_logger(),
     mysql_database=sa.engine.URL.create(
         drivername="mysql+mysqldb",
-        username=os.environ["MARIADB_USER"],
-        password=os.environ["MARIADB_PASSWORD"],
-        host=os.environ["DATABASE_HOST"],
-        database=os.environ["MARIADB_DATABASE"],
+        username=os.getenv("MARIADB_USER") or "user",
+        password=os.getenv("MARIADB_PASSWORD") or "password",
+        host=os.getenv("DATABASE_HOST") or "database",
+        database=os.getenv("MARIADB_DATABASE") or "database",
     ),
     test_database="sqlite:///:memory:",
     ci_on=os.getenv("CI"),
@@ -121,4 +131,8 @@ S = Services(
     or "digifeeds_pickup",
     digifeeds_reports_rclone_remote=os.getenv("DIGIFEEDS_REPORTS_RCLONE_REMOTE")
     or "digifeeds_reports",
+    hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
+    or "tmp/hathi_file_list_store.json",
+    hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")
+    or "http://localhost:1200/new_hathifile",
 )
