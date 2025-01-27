@@ -14,6 +14,7 @@ Subpackages
 
    aim.cli
    aim.digifeeds
+   aim.hathifiles
 
 Submodules
 ----------

@@ -6,14 +6,37 @@ from aim.services import S
 
 
 def filter_for_update_files(hathi_file_list: list) -> list:
+    """
+    Takes a plain hathifile_file_list list and filters to get only the file
+    names for update files
+
+    Args:
+        hathi_file_list (list): full list of current hathifiles from hathitrust.org
+
+    Returns:
+        list: flat list of update file names
+    """
     return [d["filename"] for d in hathi_file_list if not d["full"]]
 
 
 def get_latest_update_files():
+    """
+    Gets the latest list of current hathifiles from hathitrust.org and filters
+    for just a list of update files.
+
+    Returns:
+        _type_: flat list of update file names
+    """
     return filter_for_update_files(get_hathi_file_list())
 
 
 def get_hathi_file_list() -> list:
+    """
+    Gets the latest current list of hathifiles from hathitrust.org.
+
+    Returns:
+        list: list of dictionairies that describe hathifiles
+    """
     response = requests.get(
         "https://www.hathitrust.org/files/hathifiles/hathi_file_list.json"
     )
@@ -23,12 +46,30 @@ def get_hathi_file_list() -> list:
 
 
 def get_store(store_path: str = S.hathifiles_store_path) -> list:
+    """
+    Loads the store file that contains the list of all hathifile update files
+    that have been seen before.
+
+    Args:
+        store_path (str, optional): path to the store file. Defaults to S.hathifiles_store_path.
+
+    Returns:
+        list: list of hathifile update files that have been seen before
+    """
     with open(store_path) as f:
         file_list = json.load(f)
     return file_list
 
 
 def create_store_file(store_path: str = S.hathifiles_store_path) -> None:
+    """
+    Creates a store file of the current list of update files from hathitrust.org
+    if there does not already exist a store file.
+
+    Args:
+        store_path (str, optional): path to store file. Defaults to S.hathifiles_store_path.
+    """
+
     if os.path.exists(store_path):
         S.logger.info("HathiFiles store file already exists. Leaving alone.")
     else:
@@ -44,6 +85,10 @@ class NewFileHandler:
         self.store = store
 
     def notify_webhook(self):
+        """
+        Sends a list of update files that haven't been seen to the argo events
+        webhook for hathifiles.
+        """
         response = requests.post(
             S.hathifiles_webhook_url, json={"file_names": self.new_files}
         )
@@ -53,6 +98,12 @@ class NewFileHandler:
             response.raise_for_status()
 
     def replace_store(self, store_path: str = S.hathifiles_store_path):
+        """
+        Replaces the store file with a list of hathifile update files
+
+        Args:
+            store_path (str, optional):  path to hathifiles store file. Defaults to S.hathifiles_store_path.
+        """
         with open(store_path, "w") as f:
             json.dump((self.store + self.new_files), f, ensure_ascii=False, indent=4)
 
@@ -64,6 +115,16 @@ def check_for_new_update_files(
     store: list | None = None,
     new_file_handler_klass: Type[NewFileHandler] = NewFileHandler,
 ):
+    """
+    Gets the latest list of hathifiles from hathitrust.org, loads up the store
+    file and compares them. If there are new files triggers the argo events
+    webhook and updates the store. If there are no new files, it exits.
+
+    Args:
+        latest_update_files (list | None, optional): list of latest update files. This will call get_latest_update_files() when None is given.
+        store (list | None, optional): list of hathifiles update files that have been seen before. This will call get_store() if None is given.
+        new_file_handler_klass (Type[NewFileHandler], optional): Class that handles new update files. Defaults to NewFileHandler.
+    """
     if latest_update_files is None:  # pragma: no cover
         latest_update_files = get_latest_update_files()
 
