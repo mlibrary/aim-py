@@ -2,6 +2,7 @@ import pytest
 import json
 import responses
 from responses import matchers
+from datetime import datetime, timedelta
 import os
 from requests.exceptions import HTTPError
 from structlog.testing import capture_logs
@@ -27,6 +28,24 @@ def cleanup_temp_files(temp_dir):
     for file in temp_dir.iterdir():
         if file.is_file():
             os.remove(file)
+
+
+@pytest.fixture
+def today_file_name():
+    today = datetime.today().strftime("%Y%m%d")
+    return f"hathi_upd_{today}.txt.gz"
+
+
+@pytest.fixture
+def yesterday_file_name():
+    yesterday = (datetime.today() - timedelta(days=1)).strftime("%Y%m%d")
+    return f"hathi_upd_{yesterday}.txt.gz"
+
+
+@pytest.fixture
+def last_year_file_name():
+    last_year = (datetime.today() - timedelta(days=366)).strftime("%Y%m%d")
+    return f"hathi_upd_{last_year}.txt.gz"
 
 
 @pytest.fixture
@@ -153,16 +172,29 @@ def test_new_file_handler_notify_webhook_fail():
     assert webhook_stub.call_count == 1
 
 
-def test_new_file_handler_replace_store(temp_dir):
+def test_new_file_handler_replace_store(
+    temp_dir, today_file_name, yesterday_file_name, last_year_file_name
+):
     store_path = temp_dir / "test_store_file.json"
     with open(store_path, "w") as f:
         f.write("This_is_a_line")
 
-    handler = NewFileHandler(new_files=["new_file"], store=["old_file"])
+    handler = NewFileHandler(
+        new_files=[today_file_name], store=[yesterday_file_name, last_year_file_name]
+    )
 
     handler.replace_store(store_path)
 
     with open(store_path, "r") as f:
         file_contents = json.load(f)
 
-    assert file_contents == ["old_file", "new_file"]
+    assert file_contents == [yesterday_file_name, today_file_name]
+
+
+def test_new_file_handler_slim_store(yesterday_file_name, last_year_file_name):
+    handler = NewFileHandler(
+        new_files=["new_file"], store=[yesterday_file_name, last_year_file_name]
+    )
+
+    slimmed_store = handler.slim_store
+    assert slimmed_store == [yesterday_file_name]

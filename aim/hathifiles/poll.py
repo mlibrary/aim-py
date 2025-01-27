@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+from datetime import datetime, timedelta
 from typing import Type
 from aim.services import S
 
@@ -25,7 +26,7 @@ def get_latest_update_files():
     for just a list of update files.
 
     Returns:
-        _type_: flat list of update file names
+        list: flat list of update file names
     """
     return filter_for_update_files(get_hathi_file_list())
 
@@ -97,6 +98,23 @@ class NewFileHandler:
         else:
             response.raise_for_status()
 
+    @property
+    def slim_store(self):
+        """
+        Removes files from the store that are over one year old
+
+        Returns:
+            list: list of update files that are newer than one year
+        """
+        last_year = datetime.today() - timedelta(days=365)
+        slimmed_store = []
+        for file_name in self.store:
+            end = file_name.split("_")[2]
+            date = datetime.strptime(end.split(".")[0], "%Y%m%d")
+            if date > last_year:
+                slimmed_store.append(file_name)
+        return slimmed_store
+
     def replace_store(self, store_path: str = S.hathifiles_store_path):
         """
         Replaces the store file with a list of hathifile update files
@@ -105,7 +123,9 @@ class NewFileHandler:
             store_path (str, optional):  path to hathifiles store file. Defaults to S.hathifiles_store_path.
         """
         with open(store_path, "w") as f:
-            json.dump((self.store + self.new_files), f, ensure_ascii=False, indent=4)
+            json.dump(
+                (self.slim_store + self.new_files), f, ensure_ascii=False, indent=4
+            )
 
         S.logger.info("Update store SUCCESS")
 
