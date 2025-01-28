@@ -16,5 +16,6 @@ documentation for details.
    :caption: Contents:
 
    api/aim
+   hathifiles/index
    digifeeds/index
    future_projects/index

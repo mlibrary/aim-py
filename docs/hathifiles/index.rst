@@ -1,0 +1,4 @@
+Hathifiles
+=================
+.. toctree::
+    diagrams
