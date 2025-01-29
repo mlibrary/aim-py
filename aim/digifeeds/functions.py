@@ -61,8 +61,8 @@ def generate_barcodes_added_in_last_two_weeks_report():
         write_barcodes_added_in_last_two_weeks_report(rf)
 
     today = datetime.today().strftime("%Y-%m-%d")
-    S.logger.info("writing report to dropbox")
+    S.logger.info("writing google delivery report")
     rclone.copyto(
         in_path=report_file.name,
-        out_path=f"{S.digifeeds_reports_rclone_remote}:{today}_barcodes_in_s3_processed.tsv",
+        out_path=f"{S.digifeeds_google_delivery_reports_rclone_remote}:{today}_barcodes_in_s3_processed.tsv",
     )

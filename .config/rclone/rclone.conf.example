@@ -22,11 +22,3 @@ user = YOUR_USERNAME
 port = YOUR_PORT
 pass =  YOUR_ENCRYPTED_HASH
 shell_type = cmd
-
-[digifeeds_reports]
-type = alias
-remote = digifeeds_dropbox:YOUR_REPORTS_FOLDER
-
-[digifeeds_dropbox]
-type = dropbox
-token = {"access_token":"YOUR_ACCESS_TOKEN","token_type":"bearer","expiry":"0001-01-01T00:00:00Z"}
