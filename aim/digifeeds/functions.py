@@ -31,7 +31,7 @@ def last_two_weeks_rclone_filter(start_date: datetime = datetime.today()):
 
 def barcodes_added_in_last_two_weeks():
     files = rclone.ls(
-        path=f"{S.digifeeds_s3_bucket}:{S.digifeeds_s3_processed_path}",
+        path=f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_processed_path}",
         args=[f'--include "{last_two_weeks_rclone_filter()}"'],
     )
     output = []
