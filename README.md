@@ -19,7 +19,6 @@ AIM's python code repository
 
     This will:
     * set up the initial environment variables file
-    * set up the rclone config with the example file
     * build the docker image
     * install the python dependencies
     * Set up the database for digifeeds
@@ -28,11 +27,9 @@ AIM's python code repository
   
 3. Edit `.env` with actual environment variables
 
-4. Edit `.config/rclone/rclone.conf` with your actual values
+4. If using VSCode for editing, the repository is set up for use with dev containers. You will have to rebuild the container in there.
 
-5. If using VSCode for editing, the repository is set up for use with dev containers. You will have to rebuild the container in there.
-
-6. In the app container, use `poetry shell` to enable the virtual environment. Otherwise use:
+5. In the app container, use `poetry shell` to enable the virtual environment. Otherwise use:
 
 ```bash
  docker compose run --rm app poetry run YOUR_COMMAND
@@ -119,6 +116,14 @@ docker compose run --rm app poetry run aim digifeeds --help
 ```
 
 This will show the commands available for the digifeeds cli applciation.
+
+### Rclone
+
+This applicaiton uses [Rclone](https://rclone.org/) to work with remote storage. It uses the [rclone-python](https://pypi.org/project/rclone-python/) for working with rclone in python.  
+
+To configure new remotes for use with the application use environment variables. The names of the environment variables are on the documentation page for a given remote. We use environment variables because it so all of the configuration happens in `.env` instead of in multiple places.
+
+If you want to quickly add a remote to try something out, you can use `rclone configure` in the container terminal. The config file is ignored.
 
 ## Tests
 

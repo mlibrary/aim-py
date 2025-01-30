@@ -171,6 +171,6 @@ def generate_barcodes_in_s3_report():
     """
     Generates a report of barcodes that have been moved to the google pickup
     location in the last two weeks. It is based on the files in the processed
-    location in the s3 bucket. This report is sent to a dropbox folder.
+    location in the s3 bucket. This report is sent to a folder on Mayhem.
     """
     functions.generate_barcodes_added_in_last_two_weeks_report()
