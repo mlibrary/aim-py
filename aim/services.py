@@ -132,7 +132,7 @@ S = Services(
     digifeeds_google_delivery_reports_rclone_remote=os.getenv(
         "DIGIFEEDS_GOOGLE_DELIVERY_REPORTS_RCLONE_REMOTE"
     )
-    or "digifeeds_reports",
+    or "digifeeds_google_delivery_reports",
     hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
     or "tmp/hathi_file_list_store.json",
     hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")

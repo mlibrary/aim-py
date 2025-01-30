@@ -17,8 +17,9 @@ requirements.txt
 
 docs/_build
 bin/digifeeds/*.config
-.config/rclone/rclone.conf
-.config/rclone/*.json
+
+.config/rclone/*
+!.config/rclone/.keep
 
 tmp/*
 !tmp/.keep
