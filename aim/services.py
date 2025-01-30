@@ -90,7 +90,7 @@ class Services:
     digifeeds_pickup_rclone_remote: str
 
     #: The name of the rclone remote where reports about what has been sent to google are sent
-    digifeeds_google_delivery_reports_rclone_remote: str
+    digifeeds_delivery_reports_rclone_remote: str
 
     #: file path to store of the hathi_file_list update items
     hathifiles_store_path: str
@@ -129,10 +129,10 @@ S = Services(
     or "digifeeds_bucket",
     digifeeds_pickup_rclone_remote=os.getenv("DIGIFEEDS_PICKUP_RCLONE_REMOTE")
     or "digifeeds_pickup",
-    digifeeds_google_delivery_reports_rclone_remote=os.getenv(
-        "DIGIFEEDS_GOOGLE_DELIVERY_REPORTS_RCLONE_REMOTE"
+    digifeeds_delivery_reports_rclone_remote=os.getenv(
+        "DIGIFEEDS_DELIVERY_REPORTS_RCLONE_REMOTE"
     )
-    or "digifeeds_google_delivery_reports",
+    or "digifeeds_delivery_reports",
     hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
     or "tmp/hathi_file_list_store.json",
     hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")
