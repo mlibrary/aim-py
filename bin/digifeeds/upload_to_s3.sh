@@ -145,34 +145,25 @@ print_metrics() {
     fp_last=$(last_count $fp_metric)
     local fp_total=$((fp_last + fp_current_total))
 
-    local image_order_errors_metric="${JOB_NAME}_image_order_errors_total"
-    local image_order_errors_last
-    image_order_errors_last=$(last_count $image_order_errors_metric)
-    local image_order_errors_total=$((image_order_errors_last + image_order_errors_current_total))
+    local image_order_errors_metric="${JOB_NAME}_image_order_errors"
 
-    local upload_errors_metric="${JOB_NAME}_upload_errors_total"
-    local upload_errors_last
-    upload_errors_last=$(last_count $upload_errors_metric)
-    local upload_errors_total=$((upload_errors_last + upload_errors_current_total))
+    local upload_errors_metric="${JOB_NAME}_upload_errors"
 
-    local errors_metric="${JOB_NAME}_errors_total"
-    local errors_last
-    errors_last=$(last_count $errors_metric)
-    local errors_total=$((errors_last + errors_current_total))
+    local errors_metric="${JOB_NAME}_errors"
 
     cat <<EOMETRICS
 # HELP ${fp_metric} Count of digifeeds zip files sent to S3
 # TYPE ${fp_metric} counter
 $fp_metric $fp_total
-# HELP ${image_order_errors_metric} Count of folders where there are missing pages of images 
-# TYPE ${image_order_errors_metric} counter
-${image_order_errors_metric} $image_order_errors_total
-# HELP ${upload_errors_metric} Count of errors when uploading digifeeds zip files to S3
-# TYPE ${upload_errors_metric} counter
-${upload_errors_metric} $upload_errors_total
-# HELP ${errors_metric} Count of all errors relating ot uploading digifeeds files sent to S3
-# TYPE ${errors_metric} counter
-${errors_metric} $errors_total
+# HELP ${image_order_errors_metric} Number of folders in this run where there are missing pages of images 
+# TYPE ${image_order_errors_metric} gauge
+${image_order_errors_metric} $image_order_errors_current_total
+# HELP ${upload_errors_metric} Number of errors in this run when uploading digifeeds zip files to S3
+# TYPE ${upload_errors_metric} gauge
+${upload_errors_metric} $upload_errors_current_total
+# HELP ${errors_metric} Number of all errors in this run relating ot uploading digifeeds files sent to S3
+# TYPE ${errors_metric} gauge
+${errors_metric} $errors_current_total
 EOMETRICS
 }
 
