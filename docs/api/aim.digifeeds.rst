@@ -3,8 +3,8 @@ aim.digifeeds package
 
 .. automodule:: aim.digifeeds
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------
