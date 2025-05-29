@@ -54,7 +54,9 @@ class Item:
                             barcode=self.barcode, status="not_found_in_alma"
                         )
                     )
-                return item
+                    return item
+                else:
+                    return self
             elif any(e["errorCode"] == "60115" for e in errorList):
                 # 60115 means the barcode is already in the set. That means the
                 # db entry from this barcdoe needs to have

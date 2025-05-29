@@ -3,8 +3,8 @@ aim.digifeeds.database package
 
 .. automodule:: aim.digifeeds.database
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

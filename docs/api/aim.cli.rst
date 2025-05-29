@@ -3,8 +3,8 @@ aim.cli package
 
 .. automodule:: aim.cli
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Submodules
 ----------

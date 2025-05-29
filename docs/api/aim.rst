@@ -3,8 +3,8 @@ aim package
 
 .. automodule:: aim
    :members:
-   :undoc-members:
    :show-inheritance:
+   :undoc-members:
 
 Subpackages
 -----------

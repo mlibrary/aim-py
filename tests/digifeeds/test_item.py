@@ -178,6 +178,38 @@ def test_add_to_digifeeds_set_barcode_that_is_not_in_alma(mocker, item_data):
 
 
 @responses.activate
+def test_item_still_not_found_in_alma(mocker, item_data):
+    item_data["statuses"][0]["name"] = "not_found_in_alma"
+    add_status_mock = mocker.patch.object(
+        DBClient, "add_item_status", return_value=item_data
+    )
+    error_body = {
+        "errorsExist": True,
+        "errorList": {
+            "error": [
+                {
+                    "errorCode": "60120",
+                    "errorMessage": "The ID whatever is not valid for content type ITEM and identifier type BARCODE.",
+                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
+                }
+            ]
+        },
+    }
+    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
+    add_to_digifeeds_set_stub = responses.post(
+        add_to_digifeeds_url,
+        json=error_body,
+        status=400,
+    )
+
+    item = Item(item_data)
+    result = item.add_to_digifeeds_set()
+    add_status_mock.assert_not_called()
+    assert add_to_digifeeds_set_stub.call_count == 1
+    assert result.barcode == item.barcode
+
+
+@responses.activate
 def test_add_to_digifeeds_set_barcode_that_causes_alma_error(mocker, item_data):
     item_data["statuses"][0]["name"] = "some_other_status"
     add_status_mock = mocker.patch.object(DBClient, "add_item_status")
