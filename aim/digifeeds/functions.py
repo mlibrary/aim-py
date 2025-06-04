@@ -64,5 +64,5 @@ def generate_barcodes_added_in_last_two_weeks_report():
     S.logger.info("writing delivery report")
     rclone.copyto(
         in_path=report_file.name,
-        out_path=f"{S.digifeeds_delivery_reports_rclone_remote}:{today}_barcodes_in_s3_processed.tsv",
+        out_path=f"{S.digifeeds_delivery_reports_rclone_remote}:{today}_barcodes_in_s3_processed.txt",
     )
