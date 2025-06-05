@@ -30,6 +30,10 @@ def last_two_weeks_rclone_filter(start_date: datetime = datetime.today()):
 
 
 def barcodes_added_in_last_two_weeks():
+    def format_date(date_string: str):
+        date = datetime.strptime(date_string, "%Y-%m-%d")
+        return date.strftime("%m/%d/%Y")
+
     files = rclone.ls(
         path=f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_processed_path}",
         args=[f'--include "{last_two_weeks_rclone_filter()}"'],
@@ -43,7 +47,7 @@ def barcodes_added_in_last_two_weeks():
             barcode=barcode,
             message="Added to barcode report",
         )
-        output.append([date, barcode])
+        output.append([format_date(date), barcode])
 
     return output
 
@@ -64,5 +68,5 @@ def generate_barcodes_added_in_last_two_weeks_report():
     S.logger.info("writing delivery report")
     rclone.copyto(
         in_path=report_file.name,
-        out_path=f"{S.digifeeds_delivery_reports_rclone_remote}:{today}_barcodes_in_s3_processed.tsv",
+        out_path=f"{S.digifeeds_delivery_reports_rclone_remote}:{today}_barcodes_in_s3_processed.txt",
     )

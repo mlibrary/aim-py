@@ -48,16 +48,16 @@ def test_barcodes_added_in_last_two_weeks(mocker):
     mocker.patch.object(rclone, "ls", return_value=json.loads(ls_data_raw))
     output = barcodes_added_in_last_two_weeks()
     assert output == [
-        ["2024-12-01", "35112203951670"],
-        ["2024-12-01", "39015004707009"],
+        ["12/01/2024", "35112203951670"],
+        ["12/01/2024", "39015004707009"],
     ]
 
 
 def test_write_barcodes_added_in_last_two_weeks_report(mocker):
     outfile = StringIO()
     barcodes = [
-        ["2024-12-14", "35112203951670"],
-        ["2024-12-14", "39015004707009"],
+        ["12/14/2024", "35112203951670"],
+        ["12/14/2024", "39015004707009"],
     ]
 
     mocker.patch(
@@ -67,7 +67,7 @@ def test_write_barcodes_added_in_last_two_weeks_report(mocker):
     write_barcodes_added_in_last_two_weeks_report(outfile)
     outfile.seek(0)
     content = outfile.read()
-    assert content == "2024-12-14\t35112203951670\n2024-12-14\t39015004707009\n"
+    assert content == "12/14/2024\t35112203951670\n12/14/2024\t39015004707009\n"
 
 
 def test_generate_barcodes_added_in_last_two_weeks_report(mocker):
