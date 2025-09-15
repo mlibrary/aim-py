@@ -1,0 +1,28 @@
+version: 2
+
+multi-ecosystem-groups:
+  app-dependencies:
+    schedule:
+      interval: "daily"
+      time: "06:00"
+      #day: "monday"
+      timezone: "America/Detroit"
+    labels:
+      - "dependencies"
+    commit-message:
+      prefix: "update-dependencies: "
+    open-pull-requests-limit: 5
+
+
+updates:
+  # For GitHub Actions updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    multi-ecosystem-group: "app-dependencies"
+    patterns: ["*"]
+
+  # For Poetry/Python
+  - package-ecosystem: "pip"
+    directory: "/"
+    multi-ecosystem-group: "app-dependencies"
+    patterns: ["*"]
