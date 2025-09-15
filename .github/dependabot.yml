@@ -3,9 +3,9 @@ version: 2
 multi-ecosystem-groups:
   app-dependencies:
     schedule:
-      interval: "daily"
+      interval: "weekly"
       time: "06:00"
-      #day: "monday"
+      day: "monday"
       timezone: "America/Detroit"
     labels:
       - "dependencies"
