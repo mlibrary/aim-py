@@ -6,7 +6,7 @@ jobs:
   test-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Create .env file
         run: cat env.* > .env
       - name: Load .env file
@@ -14,7 +14,7 @@ jobs:
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'poetry'
@@ -31,10 +31,10 @@ jobs:
   test-bash:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup Bats and bats libs
         id: setup-bats
-        uses: bats-core/bats-action@3.0.0
+        uses: bats-core/bats-action@3.0.1
       - name: Setup Shell Mock
         run: wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash 
       - run: ls /opt
