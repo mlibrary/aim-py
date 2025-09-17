@@ -36,6 +36,7 @@ if ! input_directory=${input_directory:?}; then exit 1; fi
 if ! processed_directory=${processed_directory:?}; then exit 1; fi
 if ! working_directory=${working_directory:?}; then exit 1; fi
 if ! digifeeds_bucket=${digifeeds_bucket:?}; then exit 1; fi
+prometheus_label=${prometheus_label:-"all"}
 send_metrics=${send_metrics:-"true"}
 
 # matches .tif and .jp2 files with 8 digit file names that start with 0 OR
@@ -154,16 +155,16 @@ print_metrics() {
     cat <<EOMETRICS
 # HELP ${fp_metric} Count of digifeeds zip files sent to S3
 # TYPE ${fp_metric} counter
-$fp_metric $fp_total
+$fp_metric{kind="${prometheus_label}"} $fp_total
 # HELP ${image_order_errors_metric} Number of folders in this run where there are missing pages of images 
 # TYPE ${image_order_errors_metric} gauge
-${image_order_errors_metric} $image_order_errors_current_total
+${image_order_errors_metric}{kind="${prometheus_label}"} $image_order_errors_current_total
 # HELP ${upload_errors_metric} Number of errors in this run when uploading digifeeds zip files to S3
 # TYPE ${upload_errors_metric} gauge
-${upload_errors_metric} $upload_errors_current_total
+${upload_errors_metric}{kind="${prometheus_label}"} $upload_errors_current_total
 # HELP ${errors_metric} Number of all errors in this run relating ot uploading digifeeds files sent to S3
 # TYPE ${errors_metric} gauge
-${errors_metric} $errors_current_total
+${errors_metric}{kind="${prometheus_label}"} $errors_current_total
 EOMETRICS
 }
 
