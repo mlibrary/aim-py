@@ -37,6 +37,8 @@ def barcodes_added_in_last_two_weeks():
     files = rclone.ls(
         path=f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_processed_path}",
         args=[f'--include "{last_two_weeks_rclone_filter()}"'],
+        files_only=True,
+        max_depth=2,
     )
     output = []
     for file in files:
