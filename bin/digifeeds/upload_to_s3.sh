@@ -278,7 +278,7 @@ if [[ $APP_ENV != "test" ]]; then
 
     if [ "$send_metrics" != "false" ]; then
         print_metrics $files_processed_total $image_order_errors_total $upload_errors_total $errors_total | /usr/local/bin/pushgateway_advanced -j $JOB_NAME
-        /usr/local/bin/pushgateway -j $JOB_NAME -b "$START_TIME"
+	/usr/local/bin/pushgateway -j $JOB_NAME -l kind=${prometheus_label} -b "$START_TIME"
     fi
     log_info "=====End $(date)====="
 fi
