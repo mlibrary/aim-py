@@ -1,5 +1,4 @@
 from aim.services import S
-import boto3
 from pathlib import Path
 from rclone_python import rclone
 from datetime import datetime, timedelta
@@ -8,15 +7,12 @@ import tempfile
 
 
 def list_barcodes_in_input_bucket():
-    s3 = boto3.client(
-        "s3",
-        aws_access_key_id=S.digifeeds_s3_access_key,
-        aws_secret_access_key=S.digifeeds_s3_secret_access_key,
+    files = rclone.ls(
+        path=f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_input_path}",
+        files_only=True,
+        max_depth=1,
     )
-    prefix = S.digifeeds_s3_input_path + "/"
-    response = s3.list_objects_v2(Bucket=S.digifeeds_s3_bucket, Prefix=prefix)
-    barcodes = [Path(object["Key"]).stem for object in response["Contents"]]
-    return barcodes
+    return [Path(file["Name"]).stem for file in files]
 
 
 def last_two_weeks_rclone_filter(start_date: datetime = datetime.today()):
