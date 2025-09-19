@@ -1,3 +1,4 @@
 input_directory="some/path/to/input/directory"
 processed_directory="some/path/to/processed/directory"
 digifeeds_bucket="rclone_remote_to_s3_bucket"
+prometheus_label="kind_of_input"

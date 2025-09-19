@@ -248,10 +248,10 @@ teardown() {
     shellmock new pushgateway_advanced
     shellmock config pushgateway_advanced 0 <<<5
     run print_metrics 1 2 3 4
-    assert_output --partial "aim_digifeeds_upload_to_aws_files_processed_total 6"
-    assert_output --partial "aim_digifeeds_upload_to_aws_image_order_errors 2"
-    assert_output --partial "aim_digifeeds_upload_to_aws_upload_errors 3"
-    assert_output --partial "aim_digifeeds_upload_to_aws_errors 4"
+    assert_output --partial "aim_digifeeds_upload_to_aws_files_processed_total{kind=\"all\"} 6"
+    assert_output --partial "aim_digifeeds_upload_to_aws_image_order_errors{kind=\"all\"} 2"
+    assert_output --partial "aim_digifeeds_upload_to_aws_upload_errors{kind=\"all\"} 3"
+    assert_output --partial "aim_digifeeds_upload_to_aws_errors{kind=\"all\"} 4"
     shellmock assert expectations pushgateway_advanced
 
 }
