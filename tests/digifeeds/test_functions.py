@@ -6,8 +6,38 @@ from aim.digifeeds.functions import (
     write_barcodes_added_in_last_two_weeks_report,
     generate_barcodes_added_in_last_two_weeks_report,
     last_two_weeks_rclone_filter,
+    list_barcodes_in_input_bucket,
 )
 from io import StringIO
+
+
+def test_list_barcodes_in_input_bucket(mocker):
+    ls_data_raw = """
+    [
+      {
+        "Path": "35112203951670.zip",
+        "Name": "35112203951670.zip",
+        "Size": 554562627,
+        "MimeType": "application/zip",
+        "ModTime": "2024-12-14T02:01:05.093051502-05:00",
+        "IsDir": false,
+        "Tier": "STANDARD"
+      },
+      {
+        "Path": "39015004707009.zip",
+        "Name": "39015004707009.zip",
+        "Size": 232895588,
+        "MimeType": "application/zip",
+        "ModTime": "2024-12-14T02:02:29.111076546-05:00",
+        "IsDir": false,
+        "Tier": "STANDARD"
+      }
+    ]
+"""
+    mocker.patch.object(rclone, "ls", return_value=json.loads(ls_data_raw))
+    subject = list_barcodes_in_input_bucket()
+
+    assert subject == ["35112203951670", "39015004707009"]
 
 
 def test_last_two_weeks_rclone_filter():

@@ -66,15 +66,6 @@ class Services:
     #: The Alma Set Id for the digifeeds set
     digifeeds_set_id: str
 
-    #: The S3 bucket access key for digifeeds
-    digifeeds_s3_access_key: str
-
-    #: The S3 bucket secret access key for digifeeds
-    digifeeds_s3_secret_access_key: str
-
-    #: The S3 bucket name for the digifeeds process
-    digifeeds_s3_bucket: str
-
     #: The url in the s3 bucket for the digifeeds process
     digifeeds_s3_input_path: str
 
@@ -115,11 +106,6 @@ S = Services(
     digifeeds_set_id=os.getenv("DIGIFEEDS_SET_ID") or "digifeeds_set_id",
     alma_api_key=os.getenv("ALMA_API_KEY") or "alma_api_key",
     alma_api_url="https://api-na.hosted.exlibrisgroup.com/almaws/v1",
-    digifeeds_s3_access_key=os.getenv("DIGIFEEDS_S3_ACCESS_KEY")
-    or "digifeeds_s3_access_key",
-    digifeeds_s3_secret_access_key=os.getenv("DIGIFEEDS_S3_SECRET_ACCESS_KEY")
-    or "digifeeds_s3_secret_access_key",
-    digifeeds_s3_bucket=os.getenv("DIGIFEEDS_S3_BUCKET") or "digifeeds_s3_bucket",
     digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
     or "path_to_input_barcodes",
     zephir_bib_api_url="http://zephir.cdlib.org/api/item",
