@@ -31,5 +31,5 @@ jobs:
     uses: mlibrary/platform-engineering-workflows/.github/workflows/deploy.yml@v1
     with:
       image: ${{ needs.build-unstable.outputs.image }}
-      file: environments/hathifiles/workshop/cli-image.txt
+      file: environments/hathifiles/workshop/py-app-image.txt
     secrets: inherit

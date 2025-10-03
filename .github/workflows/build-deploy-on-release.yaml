@@ -29,5 +29,5 @@ jobs:
     uses: mlibrary/platform-engineering-workflows/.github/workflows/deploy.yml@v1
     with:
       image: ghcr.io/mlibrary/${{ vars.IMAGE_NAME }}:${{ github.event.release.tag_name }}
-      file: environments/hathifiles/production/cli-image.txt
+      file: environments/hathifiles/production/py-app-image.txt
     secrets: inherit
