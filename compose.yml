@@ -50,6 +50,27 @@ services:
     stdin_open: true
     command: "poetry run uvicorn aim.digifeeds.database.main:app --host 0.0.0.0 --reload"
 
+  hathifiles-api:
+    build:
+      context: .
+      target: development
+      dockerfile: Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        DEV: ${DEV:-false}
+        POETRY_VERSION: ${POETRY_VERSION:-1.8.3}
+    ports:
+      - 8001:8000
+    env_file:
+      - env.development
+      - .env
+    volumes:
+      - .:/app
+    tty: true
+    stdin_open: true
+    command: "poetry run uvicorn aim.hathifiles.main:app --host 0.0.0.0 --reload"
+
   docs:
     build:
       context: .
@@ -71,5 +92,17 @@ services:
     stdin_open: true
     command: [ "poetry", "run", "sphinx-autobuild", "--watch", "aim", "--port", "8888", "--host", "0.0.0.0", "--pre-build", "/app/prebuild.sh", "docs", "docs/_build/html" ]
 
+  hathifiles-db:
+    image: mariadb
+    volumes:
+      - hathifiles:/var/lib/mysql
+      - ./hathifiles/umich_small.sql:/docker-entrypoint-initdb.d/umich_small.sql
+    environment:
+      - MARIADB_ROOT_PASSWORD=password
+      - MARIADB_USER=user
+      - MARIADB_PASSWORD=password
+      - MARIADB_DATABASE=database
+
 volumes:
   database:
+  hathifiles:
