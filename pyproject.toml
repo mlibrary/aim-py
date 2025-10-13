@@ -12,11 +12,11 @@ aim = "aim.cli.main:app"
 [tool.poetry.dependencies]
 python = "^3.11"
 requests = "^2.31.0"
-sqlalchemy = "^2.0.34"
+sqlalchemy = "^2.0.44"
 mysqlclient = "^2.2.4"
-fastapi = {extras = ["standard"], version = "^0.118.0"}
+fastapi = {extras = ["standard"], version = "^0.119.0"}
 httpx = "^0.28.1"
-alembic = "^1.13.2"
+alembic = "^1.17.0"
 typer = "^0.19.2"
 rclone-python = "^0.1.12"
 structlog = "^25.4.0"
@@ -25,7 +25,7 @@ structlog = "^25.4.0"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
 pytest-cov = "^7.0.0"
-ruff = "^0.13.3"
+ruff = "^0.14.0"
 responses = "^0.25.3"
 pytest-socket = "^0.7.0"
 pytest-mock = "^3.15.1"
