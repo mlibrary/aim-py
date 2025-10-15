@@ -8,6 +8,9 @@ from sqlalchemy import select, func
 from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
+import datetime
+import shlex
+import re
 
 
 class NotFoundError(Exception):
@@ -46,8 +49,9 @@ def get_item(db: Session, barcode: str):
         return item
 
 
-def get_items_total(db: Session, filter: schemas.ItemFilters = None):
+def get_items_total(db: Session, filter: schemas.ItemFilters = None, query: str = None):
     stmnt = get_items_statement(filter=filter)
+    stmnt = get_query_statement(query=query, stmnt=stmnt)
     return db.execute(select(func.count()).select_from(stmnt.subquery())).scalar_one()
 
 
@@ -56,6 +60,7 @@ def get_items(
     limit: int,
     offset: int,
     filter: schemas.ItemFilters = None,
+    query: str = None,
 ):
     """
     Get Digifeed items from the database
@@ -67,8 +72,60 @@ def get_items(
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
+
     stmnt = get_items_statement(filter=filter).offset(offset).limit(limit)
+    stmnt = get_query_statement(query=query, stmnt=stmnt)
     return db.scalars(stmnt).all()
+
+
+def get_query_statement(query: str, stmnt):
+    if query:
+        clauses = shlex.split(query)
+        for clause in clauses:
+            result = re.match(r"(-)?(\w+)([:<>=]{1,2})(.*)", clause).groups()
+            negation = result[0] is not None
+            field = result[1]
+            operator = result[2]
+            value = result[3]
+
+            if field == "status":
+                if negation:
+                    stmnt = stmnt.where(
+                        ~models.Item.statuses.any(
+                            models.ItemStatus.status_name == value
+                        )
+                    )
+                else:
+                    stmnt = stmnt.where(
+                        models.Item.statuses.any(models.ItemStatus.status_name == value)
+                    )
+            elif field in ["created_at", "hathifiles_timestamp"]:
+                base_field = getattr(models.Item, field)
+                if operator == ":" and value in ["null", "NULL"]:
+                    if negation:
+                        stmnt = stmnt.where(base_field.isnot(None))
+                    else:
+                        stmnt = stmnt.where(base_field.is_(None))
+                    continue
+
+                date = datetime.date.fromisoformat(value)
+                date_field = func.DATE(base_field)
+                match operator:
+                    case "<=":
+                        stmnt = stmnt.where(date_field <= date)
+                    case "<":
+                        stmnt = stmnt.where(date_field < date)
+                    case ">=":
+                        stmnt = stmnt.where(date_field >= date)
+                    case ">":
+                        stmnt = stmnt.where(date_field > date)
+                    case ":":
+                        if negation:
+                            stmnt = stmnt.where(date_field != date)
+                        else:
+                            stmnt = stmnt.where(date_field == date)
+
+    return stmnt
 
 
 def get_items_statement(filter: schemas.ItemFilters = None):
