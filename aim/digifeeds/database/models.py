@@ -21,6 +21,9 @@ class Item(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
+    hathifiles_timestamp: Mapped[datetime.datetime] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
     statuses: Mapped[list["ItemStatus"]] = relationship(cascade="all, delete")
 
 
