@@ -47,6 +47,7 @@ def get_items(
     filter: schemas.ItemFilters = Query(
         None, description="Filters on the items in the database"
     ),
+    q: str = Query(None, description="Query statuses and times"),
     db: Session = Depends(get_db),
 ) -> schemas.PageOfItems:  # list[schemas.Item]:
     """
@@ -57,11 +58,11 @@ def get_items(
     them can be fetched.
     """
 
-    db_items = crud.get_items(filter=filter, db=db, offset=offset, limit=limit)
+    db_items = crud.get_items(filter=filter, db=db, offset=offset, limit=limit, query=q)
     return {
         "limit": limit,
         "offset": offset,
-        "total": crud.get_items_total(filter=filter, db=db),
+        "total": crud.get_items_total(filter=filter, db=db, query=q),
         "items": db_items,
     }
 

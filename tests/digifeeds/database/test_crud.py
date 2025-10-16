@@ -247,6 +247,63 @@ class TestCrud:
         assert (len(items)) == 1
         assert (items[0]) == regular_date
 
+    def test_get_items_where_status_has_date(self, db_session):
+        today = datetime.date.today()
+        tomorrow = today + datetime.timedelta(days=1)
+
+        earlier = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
+        later = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode2"))
+
+        status = get_status(db=db_session, name="pending_deletion")
+        add_item_status(db=db_session, item=earlier, status=status)
+        add_item_status(db=db_session, item=later, status=status)
+
+        earlier.statuses[0].created_at = today
+        later.statuses[0].created_at = tomorrow
+
+        db_session.commit()
+        db_session.refresh(earlier)
+        db_session.refresh(later)
+
+        query = f"status.pending_deletion.created_at<={today.isoformat()}"
+        items = get_items(db=db_session, query=query, limit=2, offset=0)
+        assert (len(items)) == 1
+        assert (items[0]) == earlier
+
+        query = f"status.pending_deletion.created_at<={tomorrow.isoformat()}"
+        items = get_items(db=db_session, query=query, limit=2, offset=0)
+        assert (len(items)) == 2
+
+    def test_get_items_where_status_has_negated_date(self, db_session):
+        today = datetime.date.today()
+        tomorrow = today + datetime.timedelta(days=1)
+
+        pending_today = add_item(
+            db=db_session, item=ItemCreate(barcode="valid_barcode")
+        )
+        pending_tomorrow = add_item(
+            db=db_session, item=ItemCreate(barcode="valid_barcode2")
+        )
+
+        pd_status = get_status(db=db_session, name="pending_deletion")
+        z_status = get_status(db=db_session, name="in_zephir")
+        add_item_status(db=db_session, item=pending_today, status=pd_status)
+        add_item_status(db=db_session, item=pending_tomorrow, status=pd_status)
+        add_item_status(db=db_session, item=pending_tomorrow, status=z_status)
+
+        pending_today.statuses[0].created_at = today
+        pending_tomorrow.statuses[0].created_at = tomorrow
+        pending_tomorrow.statuses[1].created_at = today
+
+        db_session.commit()
+        db_session.refresh(pending_today)
+        db_session.refresh(pending_tomorrow)
+
+        query = f"-status.pending_deletion.created_at:{tomorrow.isoformat()}"
+        items = get_items(db=db_session, query=query, limit=2, offset=0)
+        assert (len(items)) == 1
+        assert (items[0]) == pending_today
+
     def test_get_status_that_exists(self, db_session):
         status = get_status(db=db_session, name="in_zephir")
         assert (status.name) == "in_zephir"
