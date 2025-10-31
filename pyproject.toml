@@ -37,7 +37,8 @@ sphinxcontrib-mermaid = "^1.0.0"
 
 
 [tool.pytest.ini_options]
-addopts = "--cov=aim --cov-report=html --cov-report=term:skip-covered --disable-socket --allow-unix-socket"
+#addopts = "--cov=aim --cov-report=html --cov-report=term:skip-covered --disable-socket --allow-unix-socket"
+addopts = "--disable-socket --allow-unix-socket"
 testpaths = [
     "tests"
 ]

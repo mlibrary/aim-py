@@ -101,7 +101,7 @@ def get_query_statement(query: str, stmnt):
                 conditions = [models.ItemStatus.status_name == status_name]
                 if subfield:
                     conditions.append(
-                        numeric_condition(
+                        condition_given(
                             field=getattr(models.ItemStatus, subfield),
                             value=clean(field=subfield, value=value),
                             operator=operator,
@@ -111,14 +111,12 @@ def get_query_statement(query: str, stmnt):
                     negation = None
 
                 status_query = models.Item.statuses.any(and_(*conditions))
-
                 if negation:
-                    stmnt = stmnt.where(~status_query)
-                else:
-                    stmnt = stmnt.where(status_query)
+                    status_query = ~status_query
+                stmnt = stmnt.where(status_query)
             elif is_date(field):
                 stmnt = stmnt.where(
-                    numeric_condition(
+                    condition_given(
                         field=getattr(models.Item, field),
                         value=clean(field=field, value=value),
                         operator=operator,
@@ -148,7 +146,7 @@ def clean(field, value):
         return value
 
 
-def numeric_condition(field, value, operator, negation):
+def condition_given(field, value, operator, negation):
     if isinstance(value, datetime.date):
         field = func.DATE(field)
 
