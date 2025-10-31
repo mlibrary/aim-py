@@ -150,13 +150,13 @@ def get_item(barcode: str) -> None:
 
 def process_item(item: Item) -> Item:
     barcode = item.barcode
-    if item.has_status("pending_deletion"):
-        S.logger.info(
-            "already_processed",
-            message="item has already been moved so it does not need processing",
-            barcode=barcode,
-        )
-        return None
+    # if item.has_status("pending_deletion"):
+    #     S.logger.info(
+    #         "already_processed",
+    #         message="item has already been moved so it does not need processing",
+    #         barcode=barcode,
+    #     )
+    #     return None
 
     S.logger.info(
         "add_to_digifeeds_set_start",
