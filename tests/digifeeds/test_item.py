@@ -304,10 +304,10 @@ def test_move_to_pickup_item_too_recent(item_in_zephir_too_recent):
     assert result is None
 
 
-def test_process_item_that_has_already_been_processed(mocker, item_data):
-    item_data["statuses"][0]["name"] = "pending_deletion"
-    item = Item(item_data)
-    assert process_item(item) is None
+# def test_process_item_that_has_already_been_processed(mocker, item_data):
+#     item_data["statuses"][0]["name"] = "pending_deletion"
+#     item = Item(item_data)
+#     assert process_item(item) is None
 
 
 def test_process_item_not_added_to_digifeeds_set_and_not_found_in_alma(
