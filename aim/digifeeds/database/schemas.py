@@ -21,6 +21,7 @@ class ItemBase(BaseModel):
 
 class Item(ItemBase):
     created_at: datetime
+    hathifiles_timestamp: datetime | None
     statuses: list[ItemStatus] = []
     model_config = ConfigDict(
         json_schema_extra={
@@ -28,6 +29,7 @@ class Item(ItemBase):
                 {
                     "barcode": "39015040218748",
                     "created_at": "2024-09-25T17:12:39",
+                    "hathifiles_timestamp": "2024-09-25T17:12:39",
                     "statuses": [
                         {
                             "name": "in_zephir",

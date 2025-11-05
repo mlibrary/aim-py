@@ -89,6 +89,31 @@ def test_update_existing_item_with_nonexistent_status(client, valid_item):
     assert response.json() == {"detail": "Status not found"}
 
 
+def test_update_item_with_hathifiles_timestamp(client, valid_item):
+    timestamp = "2012-09-13T18:30:03"
+    response = client.put(
+        f"/items/{valid_item.barcode}/hathifiles_timestamp/{timestamp}"
+    )
+    assert response.status_code == 200, response.text
+    assert response.json()["hathifiles_timestamp"] == timestamp
+
+
+def test_update_item_with_nonexistent_barcode(client):
+    timestamp = "2012-09-13T18:30:03"
+    response = client.put(
+        f"/items/some_barcode_that_does_not_exist/hathifiles_timestamp/{timestamp}"
+    )
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Item not found"}
+
+
+def test_update_item_with_invalid_timestamp(client, valid_item):
+    response = client.put(
+        f"/items/{valid_item.barcode}/hathifiles_timestamp/not_an_iso_date_string"
+    )
+    assert response.status_code == 422
+
+
 def test_delete_item(client, valid_item):
     response = client.delete(f"/items/{valid_item.barcode}")
     assert response.status_code == 200, response.text

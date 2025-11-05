@@ -4,10 +4,13 @@
 Operations that act on the digifeeds database
 """
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
+from datetime import datetime, date
+import shlex
+import re
 
 
 class NotFoundError(Exception):
@@ -46,8 +49,9 @@ def get_item(db: Session, barcode: str):
         return item
 
 
-def get_items_total(db: Session, filter: schemas.ItemFilters = None):
+def get_items_total(db: Session, filter: schemas.ItemFilters = None, query: str = None):
     stmnt = get_items_statement(filter=filter)
+    stmnt = get_query_statement(query=query, stmnt=stmnt)
     return db.execute(select(func.count()).select_from(stmnt.subquery())).scalar_one()
 
 
@@ -56,6 +60,7 @@ def get_items(
     limit: int,
     offset: int,
     filter: schemas.ItemFilters = None,
+    query: str = None,
 ):
     """
     Get Digifeed items from the database
@@ -67,8 +72,98 @@ def get_items(
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
+
     stmnt = get_items_statement(filter=filter).offset(offset).limit(limit)
+    stmnt = get_query_statement(query=query, stmnt=stmnt)
     return db.scalars(stmnt).all()
+
+
+def get_query_statement(query: str, stmnt):
+    if query:
+        clauses = shlex.split(query)
+        for clause in clauses:
+            result = re.match(r"(-)?([\w.]+)([:<>=]{1,2})(.*)", clause).groups()
+            negation = result[0] is not None
+            field_parts = result[1].split(".")
+            field = field_parts[0]
+
+            operator = result[2]
+            value = result[3]
+
+            if field == "status":
+                if len(field_parts) == 1:
+                    status_name = value
+                    subfield = None
+                else:
+                    status_name = field_parts[1]
+                    subfield = field_parts[2]
+
+                conditions = [models.ItemStatus.status_name == status_name]
+                if subfield:
+                    conditions.append(
+                        condition_given(
+                            field=getattr(models.ItemStatus, subfield),
+                            value=clean(field=subfield, value=value),
+                            operator=operator,
+                            negation=negation,
+                        )
+                    )
+                    negation = None
+
+                status_query = models.Item.statuses.any(and_(*conditions))
+                if negation:
+                    status_query = ~status_query
+                stmnt = stmnt.where(status_query)
+            elif is_date(field):
+                stmnt = stmnt.where(
+                    condition_given(
+                        field=getattr(models.Item, field),
+                        value=clean(field=field, value=value),
+                        operator=operator,
+                        negation=negation,
+                    )
+                )
+    return stmnt
+
+
+def show_query(stmnt):
+    """
+    For debugging
+    """
+    print(stmnt.compile(compile_kwargs={"literal_binds": True}))
+
+
+def is_date(field):
+    return field in ["created_at", "hathifiles_timestamp"]
+
+
+def clean(field, value):
+    if value in ["null", "NULL"]:
+        pass
+    elif is_date(field):
+        return date.fromisoformat(value)
+    else:
+        return value
+
+
+def condition_given(field, value, operator, negation):
+    if isinstance(value, date):
+        field = func.DATE(field)
+
+    match operator:
+        case "<=":
+            return field <= value
+        case "<":
+            return field < value
+        case ">=":
+            return field >= value
+        case ">":
+            return field > value
+        case ":":
+            if negation:
+                return field != value
+            else:
+                return field == value
 
 
 def get_items_statement(filter: schemas.ItemFilters = None):
@@ -176,7 +271,34 @@ def add_item_status(db: Session, item: models.Item, status: models.Status):
     return item
 
 
+def update_hathifiles_timestamp(db: Session, item: models.Item, timestamp: datetime):
+    """Updates the hathifiles_timestamp field for an item
+
+
+    Args:
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        item (models.Item): Item object
+        timestamp (datetime.datetime): Hathifiles "rights_timestamp"
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+    """
+    item.hathifiles_timestamp = timestamp
+    db.commit()
+    db.refresh(item)
+    return item
+
+
 def delete_item(db: Session, barcode: str):
+    """Deletes a digifeeds  item
+
+    Args:
+        db (sqlalchemy.orm.Session): _description_
+        barcode (str): Barcode of the item
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+    """
     db_item = get_item(db=db, barcode=barcode)
     # need to load this now so the statuses show up in the return
     item = schemas.Item(**db_item.__dict__)
