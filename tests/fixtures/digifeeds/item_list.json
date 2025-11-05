@@ -6,6 +6,7 @@
     {
       "barcode": "some_barcode",
       "created_at": "2024-09-25T17:12:39",
+      "hathifiles_timestamp": null,
       "statuses": [
         {
           "name": "added_to_digifeeds_set",
