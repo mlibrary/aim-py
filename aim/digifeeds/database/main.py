@@ -40,6 +40,29 @@ def get_db():  # pragma: no cover
         db.close()
 
 
+query_description = """
+Query items for statuses and dates
+
+Example queries:
+* `status:in_zephir` Finds all items **with** status `in_zephir`
+* `-status:in_zephir` Finds all items **without** status in_zephir
+* `created_at<=2025-11-05` Find all items that were created on or before 2025-11-05
+* `status.in_zephir.created_at<=2025-11-05` Find all items with an `in_zephir` status that were created on or before 2025-11-05
+* `status:in_zephir status:pending_deletion` Find all items that contain both statuses `in_zephir` and `pending_deletion`.
+
+Operators supported:
+|Operator | Description | Example |
+|---------|-------------|---------|
+| `:` | exact match | `status:in_zephir` or `status.in_zephir.created_at:2025-11-05` |
+| `-` | does not match | `-status:in_zephir` |
+| `<, >, <=, >=` | greater/less than (only for dates) | `created_at<2025-11-05` or `created_at>=2025-11-05`|
+
+Chained queries are ANDed together.
+
+Modeled after the query language for [Stripe](https://docs.stripe.com/search#search-query-language).
+"""
+
+
 @app.get("/items/", response_model_by_alias=False, tags=["Digifeeds Database"])
 def get_items(
     offset: int = Query(0, ge=0, description="Requested offset from the list of pages"),
@@ -47,7 +70,7 @@ def get_items(
     filter: schemas.ItemFilters = Query(
         None, description="Filters on the items in the database"
     ),
-    q: str = Query(None, description="Query statuses and times"),
+    q: str = Query(None, description=query_description),
     db: Session = Depends(get_db),
 ) -> schemas.PageOfItems:  # list[schemas.Item]:
     """
