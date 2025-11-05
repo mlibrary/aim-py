@@ -15,6 +15,13 @@ def item_list():
     return output
 
 
+@pytest.fixture
+def item():
+    with open("tests/fixtures/digifeeds/item.json") as f:
+        output = json.load(f)
+    return output
+
+
 @responses.activate
 def test_get_item_success():
     url = f"{S.digifeeds_api_url}/items/my_barcode"
@@ -113,18 +120,30 @@ def test_get_items_multiple_pages(item_list):
 
 
 @responses.activate
-def test_get_items_in_zephir_value(item_list):
-    item_list["total"] = 1
+def test_get_items_with_remainder_items(item_list, item):
+    item_list["limit"] = 2
+    item_list["total"] = 3
+    page_2 = copy.deepcopy(item_list)
+    item["barcode"] = "yet_another_barcode"
+    item_list["items"].append(item)
+
+    page_2["offset"] = 2
+    page_2["items"][0]["barcode"] = "some_other_barcode"
+
     url = f"{S.digifeeds_api_url}/items"
     responses.get(
         url=url,
-        match=[
-            matchers.query_param_matcher({"limit": 1, "offset": 0, "in_zephir": False})
-        ],
+        match=[matchers.query_param_matcher({"limit": 2, "offset": 0})],
         json=item_list,
     )
-    items = DBClient().get_items(limit=1, in_zephir=False)
-    assert (len(items)) == 1
+    responses.get(
+        url=url,
+        match=[matchers.query_param_matcher({"limit": 2, "offset": 2})],
+        json=page_2,
+    )
+
+    items = DBClient().get_items(limit=2)
+    assert (len(items)) == 3
 
 
 @responses.activate
@@ -162,3 +181,20 @@ def test_get_items_fail_later_page(item_list):
         DBClient().get_items(limit=1)
 
     assert exc_info.type is HTTPError
+
+
+@responses.activate
+def test_get_items_with_q_string(item_list):
+    url = f"{S.digifeeds_api_url}/items"
+    responses.get(
+        url=url,
+        match=[
+            matchers.query_param_matcher(
+                {"limit": 50, "offset": 0, "q": "status:in_zephir"}
+            )
+        ],
+        json=item_list,
+    )
+
+    items = DBClient().get_items(q="status:in_zephir")
+    assert (len(items)) == 1
