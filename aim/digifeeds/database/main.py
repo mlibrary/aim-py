@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from aim.digifeeds.database import crud, schemas
 from aim.digifeeds.database.crud import NotFoundError, AlreadyExistsError
 from aim.services import S
+from datetime import datetime
 
 # This is here so SessionLocal won't have a problem in tests in github
 if S.ci_on:  # pragma: no cover
@@ -169,7 +170,7 @@ Possible reponses:
     },
     tags=["Digifeeds Database"],
 )
-def update_item(
+def add_item_status(
     barcode: str, status_name: str, db: Session = Depends(get_db)
 ) -> schemas.Item:
     """
@@ -189,6 +190,33 @@ def update_item(
         raise HTTPException(status_code=404, detail="Item not found")
 
     return crud.add_item_status(db=db, item=db_item, status=db_status)
+
+
+@app.put(
+    "/items/{barcode}/hathifiles_timestamp/{timestamp}",
+    response_model_by_alias=False,
+    responses={
+        404: {
+            "description": "Bad request: The item doesn't exist",
+            "model": schemas.Response404,
+        },
+    },
+    tags=["Digifeeds Database"],
+)
+def update_hathifiles_timestamp(
+    barcode: str, timestamp: datetime, db: Session = Depends(get_db)
+) -> schemas.Item:
+    try:
+        db_item = crud.get_item(barcode=barcode, db=db)
+    except NotFoundError:
+        raise HTTPException(status_code=404, detail="Item not found")
+
+    try:
+        return crud.update_hathifiles_timestamp(
+            db=db, item=db_item, timestamp=timestamp
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.delete(

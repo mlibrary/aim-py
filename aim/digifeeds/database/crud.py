@@ -8,7 +8,7 @@ from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session, joinedload
 from aim.digifeeds.database import schemas
 from aim.digifeeds.database import models
-import datetime
+from datetime import datetime, date
 import shlex
 import re
 
@@ -141,13 +141,13 @@ def clean(field, value):
     if value in ["null", "NULL"]:
         pass
     elif is_date(field):
-        return datetime.date.fromisoformat(value)
+        return date.fromisoformat(value)
     else:
         return value
 
 
 def condition_given(field, value, operator, negation):
-    if isinstance(value, datetime.date):
+    if isinstance(value, date):
         field = func.DATE(field)
 
     match operator:
@@ -271,7 +271,34 @@ def add_item_status(db: Session, item: models.Item, status: models.Status):
     return item
 
 
+def update_hathifiles_timestamp(db: Session, item: models.Item, timestamp: datetime):
+    """Updates the hathifiles_timestamp field for an item
+
+
+    Args:
+        db (sqlalchemy.orm.Session): Digifeeds database session
+        item (models.Item): Item object
+        timestamp (datetime.datetime): Hathifiles "rights_timestamp"
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+    """
+    item.hathifiles_timestamp = timestamp
+    db.commit()
+    db.refresh(item)
+    return item
+
+
 def delete_item(db: Session, barcode: str):
+    """Deletes a digifeeds  item
+
+    Args:
+        db (sqlalchemy.orm.Session): _description_
+        barcode (str): Barcode of the item
+
+    Returns:
+        aim.digifeeds.database.models.Item: Item object
+    """
     db_item = get_item(db=db, barcode=barcode)
     # need to load this now so the statuses show up in the return
     item = schemas.Item(**db_item.__dict__)

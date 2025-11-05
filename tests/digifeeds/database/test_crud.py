@@ -7,6 +7,7 @@ from aim.digifeeds.database.crud import (
     add_item_status,
     get_items_total,
     delete_item,
+    update_hathifiles_timestamp,
     NotFoundError,
 )
 from aim.digifeeds.database import models
@@ -334,3 +335,16 @@ class TestCrud:
         with pytest.raises(Exception) as exc_info:
             delete_item(barcode="does not exist", db=db_session)
         assert exc_info.type is NotFoundError
+
+    def test_update_hathifiles_timestamp(self, db_session):
+        item = add_item(db=db_session, item=ItemCreate(barcode="valid_barcode"))
+        timestamp = datetime.datetime.today()
+
+        result = update_hathifiles_timestamp(
+            db=db_session, item=item, timestamp=timestamp
+        )
+
+        db_session.refresh(item)
+
+        assert result.hathifiles_timestamp == timestamp
+        assert item.hathifiles_timestamp == timestamp
