@@ -1,5 +1,6 @@
 import requests
 from aim.services import S
+from datetime import datetime
 
 
 class DBClient:
@@ -63,6 +64,23 @@ class DBClient:
             json: A response object
         """
         url = self._url(f"items/{barcode}/status/{status}")
+        response = requests.put(url)
+        if response.status_code != 200:
+            response.raise_for_status()
+        return response.json()
+
+    def update_hathifiles_timestamp(self, barcode: str, timestamp: datetime):
+        """
+        Updates the hathifiles_timestamp field for an existing barcode
+
+        Args:
+            barcode (str): Barcode of the item
+            timestamp (datetime): rights_timestamp value from Hathifiles DB
+
+        Returns:
+            json: A response object
+        """
+        url = self._url(f"items/{barcode}/hathifiles_timestamp/{timestamp.isoformat()}")
         response = requests.put(url)
         if response.status_code != 200:
             response.raise_for_status()

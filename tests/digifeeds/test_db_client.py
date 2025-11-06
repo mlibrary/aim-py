@@ -4,6 +4,7 @@ import pytest
 from aim.services import S
 from aim.digifeeds.db_client import DBClient
 from requests.exceptions import HTTPError
+from datetime import datetime
 import json
 import copy
 
@@ -95,6 +96,29 @@ def test_add_item_status_failure():
     responses.put(url, json={}, status=500)
     with pytest.raises(Exception) as exc_info:
         DBClient().add_item_status(barcode="my_barcode", status="in_zephir")
+    assert exc_info.type is HTTPError
+
+
+@responses.activate
+def test_update_hathifiles_timestamp_success():
+    timestamp = datetime.now()
+    url = f"{S.digifeeds_api_url}/items/my_barcode/hathifiles_timestamp/{timestamp.isoformat()}"
+    responses.put(url, json={"item": "my_item"}, status=200)
+    item = DBClient().update_hathifiles_timestamp(
+        barcode="my_barcode", timestamp=timestamp
+    )
+    assert item == {"item": "my_item"}
+
+
+@responses.activate
+def test_update_hathifiles_timestamp_failure():
+    timestamp = datetime.now()
+    url = f"{S.digifeeds_api_url}/items/my_barcode/hathifiles_timestamp/{timestamp.isoformat()}"
+    responses.put(url, json={}, status=500)
+    with pytest.raises(Exception) as exc_info:
+        DBClient().update_hathifiles_timestamp(
+            barcode="my_barcode", timestamp=timestamp
+        )
     assert exc_info.type is HTTPError
 
 
