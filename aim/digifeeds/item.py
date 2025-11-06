@@ -108,12 +108,24 @@ class Item:
 
     def check_and_update_hathifiles_timestamp(self):
         if self.hathifiles_timestamp:
+            S.logger.warn(
+                "already_has_hathifiles_timestamp",
+                message="item already has a hathifiles timestamp",
+                barcode=self.barcode,
+            )
             return
+
         hf_item = HathifilesClient().get_item(htid=f"mdp.{self.barcode}")
+
         if hf_item:
             db_resp = DBClient().update_hathifiles_timestamp(
                 barcode=self.barcode,
                 timestamp=datetime.fromisoformat(hf_item["rights_timestamp"]),
+            )
+            S.logger.warn(
+                "already_has_hathifiles_timestamp",
+                message="item already has a hathifiles timestamp",
+                barcode=self.barcode,
             )
             return Item(db_resp)
 
@@ -166,7 +178,7 @@ class Item:
             return False
 
 
-def get_item(barcode: str) -> None:
+def get_item(barcode: str) -> Item | None:
     return Item(DBClient().get_or_add_item(barcode))
 
 

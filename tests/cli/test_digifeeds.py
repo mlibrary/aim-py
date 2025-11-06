@@ -204,6 +204,24 @@ def test_process_barcodes(mocker, item_in_zephir_too_recent):
     assert result.exit_code == 0
 
 
+def test_check_and_update_hathifiles_timestamp(mocker, item_data):
+    item_data["hathifiles_timestamp"] = datetime.today().isoformat()
+    item = Item(item_data)
+    mocker.patch("aim.cli.digifeeds.get_item", side_effect=[item, item])
+
+    result = runner.invoke(
+        app,
+        [
+            "digifeeds",
+            "check-and-update-hathifiles-timestamp",
+            "some_barcode",
+            "other_barcode",
+        ],
+    )
+    assert "already_has_hathifiles_timestamp" in result.stdout
+    assert "some_barcode" in result.stdout
+
+
 def test_generate_barcodes_in_s3_report(mocker):
     generate_report_mock = mocker.patch.object(
         functions, "generate_barcodes_added_in_last_two_weeks_report"

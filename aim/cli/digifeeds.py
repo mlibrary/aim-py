@@ -177,6 +177,18 @@ def process_barcodes(
 
 
 @app.command()
+def check_and_update_hathifiles_timestamp(
+    barcodes: Annotated[
+        List[str],
+        typer.Argument(help="The list of barcodes to check and update"),
+    ],
+):
+    for barcode in barcodes:
+        item = get_item(barcode)
+        item.check_and_update_hathifiles_timestamp()
+
+
+@app.command()
 def generate_barcodes_in_s3_report():
     """
     Generates a report of barcodes that have been moved to the google pickup
