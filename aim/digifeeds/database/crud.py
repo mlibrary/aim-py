@@ -272,7 +272,8 @@ def add_item_status(db: Session, item: models.Item, status: models.Status):
 
 
 def update_hathifiles_timestamp(db: Session, item: models.Item, timestamp: datetime):
-    """Updates the hathifiles_timestamp field for an item
+    """Updates the hathifiles_timestamp field for an item and adds the
+    `in_hathifiles` status
 
 
     Args:
@@ -283,7 +284,13 @@ def update_hathifiles_timestamp(db: Session, item: models.Item, timestamp: datet
     Returns:
         aim.digifeeds.database.models.Item: Item object
     """
+
+    status = get_status(db=db, name="in_hathifiles")
+    db_item_status = models.ItemStatus(item=item, status=status)
+    db.add(db_item_status)
+
     item.hathifiles_timestamp = timestamp
+
     db.commit()
     db.refresh(item)
     return item

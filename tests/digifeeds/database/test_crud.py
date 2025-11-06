@@ -348,3 +348,4 @@ class TestCrud:
 
         assert result.hathifiles_timestamp == timestamp
         assert item.hathifiles_timestamp == timestamp
+        assert "in_hathifiles" in [status.status_name for status in item.statuses]

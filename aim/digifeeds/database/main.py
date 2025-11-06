@@ -200,6 +200,10 @@ def add_item_status(
             "description": "Bad request: The item doesn't exist",
             "model": schemas.Response404,
         },
+        400: {
+            "description": "Bad request: The item already has a hathifiles_timestamp",
+            "model": schemas.Response400HFTimestamp,
+        },
     },
     tags=["Digifeeds Database"],
 )
@@ -210,6 +214,11 @@ def update_hathifiles_timestamp(
         db_item = crud.get_item(barcode=barcode, db=db)
     except NotFoundError:
         raise HTTPException(status_code=404, detail="Item not found")
+
+    if db_item.hathifiles_timestamp:
+        raise HTTPException(
+            status_code=400, detail="Item already has a hathifiles_timestamp"
+        )
 
     try:
         return crud.update_hathifiles_timestamp(
