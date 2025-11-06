@@ -101,6 +101,16 @@ def list_barcodes_in_input_bucket():
 
 
 @app.command()
+def list_barcodes_potentially_in_hathifiles():
+    """
+    List the barcodes of items that have gone through the digifeeds process and
+    could be in hathitrust. These are items with status `pending_deletion` and
+    without status `in_hathifiles`.
+    """
+    json.dump(functions.list_barcodes_potentially_in_hathifiles(), sys.stdout)
+
+
+@app.command()
 def move_to_pickup(
     barcode: Annotated[
         str,

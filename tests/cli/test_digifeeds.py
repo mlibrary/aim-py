@@ -103,6 +103,20 @@ def test_list_barcodes_in_input_bucket(mocker):
     assert '["barcode1", "barcode2"]' == result.stdout
 
 
+def test_list_barcodes_potentially_in_hathifiles(mocker):
+    list_barcodes_mock = mocker.patch.object(
+        functions,
+        "list_barcodes_potentially_in_hathifiles",
+        return_value=["barcode1", "barcode2"],
+    )
+    result = runner.invoke(
+        app, ["digifeeds", "list-barcodes-potentially-in-hathifiles"]
+    )
+    assert list_barcodes_mock.call_count == 1
+    assert result.exit_code == 0
+    assert '["barcode1", "barcode2"]' == result.stdout
+
+
 @responses.activate
 def test_check_zephir_for_item_when_item_is_in_zephir(item_data):
     db_url = f"{S.digifeeds_api_url}/items/some_barcode"

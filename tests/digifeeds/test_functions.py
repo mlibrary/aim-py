@@ -7,8 +7,20 @@ from aim.digifeeds.functions import (
     generate_barcodes_added_in_last_two_weeks_report,
     last_two_weeks_rclone_filter,
     list_barcodes_in_input_bucket,
+    list_barcodes_potentially_in_hathifiles,
 )
+from aim.services import S
 from io import StringIO
+import responses
+import pytest
+from responses import matchers
+
+
+@pytest.fixture
+def item_list():
+    with open("tests/fixtures/digifeeds/item_list.json") as f:
+        output = json.load(f)
+    return output
 
 
 def test_list_barcodes_in_input_bucket(mocker):
@@ -38,6 +50,28 @@ def test_list_barcodes_in_input_bucket(mocker):
     subject = list_barcodes_in_input_bucket()
 
     assert subject == ["35112203951670", "39015004707009"]
+
+
+@responses.activate
+def test_list_barcodes_potentially_in_hathifiles(item_list):
+    item_list["total"] = 1
+    url = f"{S.digifeeds_api_url}/items"
+    responses.get(
+        url=url,
+        match=[
+            matchers.query_param_matcher(
+                {
+                    "limit": 50,
+                    "offset": 0,
+                    "q": "status:pending_deletion -status:in_hathifiles",
+                }
+            )
+        ],
+        json=item_list,
+    )
+
+    subject = list_barcodes_potentially_in_hathifiles()
+    assert subject == ["some_barcode"]
 
 
 def test_last_two_weeks_rclone_filter():
