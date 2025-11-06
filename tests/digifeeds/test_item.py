@@ -362,3 +362,43 @@ def test_process_item_move_to_pickup(mocker):
 
     result = process_item(not_pending_deletion_mock)
     assert result is None
+
+
+@responses.activate
+def test_check_and_update_hathifiles_timestamp(item_data):
+    hf_url = f"{S.hathifiles_api_url}/items/mdp.some_barcode"
+    simple_hf_output = {
+        "htid": "mdp.some_barcode",
+        "rights_timestamp": "2012-09-14T16:30:02",
+    }
+    hf_get_stub = responses.get(url=hf_url, json=simple_hf_output)
+
+    digifeeds_update_hf_timestamp = f"{S.digifeeds_api_url}/items/some_barcode/hathifiles_timestamp/{simple_hf_output['rights_timestamp']}"
+    digifeeds_put_stub = responses.put(
+        url=digifeeds_update_hf_timestamp, json=item_data
+    )
+
+    result = Item(item_data).check_and_update_hathifiles_timestamp()
+    assert hf_get_stub.call_count == 1
+    assert digifeeds_put_stub.call_count == 1
+    assert result is not None
+
+
+def test_check_and_update_hathifiles_timestamp_returns_none_when_already_has_hf_timestamp(
+    item_data,
+):
+    item_data["hathifiles_timestamp"] = datetime.today().isoformat()
+    result = Item(item_data).check_and_update_hathifiles_timestamp()
+    assert result is None
+
+
+@responses.activate
+def test_check_and_update_hathifiles_timestamp_returns_none_when_not_in_hathifiles_db(
+    item_data,
+):
+    hf_url = f"{S.hathifiles_api_url}/items/mdp.some_barcode"
+    hf_get_stub = responses.get(url=hf_url, json={}, status=404)
+
+    result = Item(item_data).check_and_update_hathifiles_timestamp()
+    assert hf_get_stub.call_count == 1
+    assert result is None
