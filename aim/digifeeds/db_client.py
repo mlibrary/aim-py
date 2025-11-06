@@ -1,5 +1,6 @@
 import requests
 from aim.services import S
+from datetime import datetime
 
 
 class DBClient:
@@ -68,15 +69,43 @@ class DBClient:
             response.raise_for_status()
         return response.json()
 
-    def get_items(self, limit: int = 50, in_zephir: bool | None = None):
+    def update_hathifiles_timestamp(self, barcode: str, timestamp: datetime):
+        """
+        Updates the hathifiles_timestamp field for an existing barcode
+
+        Args:
+            barcode (str): Barcode of the item
+            timestamp (datetime): rights_timestamp value from Hathifiles DB
+
+        Returns:
+            json: A response object
+        """
+        url = self._url(f"items/{barcode}/hathifiles_timestamp/{timestamp.isoformat()}")
+        response = requests.put(url)
+        if response.status_code != 200:
+            response.raise_for_status()
+        return response.json()
+
+    def get_items(self, limit: int = 50, q: str | None = None) -> list:
+        """
+        Pages through all items to return a list. Takes an optional q string to
+        filter the list of items
+
+        Args:
+            limit (int, optional): How many items to fetch with each page. Changing this still results in getting all matching results. Defaults to 50.
+            q (str | None, optional): Query string that the api is expecting. Defaults to None.
+
+        Returns:
+            list: List of item objects.
+        """
         items = []
         url = self._url("items")
         params = {
             "limit": limit,
             "offset": 0,
         }
-        if in_zephir is not None:
-            params["in_zephir"] = in_zephir
+        if q:
+            params["q"] = q
 
         response = requests.get(url, params=params)
         if response.status_code != 200:
