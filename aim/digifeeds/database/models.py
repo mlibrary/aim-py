@@ -78,6 +78,10 @@ def load_statuses(session: Session):
             "description": "The item has been copied to the pickup location and can be deleted upon ingest confirmation",
         },
         {"name": "not_found_in_alma", "description": "Barcode wasn't found in Alma"},
+        {
+            "name": "in_hathifiles",
+            "description": "Barcode was found in the Hathifiles Database",
+        },
     ]
     objects = []
     for status in statuses:
