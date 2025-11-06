@@ -89,8 +89,11 @@ class Services:
     #: url to argo events webhook for triggering the update of the hathifiles database
     hathifiles_webhook_url: str
 
-    #: The Digifeeds MySQL database
-    hathfiles_mysql_database: sa.engine.URL
+    #: The Hathifiles MySQL database
+    hathifiles_mysql_database: sa.engine.URL
+
+    #: The Hathifiles API URL
+    hathifiles_api_url: str
 
 
 S = Services(
@@ -126,11 +129,12 @@ S = Services(
     or "tmp/hathi_file_list_store.json",
     hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")
     or "http://localhost:1200/new_hathifile",
-    hathfiles_mysql_database=sa.engine.URL.create(
+    hathifiles_mysql_database=sa.engine.URL.create(
         drivername="mysql+mysqldb",
         username=os.getenv("HATHIFILES_DB_USER") or "user",
         password=os.getenv("HATHIFILES_DB_PASSWORD") or "password",
         host=os.getenv("HATHIFILES_DB_HOST") or "hathifiles-db",
         database=os.getenv("HATHIFILES_DB_DATABASE") or "database",
     ),
+    hathifiles_api_url=os.getenv("HATHIFILES_API_URL") or "http://hathifiles-api:8000",
 )

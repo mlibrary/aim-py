@@ -100,10 +100,10 @@ class Item(BaseModel):
     )
 
 
-engine = create_engine(S.hathfiles_mysql_database, pool_pre_ping=True)
+engine = create_engine(S.hathifiles_mysql_database, pool_pre_ping=True)
 
 description = """
-The Hathfiles Database API enables getting information about items in HathiTrust 
+The Hathifiles Database API enables getting information about items in HathiTrust 
 """
 app = FastAPI(title="Hathifiles", description=description)
 
