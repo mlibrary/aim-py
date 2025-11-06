@@ -22,7 +22,7 @@ def test_get_statuses(client):
     assert response.status_code == 200, response.text
 
 
-def test_get_items(client, valid_item, valid_in_zephir_item, db_session):
+def test_get_items(client, valid_item, valid_in_zephir_item):
     valid_item
     valid_in_zephir_item
     response = client.get("/items")
@@ -112,6 +112,16 @@ def test_update_item_with_invalid_timestamp(client, valid_item):
         f"/items/{valid_item.barcode}/hathifiles_timestamp/not_an_iso_date_string"
     )
     assert response.status_code == 422
+
+
+def test_update_item_that_is_already_is_in_hf(client, valid_item):
+    timestamp = "2012-09-13T18:30:03"
+    client.put(f"/items/{valid_item.barcode}/hathifiles_timestamp/{timestamp}")
+    response = client.put(
+        f"/items/{valid_item.barcode}/hathifiles_timestamp/{timestamp}"
+    )
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Item already has a hathifiles_timestamp"}
 
 
 def test_delete_item(client, valid_item):

@@ -86,6 +86,18 @@ class Response400(Response):
     )
 
 
+class Response400HFTimestamp(Response):
+    model_config = ConfigDict(
+        json_schema_extra={
+            "examples": [
+                {
+                    "detail": "Item already has a hathifiles_timestamp",
+                }
+            ]
+        }
+    )
+
+
 class Response404(Response):
     model_config = ConfigDict(
         json_schema_extra={

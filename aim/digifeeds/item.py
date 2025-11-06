@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from aim.digifeeds.alma_client import AlmaClient
 from aim.digifeeds.db_client import DBClient
 from aim.services import S
+from aim.hathifiles.client import Client as HathifilesClient
 from requests.exceptions import HTTPError
 
 
@@ -105,6 +106,29 @@ class Item:
 
         return Item(db_resp)
 
+    def check_and_update_hathifiles_timestamp(self):
+        if self.hathifiles_timestamp:
+            S.logger.warn(
+                "already_has_hathifiles_timestamp",
+                message="item already has a hathifiles timestamp",
+                barcode=self.barcode,
+            )
+            return
+
+        hf_item = HathifilesClient().get_item(htid=f"mdp.{self.barcode}")
+
+        if hf_item:
+            db_resp = DBClient().update_hathifiles_timestamp(
+                barcode=self.barcode,
+                timestamp=datetime.fromisoformat(hf_item["rights_timestamp"]),
+            )
+            S.logger.warn(
+                "already_has_hathifiles_timestamp",
+                message="item already has a hathifiles timestamp",
+                barcode=self.barcode,
+            )
+            return Item(db_resp)
+
     @property
     def barcode(self) -> str:
         """The barcode of the Digifeeds item.
@@ -113,6 +137,16 @@ class Item:
             str: The barcode.
         """
         return self.data["barcode"]
+
+    @property
+    def hathifiles_timestamp(self) -> datetime | None:
+        """The rights_timestamp from hathifiles of the Digifeeds item at the time of checking.
+
+        Returns:
+            datetime: The hathifiles timestamp.
+        """
+        if self.data["hathifiles_timestamp"]:
+            return datetime.fromisoformat(self.data["hathifiles_timestamp"])
 
     @property
     def in_zephir_for_long_enough(self) -> bool:
@@ -144,7 +178,7 @@ class Item:
             return False
 
 
-def get_item(barcode: str) -> None:
+def get_item(barcode: str) -> Item | None:
     return Item(DBClient().get_or_add_item(barcode))
 
 
@@ -154,7 +188,7 @@ def process_item(item: Item) -> Item:
     #     S.logger.info(
     #         "already_processed",
     #         message="item has already been moved so it does not need processing",
-    #         barcode=barcode,
+    #         barcode=barcode",
     #     )
     #     return None
 

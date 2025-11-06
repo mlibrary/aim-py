@@ -103,6 +103,20 @@ def test_list_barcodes_in_input_bucket(mocker):
     assert '["barcode1", "barcode2"]' == result.stdout
 
 
+def test_list_barcodes_potentially_in_hathifiles(mocker):
+    list_barcodes_mock = mocker.patch.object(
+        functions,
+        "list_barcodes_potentially_in_hathifiles",
+        return_value=["barcode1", "barcode2"],
+    )
+    result = runner.invoke(
+        app, ["digifeeds", "list-barcodes-potentially-in-hathifiles"]
+    )
+    assert list_barcodes_mock.call_count == 1
+    assert result.exit_code == 0
+    assert '["barcode1", "barcode2"]' == result.stdout
+
+
 @responses.activate
 def test_check_zephir_for_item_when_item_is_in_zephir(item_data):
     db_url = f"{S.digifeeds_api_url}/items/some_barcode"
@@ -188,6 +202,24 @@ def test_process_barcodes(mocker, item_in_zephir_too_recent):
     assert "some_barcode" in result.stdout
     assert "other_barcode" in result.stdout
     assert result.exit_code == 0
+
+
+def test_check_and_update_hathifiles_timestamp(mocker, item_data):
+    item_data["hathifiles_timestamp"] = datetime.today().isoformat()
+    item = Item(item_data)
+    mocker.patch("aim.cli.digifeeds.get_item", side_effect=[item, item])
+
+    result = runner.invoke(
+        app,
+        [
+            "digifeeds",
+            "check-and-update-hathifiles-timestamp",
+            "some_barcode",
+            "other_barcode",
+        ],
+    )
+    assert "already_has_hathifiles_timestamp" in result.stdout
+    assert "some_barcode" in result.stdout
 
 
 def test_generate_barcodes_in_s3_report(mocker):

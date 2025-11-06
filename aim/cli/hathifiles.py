@@ -1,6 +1,9 @@
 import typer
+from typing_extensions import Annotated
 from aim.hathifiles import poll
 from aim.services import S
+from aim.hathifiles.client import Client
+import json
 
 app = typer.Typer()
 
@@ -24,3 +27,11 @@ def check_for_new_update_files():
     files and the new ones.
     """
     poll.check_for_new_update_files()
+
+
+@app.command()
+def get(htid: Annotated[str, typer.Argument(help="The HathiTrust id for an item")]):
+    """
+    Returns the Hathfiles info for a given htid
+    """
+    typer.echo(json.dumps(Client().get_item(htid=htid), indent=2))

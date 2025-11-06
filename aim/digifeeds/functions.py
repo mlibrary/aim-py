@@ -1,4 +1,5 @@
 from aim.services import S
+from aim.digifeeds.db_client import DBClient
 from pathlib import Path
 from rclone_python import rclone
 from datetime import datetime, timedelta
@@ -13,6 +14,12 @@ def list_barcodes_in_input_bucket():
         max_depth=1,
     )
     return [Path(file["Name"]).stem for file in files]
+
+
+def list_barcodes_potentially_in_hathifiles():
+    items = DBClient().get_items(q="status:pending_deletion -status:in_hathifiles")
+    if items:
+        return [item["barcode"] for item in items]
 
 
 def last_two_weeks_rclone_filter(start_date: datetime = datetime.today()):
