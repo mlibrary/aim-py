@@ -4,9 +4,6 @@ from datetime import datetime
 
 
 class DBClient:
-    def __init__(self) -> None:
-        self.base_url = S.digifeeds_api_url
-
     def get_item(self, barcode: str):
         """Get an item from the digifeeds database
 
@@ -127,4 +124,4 @@ class DBClient:
         return items
 
     def _url(self, path) -> str:
-        return f"{self.base_url}/{path}"
+        return f"{S.digifeeds_api_url}/{path}"

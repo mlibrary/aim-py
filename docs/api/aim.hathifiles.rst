@@ -12,5 +12,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   aim.hathifiles.client
    aim.hathifiles.main
    aim.hathifiles.poll
