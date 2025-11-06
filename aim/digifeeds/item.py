@@ -122,12 +122,18 @@ class Item:
                 barcode=self.barcode,
                 timestamp=datetime.fromisoformat(hf_item["rights_timestamp"]),
             )
-            S.logger.warn(
-                "already_has_hathifiles_timestamp",
-                message="item already has a hathifiles timestamp",
+            S.logger.info(
+                "hathifiles_timestamp_updated",
+                message="item was found in hathifiles; its timestamp has been updated",
                 barcode=self.barcode,
             )
             return Item(db_resp)
+        else:
+            S.logger.info(
+                "not_found_in_hathifiles",
+                message="item was not found in the hathifiles database",
+                barcode=self.barcode,
+            )
 
     @property
     def barcode(self) -> str:
