@@ -1,19 +1,21 @@
-from datetime import datetime
+from datetime import datetime, date, timedelta
 import json
 from aim.digifeeds.functions import (
     rclone,
     barcodes_added_in_last_two_weeks,
-    write_barcodes_added_in_last_two_weeks_report,
+    write_and_send_report_to_mayhem,
     generate_barcodes_added_in_last_two_weeks_report,
+    generate_barcodes_in_hathifiles_report,
     last_two_weeks_rclone_filter,
     list_barcodes_in_input_bucket,
     list_barcodes_potentially_in_hathifiles,
+    barcodes_in_hathifiles_in_last_two_weeks,
 )
 from aim.services import S
-from io import StringIO
 import responses
 import pytest
 from responses import matchers
+import tempfile
 
 
 @pytest.fixture
@@ -117,29 +119,78 @@ def test_barcodes_added_in_last_two_weeks(mocker):
     ]
 
 
-def test_write_barcodes_added_in_last_two_weeks_report(mocker):
-    outfile = StringIO()
-    barcodes = [
-        ["12/14/2024", "35112203951670"],
-        ["12/14/2024", "39015004707009"],
-    ]
-
-    mocker.patch(
-        "aim.digifeeds.functions.barcodes_added_in_last_two_weeks",
-        return_value=barcodes,
-    )
-    write_barcodes_added_in_last_two_weeks_report(outfile)
-    outfile.seek(0)
-    content = outfile.read()
-    assert content == "12/14/2024\t35112203951670\n12/14/2024\t39015004707009\n"
-
-
 def test_generate_barcodes_added_in_last_two_weeks_report(mocker):
-    rclone_mock = mocker.patch.object(rclone, "copyto")
-    report_writer_mock = mocker.patch(
-        "aim.digifeeds.functions.write_barcodes_added_in_last_two_weeks_report",
+    barcode_list_mock = mocker.patch(
+        "aim.digifeeds.functions.barcodes_added_in_last_two_weeks",
+    )
+    write_and_send_mock = mocker.patch(
+        "aim.digifeeds.functions.write_and_send_report_to_mayhem",
     )
 
     generate_barcodes_added_in_last_two_weeks_report()
+
+    write_and_send_mock.assert_called()
+    barcode_list_mock.assert_called()
+
+
+def test_generate_barcodes_in_hathitrust_report(mocker):
+    barcode_list_mock = mocker.patch(
+        "aim.digifeeds.functions.barcodes_in_hathifiles_in_last_two_weeks",
+    )
+    write_and_send_mock = mocker.patch(
+        "aim.digifeeds.functions.write_and_send_report_to_mayhem",
+    )
+
+    generate_barcodes_in_hathifiles_report()
+
+    write_and_send_mock.assert_called()
+    barcode_list_mock.assert_called()
+
+
+def test_write_and_send_report_to_mayhem(mocker):
+    rclone_mock = mocker.patch.object(rclone, "copyto")
+    content = [
+        ["12/14/2024", "35112203951670"],
+        ["12/14/2024", "39015004707009"],
+    ]
+    tf = tempfile.NamedTemporaryFile(mode="w+t")
+
+    write_and_send_report_to_mayhem(
+        content=content,
+        base_name="my_cool_report",
+        rclone_remote="my_mayhem_remote",
+        report_file=tf,
+    )
+
     rclone_mock.assert_called()
-    report_writer_mock.assert_called()
+    assert tf.read() == "12/14/2024\t35112203951670\n12/14/2024\t39015004707009\n"
+
+
+@responses.activate
+def test_barcodes_in_hathifiles_in_last_two_weeks(item_list):
+    item_list["total"] = 1
+    item_list["items"][0]["hathifiles_timestamp"] = "2009-03-02 22:30:12"
+    two_weeks_ago = date.today() - timedelta(14)
+    url = f"{S.digifeeds_api_url}/items"
+    responses.get(
+        url=url,
+        match=[
+            matchers.query_param_matcher(
+                {
+                    "limit": 50,
+                    "offset": 0,
+                    "q": f"status.in_hathifiles.created_at>={two_weeks_ago.isoformat()}",
+                }
+            )
+        ],
+        json=item_list,
+    )
+
+    subject = barcodes_in_hathifiles_in_last_two_weeks()
+    assert subject == [
+        [
+            "some_barcode",
+            "03/02/2009",
+            "https://babel.hathitrust.org/cgi/pt?id=mdp.some_barcode",
+        ]
+    ]

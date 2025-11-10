@@ -2,7 +2,7 @@ from aim.services import S
 from aim.digifeeds.db_client import DBClient
 from pathlib import Path
 from rclone_python import rclone
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 import csv
 import tempfile
 
@@ -33,10 +33,6 @@ def last_two_weeks_rclone_filter(start_date: datetime = datetime.today()):
 
 
 def barcodes_added_in_last_two_weeks():
-    def format_date(date_string: str):
-        date = datetime.strptime(date_string, "%Y-%m-%d")
-        return date.strftime("%m/%d/%Y")
-
     files = rclone.ls(
         path=f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_processed_path}",
         args=[f'--include "{last_two_weeks_rclone_filter()}"'],
@@ -52,26 +48,74 @@ def barcodes_added_in_last_two_weeks():
             barcode=barcode,
             message="Added to barcode report",
         )
-        output.append([format_date(date), barcode])
+        output.append([filemaker_date(date), barcode])
 
     return output
 
 
-def write_barcodes_added_in_last_two_weeks_report(outfile):
-    output = barcodes_added_in_last_two_weeks()
-    writer = csv.writer(outfile, delimiter="\t", lineterminator="\n")
-    S.logger.info("writing_report_rows_to_file")
-    writer.writerows(output)
+def write_and_send_report_to_mayhem(
+    content,
+    base_name,
+    rclone_remote,
+    report_file=None,
+):
+    if not report_file:
+        report_file = tempfile.NamedTemporaryFile()
+
+    with open(report_file.name, "w") as rf:
+        writer = csv.writer(rf, delimiter="\t", lineterminator="\n")
+        S.logger.info("writing_report_rows_to_file")
+        writer.writerows(content)
+
+    S.logger.info("writing delivery report")
+
+    today = date.today().isoformat()
+    rclone.copyto(
+        in_path=report_file.name,
+        out_path=f"{rclone_remote}:{today}_{base_name}.txt",
+    )
 
 
 def generate_barcodes_added_in_last_two_weeks_report():
-    report_file = tempfile.NamedTemporaryFile()
-    with open(report_file.name, "w") as rf:
-        write_barcodes_added_in_last_two_weeks_report(rf)
-
-    today = datetime.today().strftime("%Y-%m-%d")
-    S.logger.info("writing delivery report")
-    rclone.copyto(
-        in_path=report_file.name,
-        out_path=f"{S.digifeeds_delivery_reports_rclone_remote}:{today}_barcodes_in_s3_processed.txt",
+    content = barcodes_added_in_last_two_weeks()
+    write_and_send_report_to_mayhem(
+        content=content,
+        base_name="barcodes_in_s3_processed",
+        rclone_remote=S.digifeeds_delivery_reports_rclone_remote,
     )
+
+
+def barcodes_in_hathifiles_in_last_two_weeks():
+    two_weeks_ago = date.today() - timedelta(14)
+    items = DBClient().get_items(
+        q=f"status.in_hathifiles.created_at>={two_weeks_ago.isoformat()}"
+    )
+    if items:
+        return [
+            [
+                item["barcode"],
+                filemaker_date(item["hathifiles_timestamp"]),
+                hathitrust_url(item["barcode"]),
+            ]
+            for item in items
+        ]
+    else:
+        return []
+
+
+def generate_barcodes_in_hathifiles_report():
+    content = barcodes_in_hathifiles_in_last_two_weeks()
+    write_and_send_report_to_mayhem(
+        content=content,
+        base_name="barcodes_in_hathifiles",
+        rclone_remote=S.digifeeds_hathifiles_reports_rclone_remote,
+    )
+
+
+def filemaker_date(datestr: str) -> str:
+    date = datetime.fromisoformat(datestr)
+    return date.strftime("%m/%d/%Y")
+
+
+def hathitrust_url(barcode: str) -> str:
+    return f"https://babel.hathitrust.org/cgi/pt?id=mdp.{barcode}"

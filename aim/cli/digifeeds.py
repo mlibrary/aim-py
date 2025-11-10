@@ -196,3 +196,13 @@ def generate_barcodes_in_s3_report():
     location in the s3 bucket. This report is sent to a folder on Mayhem.
     """
     functions.generate_barcodes_added_in_last_two_weeks_report()
+
+
+@app.command()
+def generate_barcodes_in_hathifiles_report():
+    """
+    Generates a report of barcodes that have been found in the Hathifiles
+    Database in the last two weeks. The dates in the report are the
+    rights-timestamp in the Hathifiles.
+    """
+    functions.generate_barcodes_in_hathifiles_report()
