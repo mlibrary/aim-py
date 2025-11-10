@@ -232,3 +232,15 @@ def test_generate_barcodes_in_s3_report(mocker):
     generate_report_mock.assert_called()
 
     assert result.exit_code == 0
+
+
+def test_generate_barcodes_in_hathifiles_report(mocker):
+    generate_report_mock = mocker.patch.object(
+        functions, "generate_barcodes_in_hathifiles_report"
+    )
+
+    result = runner.invoke(app, ["digifeeds", "generate-barcodes-in-hathifiles-report"])
+
+    generate_report_mock.assert_called()
+
+    assert result.exit_code == 0
