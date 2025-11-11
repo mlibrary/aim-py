@@ -1,5 +1,6 @@
 from aim.services import S
 from aim.digifeeds.db_client import DBClient
+from aim.digifeeds.item import get_item
 from pathlib import Path
 from rclone_python import rclone
 from datetime import datetime, timedelta, date
@@ -110,6 +111,37 @@ def generate_barcodes_in_hathifiles_report():
         base_name="barcodes_in_hathifiles",
         rclone_remote=S.digifeeds_hathifiles_reports_rclone_remote,
     )
+
+
+def prune_processed_barcodes(rclone_path: str):
+    data_structure = {}
+    files_and_directories = rclone.ls(
+        path=rclone_path,
+        files_only=False,
+        max_depth=1,
+    )
+    for f in files_and_directories:
+        barcode = barcode_from_name(f["Name"])
+        if barcode not in data_structure:
+            data_structure[barcode] = [f]
+        else:
+            data_structure[barcode].append(f)
+
+    for barcode in data_structure.keys():
+        if get_item(barcode).has_status("in_hathifiles"):
+            S.logger.info("prune", {barcode: barcode})
+            for item in data_structure[barcode]:
+                if item["IsDir"]:
+                    rclone.purge(path=f"{rclone_path}/{item['Path']}")
+                else:
+                    rclone.delete(path=f"{rclone_path}/{item['Path']}")
+
+        else:
+            S.logger.info("not_in_hathifiles", {barcode: barcode})
+
+
+def barcode_from_name(name):
+    return name.split(".")[0].split("_")[-1]
 
 
 def filemaker_date(datestr: str) -> str:

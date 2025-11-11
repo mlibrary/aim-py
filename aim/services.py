@@ -86,6 +86,9 @@ class Services:
     #: The name of the rclone remote where we put reports that show what items are in hathitrust
     digifeeds_hathifiles_reports_rclone_remote: str
 
+    # The name of the rclone remote for the fileserver for digifeeds files for DCU
+    digifeeds_fileserver_rclone_remote: str
+
     #: file path to store of the hathi_file_list update items
     hathifiles_store_path: str
 
@@ -130,8 +133,9 @@ S = Services(
     or "digifeeds_delivery_reports",
     digifeeds_hathifiles_reports_rclone_remote=os.getenv(
         "DIGIFEEDS_HATHIFILES_REPORTS_RCLONE_REMOTE"
-    )
-    or "digifeeds_hathifiles_reports",
+    ),
+    digifeeds_fileserver_rclone_remote=os.getenv("DIGIFEEDS_FILESERVER_RCLONE_REMOTE")
+    or "digifeeds_fileserver",
     hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
     or "tmp/hathi_file_list_store.json",
     hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")
