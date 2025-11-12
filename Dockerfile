@@ -63,6 +63,9 @@ FROM poetry AS build
 # Just copy the files needed to install the dependencies
 COPY pyproject.toml poetry.lock README.md ./
 
+# Need to be able to export poetry
+RUN poetry self add poetry-plugin-export
+
 #Use poetry to create a requirements.txt file. Dont include development dependencies
 RUN poetry export --without dev -f requirements.txt --output requirements.txt
 
