@@ -29,8 +29,13 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   build-essential \ 
   pkg-config \
   default-mysql-client \
-  rclone\
-  vim-tiny
+  vim-tiny \
+  curl \ 
+  zip \
+  unzip
+
+#get latest rclone because the apt version can't delete files on cifs
+RUN curl https://rclone.org/install.sh | bash
 
 # Set the working directory to /app
 WORKDIR /app
@@ -77,8 +82,6 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   bats-assert \
   bats-file\
   wget\
-  zip\
-  unzip
 
 RUN wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash && \
   chown ${UID}:${GID} /opt/shellmock.bash
