@@ -129,7 +129,11 @@ def prune_processed_barcodes(rclone_path: str):
 
     for barcode in data_structure.keys():
         if get_item(barcode).has_status("in_hathifiles"):
-            S.logger.info("prune", {barcode: barcode})
+            S.logger.info(
+                "prune",
+                barcode=barcode,
+                message="removed because it was found in the hathifiles",
+            )
             for item in data_structure[barcode]:
                 if item["IsDir"]:
                     rclone.purge(path=f"{rclone_path}/{item['Path']}")
@@ -137,7 +141,11 @@ def prune_processed_barcodes(rclone_path: str):
                     rclone.delete(path=f"{rclone_path}/{item['Path']}")
 
         else:
-            S.logger.info("not_in_hathifiles", {barcode: barcode})
+            S.logger.info(
+                "not_in_hathifiles",
+                barcode=barcode,
+                message="not pruned because not found in hathifiles",
+            )
 
 
 def barcode_from_name(name):
