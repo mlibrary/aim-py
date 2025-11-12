@@ -1,5 +1,4 @@
 import pytest
-from pathlib import Path
 from rclone_python import rclone
 import responses
 import json
@@ -8,17 +7,20 @@ from aim.digifeeds.functions import prune_processed_barcodes
 
 
 @pytest.fixture
-def test_dir():
-    p = Path("tmp/test")
-    p.mkdir()
-    yield p
-    for root, dirs, files in p.walk(top_down=False):
-        for f in files:
-            (root / f).unlink()
-        for d in dirs:
-            (root / d).rmdir()
-
-    p.rmdir()
+def test_dir(tmp_path):
+    rclone_config_path = tmp_path / "rclone.conf"
+    test_path = tmp_path / "test"
+    test_path.mkdir()
+    rclone_config_path.write_text(
+        f"""
+[test_filesystem]
+type = alias
+remote = {test_path} 
+""",
+        encoding="utf-8",
+    )
+    rclone.set_config_file(config_file=rclone_config_path)
+    yield test_path
 
 
 @pytest.fixture
