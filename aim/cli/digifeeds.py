@@ -3,7 +3,7 @@
 """
 
 import typer
-from typing_extensions import Annotated
+from typing_extensions import Annotated, Literal
 from typing import List
 from aim.digifeeds.database import models, main
 from aim.digifeeds import functions
@@ -206,3 +206,17 @@ def generate_barcodes_in_hathifiles_report():
     rights-timestamp in the Hathifiles.
     """
     functions.generate_barcodes_in_hathifiles_report()
+
+
+@app.command()
+def prune(
+    location: Annotated[
+        Literal["s3", "filesystem"],
+        typer.Argument(help="The location from which to prune barcodes"),
+    ],
+):
+    rclone_mapping = {
+        "s3": f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_prunable_path}",
+        "filesystem": f"{S.digifeeds_fileserver_rclone_remote}:{S.digifeeds_fileserver_prunable_path}",
+    }
+    functions.prune_processed_barcodes(rclone_path=rclone_mapping[location])
