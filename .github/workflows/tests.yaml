@@ -11,14 +11,17 @@ jobs:
         run: cat env.* > .env
       - name: Load .env file
         uses: xom9ikk/dotenv@v2.3.0
+      - name: Install rclone
+        run: sudo apt install -y rclone
       - name: Install poetry
         run: pipx install poetry
-      - name: Set up Python 3.11
+      - name: Set up Python 3.14
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.14'
           cache: 'poetry'
-      - run: poetry install
+      - name: Install poetry packages
+        run: poetry install
       - name: setup pytest.ini
         run: mv .github/pytest.ini pytest.ini
       - name: Linting
