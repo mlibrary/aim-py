@@ -86,8 +86,14 @@ class Services:
     #: The name of the rclone remote where we put reports about what has been sent to google
     digifeeds_delivery_reports_rclone_remote: str
 
-    #: The name of the rclone remote where we put reports that show what items are in hathitrust
+    #: The name of the rclone remote
     digifeeds_hathifiles_reports_rclone_remote: str
+
+    #: The path to the directory where we put reports about what has been sent to google
+    digifeeds_delivery_reports_path: str
+
+    #: The path to the directory where we put reports that show what items are in hathitrust
+    digifeeds_hathifiles_reports_path: str
 
     # The name of the rclone remote for the fileserver for digifeeds files for DCU
     digifeeds_fileserver_rclone_remote: str
@@ -135,13 +141,19 @@ S = Services(
     or "digifeeds_bucket",
     digifeeds_pickup_rclone_remote=os.getenv("DIGIFEEDS_PICKUP_RCLONE_REMOTE")
     or "digifeeds_pickup",
+    #####
+    digifeeds_hathifiles_reports_rclone_remote=os.getenv(
+        "DIGIFEEDS_HATHIFILES_REPORTS_RCLONE_REMOTE"
+    ),
     digifeeds_delivery_reports_rclone_remote=os.getenv(
         "DIGIFEEDS_DELIVERY_REPORTS_RCLONE_REMOTE"
     )
     or "digifeeds_delivery_reports",
-    digifeeds_hathifiles_reports_rclone_remote=os.getenv(
-        "DIGIFEEDS_HATHIFILES_REPORTS_RCLONE_REMOTE"
-    ),
+    #####
+    digifeeds_delivery_reports_path=os.getenv("DIGIFEEDS_DELIVERY_REPORTS_PATH")
+    or "path/to/delivery/reports",
+    digifeeds_hathifiles_reports_path=os.getenv("DIGIFEEDS_HATHIFILES_REPORTS_PATH")
+    or "path/to/delivery/reports",
     digifeeds_fileserver_rclone_remote=os.getenv("DIGIFEEDS_FILESERVER_RCLONE_REMOTE")
     or "digifeeds_fileserver",
     digifeeds_fileserver_prunable_path=os.getenv("DIGIFEEDS_FILESERVER_PRUNABLE_PATH")

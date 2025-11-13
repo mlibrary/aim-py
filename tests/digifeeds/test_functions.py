@@ -159,7 +159,7 @@ def test_write_and_send_report_to_mayhem(mocker):
     write_and_send_report_to_mayhem(
         content=content,
         base_name="my_cool_report",
-        rclone_remote="my_mayhem_remote",
+        rclone_path="my_mayhem_remote:",
         report_file=tf,
     )
 
