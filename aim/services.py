@@ -59,23 +59,14 @@ class Services:
     #: The Alma API url
     alma_api_url: str
 
-    #: The digifeeds database API URL
-    digifeeds_api_url: str
-
     #: The Alma Set Id for the digifeeds set
     digifeeds_set_id: str
 
-    #: The url in the s3 bucket for the digifeeds process
-    digifeeds_s3_input_path: str
+    #: The digifeeds database API URL
+    digifeeds_api_url: str
 
     #: The zephir item bib api
     zephir_bib_api_url: str
-
-    #: The path in the s3 bucket for processed barcodes
-    digifeeds_s3_processed_path: str
-
-    #: The path in the s3 bucket for processed barcodes of new items that are safe to prune when found in hathifiles
-    digifeeds_s3_prunable_path: str
 
     #: The name of the rclone remote/bucket alias for the s3 input bucket
     digifeeds_s3_rclone_remote: str
@@ -83,14 +74,23 @@ class Services:
     #: The name of the rclone remote for the place where google pickups up the digifeeds files
     digifeeds_pickup_rclone_remote: str
 
-    #: The name of the rclone remote where we put reports about what has been sent to google
-    digifeeds_delivery_reports_rclone_remote: str
-
-    #: The name of the rclone remote where we put reports that show what items are in hathitrust
-    digifeeds_hathifiles_reports_rclone_remote: str
-
     # The name of the rclone remote for the fileserver for digifeeds files for DCU
     digifeeds_fileserver_rclone_remote: str
+
+    #: The url in the s3 bucket for the digifeeds process
+    digifeeds_s3_input_path: str
+
+    #: The path in the s3 bucket for processed barcodes
+    digifeeds_s3_processed_path: str
+
+    #: The path in the s3 bucket for processed barcodes of new items that are safe to prune when found in hathifiles
+    digifeeds_s3_prunable_path: str
+
+    #: The path to the directory where we put reports about what has been sent to google
+    digifeeds_delivery_reports_path: str
+
+    #: The path to the directory where we put reports that show what items are in hathitrust
+    digifeeds_hathifiles_reports_path: str
 
     #: The path to the directory on the fileserver remote for processed barcodes of new items that are safe to prune when found in hathifiles
     digifeeds_fileserver_prunable_path: str
@@ -121,29 +121,26 @@ S = Services(
     test_database="sqlite:///:memory:",
     ci_on=os.getenv("CI"),
     digifeeds_api_url=os.getenv("DIGIFEEDS_API_URL") or "http://api:8000",
-    digifeeds_set_id=os.getenv("DIGIFEEDS_SET_ID") or "digifeeds_set_id",
     alma_api_key=os.getenv("ALMA_API_KEY") or "alma_api_key",
     alma_api_url="https://api-na.hosted.exlibrisgroup.com/almaws/v1",
-    digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
-    or "path/to/input/barcodes",
+    digifeeds_set_id=os.getenv("DIGIFEEDS_SET_ID") or "digifeeds_set_id",
     zephir_bib_api_url="http://zephir.cdlib.org/api/item",
-    digifeeds_s3_processed_path=os.getenv("DIGIFEEDS_S3_PROCESSED_PATH")
-    or "path/to/processed/barcodes",
-    digifeeds_s3_prunable_path=os.getenv("DIGIFEEDS_S3_PRUNABLE_PATH")
-    or "path/to/prunable/barcodes",
     digifeeds_s3_rclone_remote=os.getenv("DIGIFEEDS_S3_RCLONE_REMOTE")
     or "digifeeds_bucket",
     digifeeds_pickup_rclone_remote=os.getenv("DIGIFEEDS_PICKUP_RCLONE_REMOTE")
     or "digifeeds_pickup",
-    digifeeds_delivery_reports_rclone_remote=os.getenv(
-        "DIGIFEEDS_DELIVERY_REPORTS_RCLONE_REMOTE"
-    )
-    or "digifeeds_delivery_reports",
-    digifeeds_hathifiles_reports_rclone_remote=os.getenv(
-        "DIGIFEEDS_HATHIFILES_REPORTS_RCLONE_REMOTE"
-    ),
     digifeeds_fileserver_rclone_remote=os.getenv("DIGIFEEDS_FILESERVER_RCLONE_REMOTE")
     or "digifeeds_fileserver",
+    digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
+    or "path/to/input/barcodes",
+    digifeeds_s3_processed_path=os.getenv("DIGIFEEDS_S3_PROCESSED_PATH")
+    or "path/to/processed/barcodes",
+    digifeeds_s3_prunable_path=os.getenv("DIGIFEEDS_S3_PRUNABLE_PATH")
+    or "path/to/prunable/barcodes",
+    digifeeds_delivery_reports_path=os.getenv("DIGIFEEDS_DELIVERY_REPORTS_PATH")
+    or "path/to/delivery/reports",
+    digifeeds_hathifiles_reports_path=os.getenv("DIGIFEEDS_HATHIFILES_REPORTS_PATH")
+    or "path/to/delivery/reports",
     digifeeds_fileserver_prunable_path=os.getenv("DIGIFEEDS_FILESERVER_PRUNABLE_PATH")
     or "digifeeds/fileserver/prunable/path",
     hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")

@@ -57,7 +57,7 @@ def barcodes_added_in_last_two_weeks():
 def write_and_send_report_to_mayhem(
     content,
     base_name,
-    rclone_remote,
+    rclone_path="",
     report_file=None,
 ):
     if not report_file:
@@ -73,7 +73,7 @@ def write_and_send_report_to_mayhem(
     today = date.today().isoformat()
     rclone.copyto(
         in_path=report_file.name,
-        out_path=f"{rclone_remote}:{today}_{base_name}.txt",
+        out_path=f"{rclone_path}/{today}_{base_name}.txt",
     )
 
 
@@ -82,7 +82,7 @@ def generate_barcodes_added_in_last_two_weeks_report():
     write_and_send_report_to_mayhem(
         content=content,
         base_name="barcodes_in_s3_processed",
-        rclone_remote=S.digifeeds_delivery_reports_rclone_remote,
+        rclone_path=f"{S.digifeeds_fileserver_rclone_remote}:{S.digifeeds_delivery_reports_path}",
     )
 
 
@@ -109,7 +109,7 @@ def generate_barcodes_in_hathifiles_report():
     write_and_send_report_to_mayhem(
         content=content,
         base_name="barcodes_in_hathifiles",
-        rclone_remote=S.digifeeds_hathifiles_reports_rclone_remote,
+        rclone_path=f"{S.digifeeds_fileserver_rclone_remote}:{S.digifeeds_hathifiles_reports_path}",
     )
 
 
