@@ -81,7 +81,7 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   bats \
   bats-assert \
   bats-file\
-  wget\
+  wget
 
 RUN wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash && \
   chown ${UID}:${GID} /opt/shellmock.bash
