@@ -221,7 +221,7 @@ def process_item(item: Item) -> Item:
             message="Item NOT added to digifeeds set",
             barcode=barcode,
         )
-        raise NotAddedToDigifeedsSetError()
+        return add_to_set_item
 
     check_zephir_item = add_to_set_item.check_zephir()
     if check_zephir_item:

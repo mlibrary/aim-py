@@ -7,7 +7,6 @@ from aim.digifeeds.item import (
     process_item,
     rclone,
     DBClient,
-    NotAddedToDigifeedsSetError,
 )
 from requests.exceptions import HTTPError
 from aim.services import S
@@ -321,10 +320,9 @@ def test_process_item_not_added_to_digifeeds_set_and_not_found_in_alma(
     item_mock.add_to_digifeeds_set.return_value = item
 
     item_mock.has_status.return_value = False
-
-    with pytest.raises(Exception) as exc_info:
-        process_item(item_mock)
-    assert exc_info.type is NotAddedToDigifeedsSetError
+    result = process_item(item_mock)
+    # returns exits after trying to add the item to the alma set
+    assert result == item
 
 
 def test_process_item_not_in_zephir_long_enough(item_in_zephir_too_recent):
