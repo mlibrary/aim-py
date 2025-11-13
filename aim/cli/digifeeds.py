@@ -215,6 +215,11 @@ def prune(
         typer.Argument(help="The location from which to prune barcodes"),
     ],
 ):
+    """
+    Deletes zips and folders of images in paths of images that have been newly
+    sent through digifeeds and have now been found in the hathifiles. The
+    filesystem is Mayhem.
+    """
     rclone_mapping = {
         "s3": f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_prunable_path}",
         "filesystem": f"{S.digifeeds_fileserver_rclone_remote}:{S.digifeeds_fileserver_prunable_path}",
