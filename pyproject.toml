@@ -10,7 +10,7 @@ packages = [{include = "aim"}]
 aim = "aim.cli.main:app"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.14"
 requests = "^2.31.0"
 sqlalchemy = "^2.0.44"
 mysqlclient = "^2.2.4"

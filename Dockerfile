@@ -9,10 +9,10 @@
 # wheel packages, which are both needed for installing applications like Pandas and Numpy.
 
 # The base layer will contain the dependencies shared by the other layers
-FROM python:3.11-slim-bookworm AS base
+FROM python:3.14-slim-bookworm AS base
 
 # Allowing the argumenets to be read into the dockerfile. Ex:  .env > compose.yml > Dockerfile
-ARG POETRY_VERSION=1.8.3
+ARG POETRY_VERSION=2.2.1
 ARG UID=1000
 ARG GID=1000
 
@@ -29,8 +29,13 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   build-essential \ 
   pkg-config \
   default-mysql-client \
-  rclone\
-  vim-tiny
+  vim-tiny \
+  curl \ 
+  zip \
+  unzip
+
+#get latest rclone because the apt version can't delete files on cifs
+RUN curl https://rclone.org/install.sh | bash
 
 # Set the working directory to /app
 WORKDIR /app
@@ -63,6 +68,9 @@ FROM poetry AS build
 # Just copy the files needed to install the dependencies
 COPY pyproject.toml poetry.lock README.md ./
 
+# Need to be able to export poetry
+RUN poetry self add poetry-plugin-export
+
 #Use poetry to create a requirements.txt file. Dont include development dependencies
 RUN poetry export --without dev -f requirements.txt --output requirements.txt
 
@@ -73,9 +81,7 @@ RUN apt-get update -yqq && apt-get install -yqq --no-install-recommends \
   bats \
   bats-assert \
   bats-file\
-  wget\
-  zip\
-  unzip
+  wget
 
 RUN wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash && \
   chown ${UID}:${GID} /opt/shellmock.bash

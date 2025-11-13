@@ -10,6 +10,7 @@ from aim.digifeeds.functions import (
     list_barcodes_in_input_bucket,
     list_barcodes_potentially_in_hathifiles,
     barcodes_in_hathifiles_in_last_two_weeks,
+    barcode_from_name,
 )
 from aim.services import S
 import responses
@@ -194,3 +195,11 @@ def test_barcodes_in_hathifiles_in_last_two_weeks(item_list):
             "https://babel.hathitrust.org/cgi/pt?id=mdp.some_barcode",
         ]
     ]
+
+
+def test_barcode_from_name_handles_directory_style_name():
+    assert (barcode_from_name("2025-10-11_02-30-02_39barcode1")) == "39barcode1"
+
+
+def test_barcode_from_name_handles_zip():
+    assert (barcode_from_name("2025-10-11_02-30-02_39barcode1.zip")) == "39barcode1"

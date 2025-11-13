@@ -1,4 +1,3 @@
-# from typing import NamedTuple
 from dataclasses import dataclass
 import os
 import sqlalchemy as sa
@@ -71,8 +70,12 @@ class Services:
 
     #: The zephir item bib api
     zephir_bib_api_url: str
-    #: The url in the s3 bucket for processed barcodes
+
+    #: The path in the s3 bucket for processed barcodes
     digifeeds_s3_processed_path: str
+
+    #: The path in the s3 bucket for processed barcodes of new items that are safe to prune when found in hathifiles
+    digifeeds_s3_prunable_path: str
 
     #: The name of the rclone remote/bucket alias for the s3 input bucket
     digifeeds_s3_rclone_remote: str
@@ -85,6 +88,12 @@ class Services:
 
     #: The name of the rclone remote where we put reports that show what items are in hathitrust
     digifeeds_hathifiles_reports_rclone_remote: str
+
+    # The name of the rclone remote for the fileserver for digifeeds files for DCU
+    digifeeds_fileserver_rclone_remote: str
+
+    #: The path to the directory on the fileserver remote for processed barcodes of new items that are safe to prune when found in hathifiles
+    digifeeds_fileserver_prunable_path: str
 
     #: file path to store of the hathi_file_list update items
     hathifiles_store_path: str
@@ -116,10 +125,12 @@ S = Services(
     alma_api_key=os.getenv("ALMA_API_KEY") or "alma_api_key",
     alma_api_url="https://api-na.hosted.exlibrisgroup.com/almaws/v1",
     digifeeds_s3_input_path=os.getenv("DIGIFEEDS_S3_INPUT_PATH")
-    or "path_to_input_barcodes",
+    or "path/to/input/barcodes",
     zephir_bib_api_url="http://zephir.cdlib.org/api/item",
     digifeeds_s3_processed_path=os.getenv("DIGIFEEDS_S3_PROCESSED_PATH")
-    or "path_to_processed_barcodes",
+    or "path/to/processed/barcodes",
+    digifeeds_s3_prunable_path=os.getenv("DIGIFEEDS_S3_PRUNABLE_PATH")
+    or "path/to/prunable/barcodes",
     digifeeds_s3_rclone_remote=os.getenv("DIGIFEEDS_S3_RCLONE_REMOTE")
     or "digifeeds_bucket",
     digifeeds_pickup_rclone_remote=os.getenv("DIGIFEEDS_PICKUP_RCLONE_REMOTE")
@@ -130,8 +141,11 @@ S = Services(
     or "digifeeds_delivery_reports",
     digifeeds_hathifiles_reports_rclone_remote=os.getenv(
         "DIGIFEEDS_HATHIFILES_REPORTS_RCLONE_REMOTE"
-    )
-    or "digifeeds_hathifiles_reports",
+    ),
+    digifeeds_fileserver_rclone_remote=os.getenv("DIGIFEEDS_FILESERVER_RCLONE_REMOTE")
+    or "digifeeds_fileserver",
+    digifeeds_fileserver_prunable_path=os.getenv("DIGIFEEDS_FILESERVER_PRUNABLE_PATH")
+    or "digifeeds/fileserver/prunable/path",
     hathifiles_store_path=os.getenv("HATHIFILES_STORE_PATH")
     or "tmp/hathi_file_list_store.json",
     hathifiles_webhook_url=os.getenv("HATHIFILES_WEBHOOK_URL")
