@@ -5,6 +5,7 @@ This hooks up the AIM CLI application. Nothing exciting happening here.
 """
 
 import typer
+import json
 from aim.services import S
 
 
@@ -13,6 +14,20 @@ def should_load(app_name: str):
 
 
 app = typer.Typer()
+
+
+@app.command()
+def get_services():
+    """
+    Show the keys and values of everything in the Services object
+    """
+    result = {}
+    keys = S.__dict__.keys()
+    for key in keys:
+        result[key] = str(S.__dict__[key])
+    print(json.dumps(result, indent=4))
+
+
 if should_load("digifeeds"):
     import aim.cli.digifeeds as digifeeds
 
