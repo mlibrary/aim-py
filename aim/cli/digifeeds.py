@@ -224,4 +224,6 @@ def prune(
         "s3": f"{S.digifeeds_s3_rclone_remote}:{S.digifeeds_s3_prunable_path}",
         "fileserver": f"{S.digifeeds_fileserver_rclone_remote}:{S.digifeeds_fileserver_prunable_path}",
     }
-    functions.prune_processed_barcodes(rclone_path=rclone_mapping[location])
+    functions.prune_processed_barcodes(
+        rclone_path=rclone_mapping[location], location=location
+    )

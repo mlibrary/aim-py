@@ -56,9 +56,14 @@ def test_prune_processed_barcodes_deletes_items_in(test_dir, item_in_hathifiles)
 
     barcode1 = item_in_hathifiles("39barcode1")
     responses.get(f"{S.digifeeds_api_url}/items/39barcode1", json=barcode1)
+    add_item_status = responses.put(
+        f"{S.digifeeds_api_url}/items/39barcode1/status/pruned_from_fileserver",
+        json=barcode1,
+    )
 
-    prune_processed_barcodes(rclone_path="test_fileserver:")
+    prune_processed_barcodes(rclone_path="test_fileserver:", location="fileserver")
     assert len(list(test_dir.iterdir())) == 0
+    assert add_item_status.call_count == 1
 
 
 @responses.activate
@@ -69,5 +74,10 @@ def test_prune_processed_barcodes_leaves_items_not_in_hathi_trust(test_dir, item
 
     item["barcode"] = "39barcode1"
     responses.get(f"{S.digifeeds_api_url}/items/39barcode1", json=item)
-    prune_processed_barcodes(rclone_path="test_fileserver:")
+    add_item_status = responses.put(
+        f"{S.digifeeds_api_url}/items/39barcode1/status/pruned_from_fileserver",
+        json=item,
+    )
+    prune_processed_barcodes(rclone_path="test_fileserver:", location="fileserver")
     assert len(list(test_dir.iterdir())) == 2
+    assert add_item_status.call_count == 0
