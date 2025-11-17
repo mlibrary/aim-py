@@ -13,7 +13,7 @@ def test_dir(tmp_path):
     test_path.mkdir()
     rclone_config_path.write_text(
         f"""
-[test_filesystem]
+[test_fileserver]
 type = alias
 remote = {test_path} 
 """,
@@ -57,7 +57,7 @@ def test_prune_processed_barcodes_deletes_items_in(test_dir, item_in_hathifiles)
     barcode1 = item_in_hathifiles("39barcode1")
     responses.get(f"{S.digifeeds_api_url}/items/39barcode1", json=barcode1)
 
-    prune_processed_barcodes(rclone_path="test_filesystem:")
+    prune_processed_barcodes(rclone_path="test_fileserver:")
     assert len(list(test_dir.iterdir())) == 0
 
 
@@ -69,5 +69,5 @@ def test_prune_processed_barcodes_leaves_items_not_in_hathi_trust(test_dir, item
 
     item["barcode"] = "39barcode1"
     responses.get(f"{S.digifeeds_api_url}/items/39barcode1", json=item)
-    prune_processed_barcodes(rclone_path="test_filesystem:")
+    prune_processed_barcodes(rclone_path="test_fileserver:")
     assert len(list(test_dir.iterdir())) == 2
