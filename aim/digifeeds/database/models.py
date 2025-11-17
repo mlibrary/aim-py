@@ -82,6 +82,14 @@ def load_statuses(session: Session):
             "name": "in_hathifiles",
             "description": "Barcode was found in the Hathifiles Database",
         },
+        {
+            "name": "pruned_from_fileserver",
+            "description": "Image zips and folders have been pruned from the fileserver",
+        },
+        {
+            "name": "pruned_from_s3",
+            "description": "Image zips have been pruned from the s3 bucket",
+        },
     ]
     objects = []
     for status in statuses:

@@ -135,6 +135,10 @@ class Item:
                 barcode=self.barcode,
             )
 
+    def add_status(self, barcode: str, status: str):
+        db_resp = DBClient().add_item_status(barcode=barcode, status=status)
+        return Item(db_resp)
+
     @property
     def barcode(self) -> str:
         """The barcode of the Digifeeds item.
