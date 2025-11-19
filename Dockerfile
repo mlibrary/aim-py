@@ -64,6 +64,8 @@ ENV PYTHONUNBUFFERED=1\
   POETRY_VIRTUALENVS_IN_PROJECT=1 \
   POETRY_CACHE_DIR=/tmp/poetry_cache
 
+RUN poetry self add poetry-plugin-shell
+
 FROM poetry AS build
 # Just copy the files needed to install the dependencies
 COPY pyproject.toml poetry.lock README.md ./

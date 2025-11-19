@@ -117,13 +117,17 @@ docker compose run --rm app poetry run aim digifeeds --help
 
 This will show the commands available for the digifeeds cli applciation.
 
-### Rclone
+#### Rclone
 
 This applicaiton uses [Rclone](https://rclone.org/) to work with remote storage. It uses the [rclone-python](https://pypi.org/project/rclone-python/) for working with rclone in python.  
 
 To configure new remotes for use with the application use environment variables. The names of the environment variables are on the documentation page for a given remote. We use environment variables because it so all of the configuration happens in `.env` instead of in multiple places.
 
 If you want to quickly add a remote to try something out, you can use `rclone configure` in the container terminal. The config file is ignored.
+
+### Hathifiles
+
+Hathifiles code is in the `aim/hathifiles` folder. The actual `database` updating and creation code is done in the [mlibrary/aim](https://github.com/mlibrary/aim) repository. The code here handles polling for when the new Hathifiles are available, and provide a REST API on top of the database. There's a cli that's set up like the one for `digifeeds`.
 
 ## Tests
 
