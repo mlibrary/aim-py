@@ -25,7 +25,7 @@ extensions = [
 autosummary_generate = True
 
 mermaid_d3_zoom = True
-mermaid_version = "11.3.0"
+mermaid_version = "11.12.0"
 myst_fence_as_directive = ["mermaid"]
 
 templates_path = ["_templates"]
