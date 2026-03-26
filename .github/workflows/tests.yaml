@@ -1,22 +1,20 @@
 name: Run Tests
-
 on: push
-
 jobs:
   test-python:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Create .env file
         run: cat env.* > .env
       - name: Load .env file
-        uses: xom9ikk/dotenv@v2.3.0
+        uses: xom9ikk/dotenv@ac290ca23a42155a0cba1031d23afa46240116a9 # v2.3.0
       - name: Install rclone
         run: sudo apt install -y rclone
       - name: Install poetry
         run: pipx install poetry
       - name: Set up Python 3.14
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: '3.14'
           cache: 'poetry'
@@ -29,22 +27,21 @@ jobs:
       - name: Run tests
         env:
           CI: "true"
-        run: poetry run pytest 
-
+        run: poetry run pytest
   test-bash:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - name: Setup Bats and bats libs
         id: setup-bats
-        uses: bats-core/bats-action@3.0.1
+        uses: bats-core/bats-action@77d6fb60505b4d0d1d73e48bd035b55074bbfb43 # 4.0.0
       - name: Setup Shell Mock
-        run: wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash 
+        run: wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash
       - run: ls /opt
       - name: Run tests
         shell: bash
         env:
-         BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
-         SHELLMOCK_PATH: /opt/shellmock.bash
-         TERM: xterm
+          BATS_LIB_PATH: ${{ steps.setup-bats.outputs.lib-path }}
+          SHELLMOCK_PATH: /opt/shellmock.bash
+          TERM: xterm
         run: bats ./bin/**/*_test.sh
