@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v6
       - name: Setup Bats and bats libs
         id: setup-bats
-        uses: bats-core/bats-action@3.0.1
+        uses: bats-core/bats-action@4.0.0
       - name: Setup Shell Mock
         run: wget -P /opt/ https://github.com/boschresearch/shellmock/releases/download/0.9.1/shellmock.bash 
       - run: ls /opt
