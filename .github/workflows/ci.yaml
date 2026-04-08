@@ -1,5 +1,9 @@
-name: Run Tests
-on: push
+name: Continuous integration
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
 jobs:
   test-python:
     runs-on: ubuntu-latest
@@ -45,3 +49,21 @@ jobs:
           SHELLMOCK_PATH: /opt/shellmock.bash
           TERM: xterm
         run: bats ./bin/**/*_test.sh
+  dependabot:
+    name: 'Dependabot'
+    needs: [test-python, test-bash]
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' && github.event_name == 'pull_request'}}
+    steps:
+      - name: Fetch Dependabot Metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@ffa630c65fa7e0ecfa0625b5ceda64399aea1b36 # v3.0.0
+        with:
+          github-token: '${{ secrets.GITHUB_TOKEN }}'
+      - name: Enable auto-merge for Dependabot PRs
+        # Don't do this for the container-updates group
+        if: ${{ steps.dependabot-metadata.outputs.dependency-group != 'container-updates' }}
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
