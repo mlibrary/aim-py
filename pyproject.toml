@@ -14,7 +14,7 @@ python = "^3.14"
 requests = "^2.34.2"
 sqlalchemy = "^2.0.50"
 mysqlclient = "^2.2.8"
-fastapi = {extras = ["standard"], version = "^0.136.3"}
+fastapi = {extras = ["standard"], version = "^0.137.0"}
 httpx = "^0.28.1"
 alembic = "^1.18.4"
 typer = "^0.26.7"
@@ -23,9 +23,9 @@ structlog = "^26.1.0"
 
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^9.0.3"
+pytest = "^9.1.0"
 pytest-cov = "^7.1.0"
-ruff = "^0.15.16"
+ruff = "^0.15.17"
 responses = "^0.26.1"
 pytest-socket = "^0.8.0"
 pytest-mock = "^3.15.1"
