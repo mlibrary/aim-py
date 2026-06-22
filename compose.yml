@@ -1,3 +1,10 @@
+x-condition-healthy: &healthy
+  condition: service_healthy
+x-healthcheck-defaults: &healthcheck-defaults
+  interval: 30s
+  timeout: 10s
+  start_period: 30s
+  retries: 5
 services:
   app:
     build:
@@ -11,6 +18,9 @@ services:
     env_file:
       - env.development
       - .env
+    depends_on:
+      database: *healthy
+      hathifiles-db: *healthy
     volumes:
       - .:/app
     tty: true
@@ -19,6 +29,9 @@ services:
     image: mariadb
     volumes:
       - database:/var/lib/mysql
+    healthcheck:
+      !!merge <<: *healthcheck-defaults
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
     ports:
       - 3306:3306
     environment:
@@ -58,6 +71,8 @@ services:
         POETRY_VERSION: ${POETRY_VERSION:-1.8.3}
     ports:
       - 8001:8000
+    depends_on:
+      hathifiles-db: *healthy
     env_file:
       - env.development
       - .env
@@ -88,6 +103,9 @@ services:
     command: ["poetry", "run", "sphinx-autobuild", "--watch", "aim", "--port", "8888", "--host", "0.0.0.0", "--pre-build", "/app/prebuild.sh", "docs", "docs/_build/html"]
   hathifiles-db:
     image: mariadb
+    healthcheck:
+      !!merge <<: *healthcheck-defaults
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
     volumes:
       - hathifiles:/var/lib/mysql
       - ./hathifiles/umich_small.sql:/docker-entrypoint-initdb.d/umich_small.sql
