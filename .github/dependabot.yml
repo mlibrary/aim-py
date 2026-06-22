@@ -11,13 +11,8 @@ multi-ecosystem-groups:
     commit-message:
       prefix: "update-dependencies: "
     open-pull-requests-limit: 5
-  container-updates:
-    schedule:
-      interval: "cron"
-      cronjob: "0 6 3 1 *" #January 3 at 6AM
-      timezone: "America/Detroit"
-    commit-message:
-      prefix: "Annual container update: "
+    cooldown:
+      default-days: 7
 updates:
   # For GitHub Actions updates
   - package-ecosystem: "github-actions"
@@ -32,10 +27,10 @@ updates:
   # For Docker
   - package-ecosystem: "docker"
     directory: "/"
-    multi-ecosystem-group: "container-updates"
+    multi-ecosystem-group: "app-dependencies"
     patterns: ["*"]
   # For Docker Compose
   - package-ecosystem: "docker-compose"
     directory: "/"
-    multi-ecosystem-group: "container-updates"
+    multi-ecosystem-group: "app-dependencies"
     patterns: ["*"]
