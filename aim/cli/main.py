@@ -5,6 +5,7 @@ This hooks up the AIM CLI application. Nothing exciting happening here.
 """
 
 import typer
+from typing_extensions import Annotated
 import json
 from aim.services import S
 
@@ -46,6 +47,31 @@ if should_load("hathifiles"):
         name="hathifiles",
         help="Commands related to the hathifiles database",
     )
+
+if should_load("google_picklist"):
+    from aim.google_picklist import enricher
+
+    @app.command()
+    def process_google_picklist(
+        input_path: Annotated[
+            str,
+            typer.Option(
+                "-i",
+                help="The path to the input picklist file",
+            ),
+        ] = S.google_picklist_input_file_path,
+        output_path: Annotated[
+            str,
+            typer.Option(
+                "-o",
+                help="The path to the enriched picklist file",
+            ),
+        ] = S.google_picklist_output_file_path,
+    ):
+        """
+        Takes in a google picklist and adds extra info about each item from alma
+        """
+        enricher.main(input_path=input_path, output_path=output_path)
 
 
 if __name__ == "__main__":  # pragma: no cover
