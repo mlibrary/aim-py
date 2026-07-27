@@ -107,6 +107,12 @@ class Services:
     #: The Hathifiles API URL
     hathifiles_api_url: str
 
+    #: Path to input picklist file
+    google_picklist_input_file_path: str
+
+    #: Path to output picklist file
+    google_picklist_output_file_path: str
+
 
 S = Services(
     app_name=os.getenv("APP_NAME") or "aim",
@@ -155,4 +161,8 @@ S = Services(
         database=os.getenv("HATHIFILES_DB_DATABASE") or "database",
     ),
     hathifiles_api_url=os.getenv("HATHIFILES_API_URL") or "http://hathifiles-api:8000",
+    google_picklist_input_file_path=os.getenv("GOOGLE_PICKLIST_INPUT_FILE_PATH")
+    or "tmp/google_picklist_input.txt",
+    google_picklist_output_file_path=os.getenv("GOOGLE_PICKLIST_OUTPUT_FILE_PATH")
+    or "tmp/google_picklist_output.txt",
 )
