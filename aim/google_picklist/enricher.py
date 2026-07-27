@@ -1,57 +1,105 @@
-import requests
-from urllib3.util import Retry
+from aim.google_picklist.alma_client import AlmaClient
 from aim.services import S
-import xml.etree.ElementTree as ET
+from functools import reduce
+import re
 
 
-class AlmaClient:
-    def __init__(self) -> None:
-        self.session = requests.Session()
-        self.session.headers.update(
-            {
-                "content": "application/json",
-                "Accept": "application/json",
-                "Authorization": f"apikey {S.alma_api_key}",
-            }
-        )
-        retries = Retry(
-            total=5,
-            backoff_factor=0.1,
-            status_forcelist=[502, 503, 504],
-            allowed_methods={"GET"},
-        )
-        self.session.mount(
-            "https://", requests.adapters.HTTPAdapter(max_retries=retries)
-        )
-        self.base_url = S.alma_api_url
+def main(
+    input_path=S.google_picklist_input_file_path,
+    output_path=S.google_picklist_output_file_path,
+):
+    with open(input_path) as in_file:
+        with open(output_path, "w") as out_file:
+            for line in in_file:
+                parts = line.strip().split("\t")
+                barcode = parts[12]
+                row = barcode_to_row(barcode)
+                out_file.write(row)
 
-    def get_barcode(self, barcode):
-        url = f"{self.base_url}/items"
-        query = {"item_barcode": barcode}
-        try:
-            response = self.session.get(url, params=query)
-            response.raise_for_status()
-            return response.json()
 
-        except requests.exceptions.HTTPError:
-            if response.headers["Content-Type"].startswith("application/json"):
-                code = response.json()["errorList"]["error"][0]["errorCode"]
-                if code == "401689":
-                    return {"not_found": True}
-                    S.logger.error(f"Barcode not found: {barcode}")
-                else:
-                    S.logger.error(f"Error code: {code} for barcode: {barcode}")
-            else:
-                error = self.parse_error(response.text)
-                S.logger.error(
-                    f"Error code: {error['code'].text}; Error message: {error['message'].text}; for barcode: {barcode}"
+def barcode_to_row(barcode):
+    response = AlmaClient().get_barcode(barcode)
+    if "not_found" in response:
+        return f"barcode not found: {barcode}\n"
+    else:
+        return AlmaItem(response).row()
+
+
+class AlmaItem:
+    def __init__(self, data):
+        self.data = data
+
+    @property
+    def mms_id(self):
+        return self.safe_get("bib_data", "mms_id")
+
+    @property
+    def title(self):
+        return self.safe_get("bib_data", "title")
+
+    @property
+    def library_code(self):
+        return self.safe_get("item_data", "library", "value")
+
+    @property
+    def location_code(self):
+        return self.safe_get("item_data", "location", "value")
+
+    @property
+    def barcode(self):
+        return self.safe_get("item_data", "barcode")
+
+    @property
+    def call_number(self):
+        return self.safe_get("holding_data", "call_number")
+
+    @property
+    def description(self):
+        return self.safe_get("item_data", "description")
+
+    @property
+    def inventory_number(self):
+        return self.safe_get("item_data", "inventory_number")
+
+    @property
+    def base_status(self):
+        return self.safe_get("item_data", "base_status", "desc")
+
+    @property
+    def work_order_type(self):
+        return self.safe_get("item_data", "work_order_type", "value")
+
+    @property
+    def htid(self):
+        alternative_call_number = self.safe_get("item_data", "alternative_call_number")
+        split_callnumber = re.split(r"\s", alternative_call_number)
+        return split_callnumber[0]
+
+    def row(self):
+        return (
+            "\t".join(
+                (
+                    self.mms_id,
+                    self.title,
+                    self.library_code,
+                    self.location_code,
+                    self.barcode,
+                    self.htid,
+                    self.call_number,
+                    self.description,
+                    self.inventory_number,
+                    self.base_status,
+                    self.work_order_type,
                 )
+            )
+            + "\n"
+        )
 
-    def parse_error(self, error_string):
-        ns = {"alma": "http://com/exlibris/urm/general/xmlbeans"}
-        root = ET.fromstring(error_string)
-        result = {}
-        for error in root.findall(".//alma:error", ns):
-            result["code"] = error.find("alma:errorCode", ns)
-            result["message"] = error.find("alma:errorMessage", ns)
-        return result
+    def safe_get(self, *keys):
+        return (
+            reduce(lambda val, key: val.get(key) if val else "", keys, self.data) or ""
+        )
+
+
+def ht_id(item_status):
+    return "htid"
