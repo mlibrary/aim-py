@@ -8,13 +8,26 @@ def main(
     input_path=S.google_picklist_input_file_path,
     output_path=S.google_picklist_output_file_path,
 ):
+    line_number = 0
+    S.logger.info("Start processing picklist")
     with open(input_path) as in_file:
         with open(output_path, "w") as out_file:
             for line in in_file:
+                line_number = line_number + 1
                 parts = line.strip().split("\t")
                 barcode = parts[12]
                 row = barcode_to_row(barcode)
                 out_file.write(row)
+                log_batch(line_number)
+    S.logger.info(f"Processed {line_number} lines total")
+    S.logger.info("Finish processing picklist")
+
+
+def log_batch(number):
+    batch = 100
+
+    if number % batch == 0:
+        S.logger.info(f"Processed {number} lines")
 
 
 def barcode_to_row(barcode):
