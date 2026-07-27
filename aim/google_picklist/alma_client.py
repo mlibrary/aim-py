@@ -16,8 +16,9 @@ class AlmaClient:
         )
         retries = Retry(
             total=4,
-            backoff_factor=0.1,
-            status_forcelist=[500, 502, 503, 504],
+            backoff_factor=5,
+            backoff_jitter=5,
+            status_forcelist=[429, 500, 502, 503, 504],
             allowed_methods={"GET"},
         )
         self.session.mount(
