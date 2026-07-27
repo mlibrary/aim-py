@@ -1,0 +1,141 @@
+{
+  "bib_data": {
+    "title": "Briefe, 1913-1959 /",
+    "author": "Grosz, George,",
+    "isbn": "0349804281",
+    "mms_id": "990000961520106381",
+    "bib_suppress_from_publishing": "false",
+    "complete_edition": "1. Aufl.",
+    "network_number": [
+      "(OCoLC)ocm06043892",
+      "(CaOTULAS)160069648",
+      "(RLIN)MIUG6043892-B",
+      "(MiU)000096152MIU01"
+    ],
+    "place_of_publication": "Reinbek bei Hamburg :",
+    "date_of_publication": "1979.",
+    "publisher_const": "Rowohlt",
+    "link": "https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/990000961520106381"
+  },
+  "holding_data": {
+    "holding_id": "22777218530006381",
+    "holding_suppress_from_publishing": "false",
+    "calculated_suppress_from_publishing": "false",
+    "permanent_call_number_type": {
+      "value": "0",
+      "desc": "Library of Congress classification"
+    },
+    "permanent_call_number": "N6888.G88 A35",
+    "call_number_type": {
+      "value": "0",
+      "desc": "Library of Congress classification"
+    },
+    "call_number": "N6888.G88 A35",
+    "accession_number": "",
+    "copy_id": "",
+    "in_temp_location": true,
+    "temp_library": {
+      "value": "RES_SHARE",
+      "desc": "Resource Sharing Library"
+    },
+    "temp_location": {
+      "value": "IN_RS_REQ",
+      "desc": "Lending Resource Sharing Requests"
+    },
+    "temp_call_number_type": {
+      "value": ""
+    },
+    "temp_call_number": "",
+    "temp_call_number_source": "",
+    "temp_policy": {
+      "value": "08",
+      "desc": "No Loan"
+    },
+    "due_back_date": "2026-05-27Z",
+    "link": "https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/990000961520106381/holdings/22777218530006381"
+  },
+  "item_data": {
+    "pid": "23777218520006381",
+    "barcode": "39015005144582",
+    "policy": {
+      "value": ""
+    },
+    "provenance": {
+      "value": ""
+    },
+    "description": "",
+    "library": {
+      "value": "HATCH",
+      "desc": "Hatcher Graduate"
+    },
+    "location": {
+      "value": "GRAD",
+      "desc": "GRAD"
+    },
+    "pages": "",
+    "pieces": "",
+    "requested": false,
+    "creation_date": "1989-09-20Z",
+    "modification_date": "2026-01-28Z",
+    "base_status": {
+      "value": "0",
+      "desc": "Item not in place"
+    },
+    "awaiting_reshelving": false,
+    "physical_material_type": {
+      "value": "BOOK",
+      "desc": "Book"
+    },
+    "po_line": "",
+    "arrival_date": "1989-09-21Z",
+    "year_of_issue": "",
+    "enumeration_a": "",
+    "enumeration_b": "",
+    "enumeration_c": "",
+    "enumeration_d": "",
+    "enumeration_e": "",
+    "enumeration_f": "",
+    "enumeration_g": "",
+    "enumeration_h": "",
+    "chronology_i": "",
+    "chronology_j": "",
+    "chronology_k": "",
+    "chronology_l": "",
+    "chronology_m": "",
+    "break_indicator": {
+      "value": ""
+    },
+    "pattern_type": {
+      "value": ""
+    },
+    "linking_number": "",
+    "type_of_unit": "",
+    "receiving_operator": "import",
+    "process_type": {
+      "value": "ILL",
+      "desc": "Resource Sharing Request"
+    },
+    "inventory_number": "",
+    "inventory_price": "",
+    "alternative_call_number": "",
+    "alternative_call_number_type": {
+      "value": ""
+    },
+    "storage_location_id": "",
+    "public_note": "",
+    "fulfillment_note": "",
+    "internal_note_1": "",
+    "internal_note_2": "",
+    "internal_note_3": "",
+    "statistics_note_1": "",
+    "statistics_note_2": "",
+    "statistics_note_3": "Maintenance count: 002",
+    "physical_condition": {},
+    "committed_to_retain": {},
+    "retention_reason": {
+      "value": ""
+    },
+    "retention_note": ""
+  },
+  "link": "https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/990000961520106381/holdings/22777218530006381/items/23777218520006381"
+}

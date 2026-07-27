@@ -1,0 +1,140 @@
+{
+  "bib_data": {
+    "title": "Opera musica /",
+    "author": "Wilhelmi de Grudencz, Petrus,",
+    "isbn": "8322430736",
+    "mms_id": "990040063470106381",
+    "bib_suppress_from_publishing": "false",
+    "complete_edition": "Wyd. 1.",
+    "network_number": [
+      "(OCoLC)ocm39819963",
+      "(III)iiio31544307",
+      "(RLIN)MIUG99-C817",
+      "(MiU)004006347MIU01"
+    ],
+    "place_of_publication": "Krak\\u00f3w :",
+    "date_of_publication": "1993.",
+    "publisher_const": "Polskie Wydawn Muzyczne",
+    "link": "https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/990040063470106381"
+  },
+  "holding_data": {
+    "holding_id": "22975380140006381",
+    "holding_suppress_from_publishing": "false",
+    "calculated_suppress_from_publishing": "false",
+    "permanent_call_number_type": {
+      "value": "0",
+      "desc": "Library of Congress classification"
+    },
+    "permanent_call_number": "M 3 .P52 1993",
+    "call_number_type": {
+      "value": "0",
+      "desc": "Library of Congress classification"
+    },
+    "call_number": "M 3 .P52 1993",
+    "accession_number": "",
+    "copy_id": "",
+    "in_temp_location": false,
+    "temp_library": {
+      "value": "RES_SHARE",
+      "desc": "Resource Sharing Library"
+    },
+    "temp_location": {
+      "value": "IN_RS_REQ",
+      "desc": "Lending Resource Sharing Requests"
+    },
+    "temp_call_number_type": {
+      "value": ""
+    },
+    "temp_call_number": "",
+    "temp_call_number_source": "",
+    "temp_policy": {
+      "value": "08",
+      "desc": "No Loan"
+    },
+    "link": "https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/990040063470106381/holdings/22975380140006381"
+  },
+  "item_data": {
+    "pid": "23975380130006381",
+    "barcode": "39015040218748",
+    "policy": {
+      "value": "08",
+      "desc": "No Loan"
+    },
+    "provenance": {
+      "value": ""
+    },
+    "description": "",
+    "library": {
+      "value": "MUSIC",
+      "desc": "Music"
+    },
+    "location": {
+      "value": "MAIN",
+      "desc": "Main Collection"
+    },
+    "pages": "",
+    "pieces": "",
+    "requested": false,
+    "creation_date": "1998-12-15Z",
+    "modification_date": "2024-10-14Z",
+    "base_status": {
+      "value": "1",
+      "desc": "Item in place"
+    },
+    "awaiting_reshelving": false,
+    "physical_material_type": {
+      "value": "SCORE",
+      "desc": "Music Score"
+    },
+    "po_line": "",
+    "arrival_date": "1998-12-16Z",
+    "year_of_issue": "",
+    "enumeration_a": "",
+    "enumeration_b": "",
+    "enumeration_c": "",
+    "enumeration_d": "",
+    "enumeration_e": "",
+    "enumeration_f": "",
+    "enumeration_g": "",
+    "enumeration_h": "",
+    "chronology_i": "",
+    "chronology_j": "",
+    "chronology_k": "",
+    "chronology_l": "",
+    "chronology_m": "",
+    "break_indicator": {
+      "value": ""
+    },
+    "pattern_type": {
+      "value": ""
+    },
+    "linking_number": "",
+    "type_of_unit": "",
+    "receiving_operator": "import",
+    "process_type": {
+      "value": ""
+    },
+    "inventory_number": "",
+    "inventory_price": "",
+    "alternative_call_number": "mdp.39015040218748 ic 20201202",
+    "alternative_call_number_type": {
+      "value": "M"
+    },
+    "storage_location_id": "",
+    "public_note": "",
+    "fulfillment_note": "",
+    "internal_note_1": "",
+    "internal_note_2": "",
+    "internal_note_3": "",
+    "statistics_note_1": "MD20100430",
+    "statistics_note_2": "",
+    "statistics_note_3": "",
+    "physical_condition": {},
+    "committed_to_retain": {},
+    "retention_reason": {
+      "value": ""
+    },
+    "retention_note": ""
+  },
+  "link": "https://api-na.hosted.exlibrisgroup.com/almaws/v1/bibs/990040063470106381/holdings/22975380140006381/items/23975380130006381"
+}
