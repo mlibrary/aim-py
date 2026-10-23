@@ -72,6 +72,22 @@ class Item:
         )
         return item
 
+    def add_digitizer_to_metadata(self):
+        metadata = AlmaClient().get_barcode(self.barcode)
+        if metadata["item_data"]["statistics_note_1"] == "umich":
+            S.logger.info(
+                "item_digitizer_already_umich",
+                message="item already has a umich digitizer",
+                barcode=self.barcode,
+            )
+            return
+
+        mms_id = metadata["bib_data"]["mms_id"]
+        holding_id = metadata["holding_data"]["holding_id"]
+        item_pid = metadata["item_data"]["pid"]
+        metadata["item_data"]["statistics_note_1"] = "umich"
+        AlmaClient().update_alma_item(mms_id, holding_id, item_pid, metadata)
+
     def check_zephir(self):
         if self.has_status("in_zephir"):
             return self

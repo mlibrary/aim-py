@@ -44,6 +44,9 @@ addopts = "--disable-socket --allow-unix-socket -p pytest_httpx2"
 testpaths = [
     "tests"
 ]
+markers = [
+    "httpx2: configure the pytest-httpx2 httpx2_mock fixture (e.g. assert_all_called=False)",
+]
 
 
 [build-system]

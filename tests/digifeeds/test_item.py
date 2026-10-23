@@ -10,11 +10,20 @@ from aim.digifeeds.item import (
 )
 from httpx2 import HTTPStatusError
 from aim.services import S
+import copy
+import httpx2
 
 
 @pytest.fixture
 def item_data():
     with open("tests/fixtures/digifeeds/item.json") as f:
+        output = json.load(f)
+    return output
+
+
+@pytest.fixture
+def alma_metadata():
+    with open("tests/fixtures/google_picklist/item.json") as f:
         output = json.load(f)
     return output
 
@@ -380,4 +389,48 @@ def test_check_and_update_hathifiles_timestamp_returns_none_when_not_in_hathifil
 
     result = Item(item_data).check_and_update_hathifiles_timestamp()
     assert hf_get_stub.call_count == 1
+    assert result is None
+
+
+def test_add_digitizer_to_metadata_successful_add(
+    httpx2_mock, item_data, alma_metadata
+):
+    mms_id = "990040063470106381"
+    holding_id = "22975380140006381"
+    item_pid = "23975380130006381"
+    updated_metadata = copy.deepcopy(alma_metadata)
+    updated_metadata["item_data"]["statistics_note_1"] = "umich"
+
+    get_stub = httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
+    put_stub = httpx2_mock.put(
+        f"{S.alma_api_url}/bibs/{mms_id}/holdings/{holding_id}/items/{item_pid}",
+        json=updated_metadata,
+    ).respond(200, json=updated_metadata)
+    result = Item(item_data).add_digitizer_to_metadata()
+    assert get_stub.call_count == 1
+    assert put_stub.call_count == 1
+    assert result is None
+
+
+@pytest.mark.httpx2(assert_all_called=False)
+def test_add_digitizer_to_metadata_successful_skip(
+    httpx2_mock, item_data, alma_metadata
+):
+    mms_id = "990040063470106381"
+    holding_id = "22975380140006381"
+    item_pid = "23975380130006381"
+    alma_metadata["item_data"]["statistics_note_1"] = "umich"
+
+    get_stub = httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
+    put_stub = httpx2_mock.put(
+        f"{S.alma_api_url}/bibs/{mms_id}/holdings/{holding_id}/items/{item_pid}",
+        json=alma_metadata,
+    ).respond(200, json=alma_metadata)
+    result = Item(item_data).add_digitizer_to_metadata()
+    assert get_stub.call_count == 1
+    assert put_stub.call_count == 0
     assert result is None
