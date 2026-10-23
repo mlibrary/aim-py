@@ -1,7 +1,7 @@
 import requests
 from rclone_python import rclone
 from datetime import datetime, timedelta
-from aim.digifeeds.alma_client import AlmaClient
+from aim.clients.alma_client import AlmaClient
 from aim.digifeeds.db_client import DBClient
 from aim.services import S
 from aim.hathifiles.client import Client as HathifilesClient

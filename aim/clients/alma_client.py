@@ -1,12 +1,16 @@
 import httpx2
 from aim.services import S
 import xml.etree.ElementTree as ET
+import sys
+
+sys.modules["httpx"] = httpx2  # do this first, before importing httpx or httpx_retries
+import httpx  # -> httpx2
+from httpx_retries import RetryTransport, Retry
 
 
 class AlmaClient:
     def __init__(self) -> None:
         self.base_url = S.alma_api_url
-        self.digifeeds_set_id = S.digifeeds_set_id
         self.headers = {
             "Authorization": f"apikey {S.alma_api_key}",
             "Accept": "application/json",
@@ -22,7 +26,7 @@ class AlmaClient:
         Returns:
             None: None
         """
-        url = self._url(f"conf/sets/{self.digifeeds_set_id}")
+        url = self._url(f"conf/sets/{S.digifeeds_set_id}")
         query = {
             "id_type": "BARCODE",
             "op": "add_members",
@@ -39,6 +43,31 @@ class AlmaClient:
                         f"HTTP error occurred: {e} {self.get_error_string(response.text)}"
                     )
                 raise
+
+    def get_barcode(self, barcode):
+        url = f"{self.base_url}/items"
+        query = {"item_barcode": barcode}
+        retry = Retry(total=4, backoff_factor=5)
+        transport = RetryTransport(retry=retry)
+        with httpx2.Client(headers=self.headers, transport=transport) as client:
+            try:
+                response = client.get(url, params=query)
+                response.raise_for_status()
+                return response.json()
+
+            except httpx2.HTTPError as e:
+                if response.headers["Content-Type"].startswith("application/json"):
+                    code = response.json()["errorList"]["error"][0]["errorCode"]
+                    if code == "401689":
+                        return {"not_found": True}
+                        S.logger.error(f"Barcode not found: {barcode}")
+                    else:
+                        S.logger.error(f"Error code: {code} for barcode: {barcode}")
+                else:
+                    S.logger.error(
+                        f"HTTP error occurred: {e} {self.get_error_string(response.text)} for barcode: {barcode}"
+                    )
+                    response.raise_for_status()
 
     def get_error_string(self, error_string):
         ns = {"alma": "http://com/exlibris/urm/general/xmlbeans"}

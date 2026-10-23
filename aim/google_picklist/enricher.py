@@ -1,4 +1,4 @@
-from aim.google_picklist.alma_client import AlmaClient
+from aim.clients.alma_client import AlmaClient
 from aim.services import S
 from functools import reduce
 import re
