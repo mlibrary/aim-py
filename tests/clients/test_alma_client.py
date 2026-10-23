@@ -95,3 +95,25 @@ def test_get_barcode_handles_other_error(httpx2_mock):
     with pytest.raises(Exception) as exc_info:
         AlmaClient().get_barcode("some_barcode")
     assert exc_info.type is HTTPStatusError
+
+
+def test_update_alma_item_success(httpx2_mock):
+    mms_id = "mms_id"
+    holding_id = "holding_id"
+    item_pid = "item_pid"
+    url = f"{S.alma_api_url}/bibs/{mms_id}/holdings/{holding_id}/items/{item_pid}"
+    updated_item_body = {"something": "updated"}
+
+    put_stub = httpx2_mock.put(url, json=updated_item_body).respond(
+        200, json=updated_item_body
+    )
+
+    item_body = AlmaClient().update_alma_item(
+        mms_id=mms_id,
+        holding_id=holding_id,
+        item_pid=item_pid,
+        item_body=updated_item_body,
+    )
+
+    assert put_stub.call_count == 1
+    assert item_body == updated_item_body

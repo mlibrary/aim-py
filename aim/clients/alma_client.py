@@ -67,7 +67,22 @@ class AlmaClient:
                     S.logger.error(
                         f"HTTP error occurred: {e} {self.get_error_string(response.text)} for barcode: {barcode}"
                     )
-                    response.raise_for_status()
+                    raise
+
+    def update_alma_item(
+        self, mms_id: str, holding_id: str, item_pid: str, item_body: dict
+    ):
+        url = self._url(f"bibs/{mms_id}/holdings/{holding_id}/items/{item_pid}")
+        with httpx2.Client(headers=self.headers) as client:
+            try:
+                response = client.put(url, json=item_body)
+                response.raise_for_status()
+                return response.json()
+            except httpx2.HTTPError as e:
+                if response.headers["content-type"] != "application/json":
+                    S.logger.error(
+                        f"HTTP error occurred: {e} {self.get_error_string(response.text)}"
+                    )
 
     def get_error_string(self, error_string):
         ns = {"alma": "http://com/exlibris/urm/general/xmlbeans"}
