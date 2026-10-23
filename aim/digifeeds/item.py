@@ -5,7 +5,7 @@ from aim.digifeeds.alma_client import AlmaClient
 from aim.digifeeds.db_client import DBClient
 from aim.services import S
 from aim.hathifiles.client import Client as HathifilesClient
-from requests.exceptions import HTTPError
+from httpx2 import HTTPError
 
 
 class NotAddedToDigifeedsSetError(Exception):

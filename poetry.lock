@@ -1684,6 +1684,21 @@ pytest = ">=7"
 testing = ["process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
+name = "pytest-httpx2"
+version = "1.0.0"
+description = "A pytest plugin for mocking out httpx2 using respx."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "pytest_httpx2-1.0.0-py3-none-any.whl", hash = "sha256:467dc7f6946854ffc20e1678703266b093037d8f3fb9f1fb523a2c432c64cff0"},
+    {file = "pytest_httpx2-1.0.0.tar.gz", hash = "sha256:d897a14c1341d3f3014e9432c16fed366598aba06a2ba9c08460a51799cb7128"},
+]
+
+[package.dependencies]
+respx = "*"
+
+[[package]]
 name = "pytest-mock"
 version = "3.17.0"
 description = "Thin-wrapper around the mock package for easier use with pytest"
@@ -1882,6 +1897,21 @@ urllib3 = ">=1.25.10,<3.0"
 
 [package.extras]
 tests = ["coverage (>=6.0.0)", "flake8", "mypy", "pytest (>=7.0.0)", "pytest-asyncio", "pytest-cov", "pytest-httpserver", "tomli ; python_version < \"3.11\"", "tomli-w", "types-PyYAML", "types-requests"]
+
+[[package]]
+name = "respx"
+version = "0.23.1"
+description = "A utility for mocking out the Python HTTPX and HTTP Core libraries."
+optional = false
+python-versions = ">=3.8"
+groups = ["main"]
+files = [
+    {file = "respx-0.23.1-py2.py3-none-any.whl", hash = "sha256:b18004b029935384bccfa6d7d9d74b4ec9af73a081cc28600fffc0447f4b8c1a"},
+    {file = "respx-0.23.1.tar.gz", hash = "sha256:242dcc6ce6b5b9bf621f5870c82a63997e8e82bc7c947f9ffe272b8f3dd5a780"},
+]
+
+[package.dependencies]
+httpx = ">=0.25.0"
 
 [[package]]
 name = "rich"
@@ -2916,4 +2946,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "ec5e9bdef6b2f52fcbc585f8e23301aaea2f3197b56931cb5f6e9fc05897694d"
+content-hash = "9b501e950bcaf7071fb5fe2fe673e2f3080c13d3596e0cecf2c6aebb911b7d26"

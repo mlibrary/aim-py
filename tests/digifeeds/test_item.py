@@ -8,7 +8,7 @@ from aim.digifeeds.item import (
     rclone,
     DBClient,
 )
-from requests.exceptions import HTTPError
+from httpx2 import HTTPStatusError
 from aim.services import S
 
 
@@ -41,6 +41,62 @@ def item_in_zephir_too_recent(item_in_zephir_for_long_enough):
 @pytest.fixture
 def barcode():
     return "some_barcode"
+
+
+@pytest.fixture
+def add_to_digifeeds_url():
+    return f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
+
+
+@pytest.fixture
+def add_to_digifeeds_set_stub_already_there(httpx2_mock, add_to_digifeeds_url):
+    error_body = {
+        "errorsExist": True,
+        "errorList": {
+            "error": [
+                {
+                    "errorCode": "60115",
+                    "errorMessage": "The following ID(s) are already in the set ['some_barcode']",
+                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
+                }
+            ]
+        },
+    }
+    return httpx2_mock.post(add_to_digifeeds_url).respond(400, json=error_body)
+
+
+@pytest.fixture
+def add_to_digifeeds_set_stub_not_found(httpx2_mock, add_to_digifeeds_url):
+    error_body = {
+        "errorsExist": True,
+        "errorList": {
+            "error": [
+                {
+                    "errorCode": "60120",
+                    "errorMessage": "The ID whatever is not valid for content type ITEM and identifier type BARCODE.",
+                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
+                }
+            ]
+        },
+    }
+    return httpx2_mock.post(add_to_digifeeds_url).respond(400, json=error_body)
+
+
+@pytest.fixture
+def add_to_digifeeds_set_stub_other_error(httpx2_mock, add_to_digifeeds_url):
+    error_body = {
+        "errorsExist": True,
+        "errorList": {
+            "error": [
+                {
+                    "errorCode": "60125",
+                    "errorMessage": "some_other_error",
+                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
+                }
+            ]
+        },
+    }
+    return httpx2_mock.post(add_to_digifeeds_url).respond(400, json=error_body)
 
 
 def test_has_status_is_true(item_data):
@@ -84,55 +140,33 @@ def test_add_to_digifeeds_set_for_barcode_thats_in_the_digifeeds_set(item_data):
     assert result == item
 
 
-@responses.activate
 def test_add_to_digifeeds_set_where_item_is_in_the_digifeeds_set_but_doesnt_have_status(
-    mocker, item_data
+    mocker, item_data, add_to_digifeeds_set_stub_already_there
 ):
     item_data["statuses"][0]["name"] = "some_other_status"
     item = Item(item_data)
     add_status_mock = mocker.patch.object(
         DBClient, "add_item_status", return_value=item_data
     )
-    error_body = {
-        "errorsExist": True,
-        "errorList": {
-            "error": [
-                {
-                    "errorCode": "60115",
-                    "errorMessage": "The following ID(s) are already in the set ['some_barcode']",
-                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
-                }
-            ]
-        },
-    }
-    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
-    add_to_digifeeds_set_stub = responses.post(
-        add_to_digifeeds_url,
-        json=error_body,
-        status=400,
-    )
 
     result = item.add_to_digifeeds_set()
     add_status_mock.assert_called_once_with(
         barcode="some_barcode", status="added_to_digifeeds_set"
     )
-    assert add_to_digifeeds_set_stub.call_count == 1
+    assert add_to_digifeeds_set_stub_already_there.call_count == 1
     assert result.barcode == item.barcode
 
 
-@responses.activate
 def test_add_to_digifeeds_set_for_barcode_thats_not_in_the_digifeeds_set(
-    mocker, item_data
+    mocker, item_data, httpx2_mock
 ):
     item_data["statuses"][0]["name"] = "some_other_status"
     add_status_mock = mocker.patch.object(
         DBClient, "add_item_status", return_value=item_data
     )
     add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
-    add_to_digifeeds_set_stub = responses.post(
-        add_to_digifeeds_url,
-        json=item_data,
-        status=200,
+    add_to_digifeeds_set_stub = httpx2_mock.post(add_to_digifeeds_url).respond(
+        200, json=item_data
     )
     item = Item(item_data)
     result = item.add_to_digifeeds_set()
@@ -142,100 +176,47 @@ def test_add_to_digifeeds_set_for_barcode_thats_not_in_the_digifeeds_set(
     assert result.barcode == item.barcode
 
 
-@responses.activate
-def test_add_to_digifeeds_set_barcode_that_is_not_in_alma(mocker, item_data):
+def test_add_to_digifeeds_set_barcode_that_is_not_in_alma(
+    mocker, item_data, add_to_digifeeds_set_stub_not_found
+):
     item_data["statuses"][0]["name"] = "some_other_status"
     add_status_mock = mocker.patch.object(
         DBClient, "add_item_status", return_value=item_data
     )
-    error_body = {
-        "errorsExist": True,
-        "errorList": {
-            "error": [
-                {
-                    "errorCode": "60120",
-                    "errorMessage": "The ID whatever is not valid for content type ITEM and identifier type BARCODE.",
-                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
-                }
-            ]
-        },
-    }
-    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
-    add_to_digifeeds_set_stub = responses.post(
-        add_to_digifeeds_url,
-        json=error_body,
-        status=400,
-    )
-
     item = Item(item_data)
     result = item.add_to_digifeeds_set()
     add_status_mock.assert_called_once_with(
         barcode="some_barcode", status="not_found_in_alma"
     )
-    assert add_to_digifeeds_set_stub.call_count == 1
+    assert add_to_digifeeds_set_stub_not_found.call_count == 1
     assert result.barcode == item.barcode
 
 
-@responses.activate
-def test_item_still_not_found_in_alma(mocker, item_data):
+def test_item_still_not_found_in_alma(
+    mocker, item_data, add_to_digifeeds_set_stub_not_found
+):
     item_data["statuses"][0]["name"] = "not_found_in_alma"
     add_status_mock = mocker.patch.object(
         DBClient, "add_item_status", return_value=item_data
-    )
-    error_body = {
-        "errorsExist": True,
-        "errorList": {
-            "error": [
-                {
-                    "errorCode": "60120",
-                    "errorMessage": "The ID whatever is not valid for content type ITEM and identifier type BARCODE.",
-                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
-                }
-            ]
-        },
-    }
-    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
-    add_to_digifeeds_set_stub = responses.post(
-        add_to_digifeeds_url,
-        json=error_body,
-        status=400,
     )
 
     item = Item(item_data)
     result = item.add_to_digifeeds_set()
     add_status_mock.assert_not_called()
-    assert add_to_digifeeds_set_stub.call_count == 1
+    assert add_to_digifeeds_set_stub_not_found.call_count == 1
     assert result.barcode == item.barcode
 
 
-@responses.activate
-def test_add_to_digifeeds_set_barcode_that_causes_alma_error(mocker, item_data):
+def test_add_to_digifeeds_set_barcode_that_causes_alma_error(
+    mocker, item_data, add_to_digifeeds_set_stub_other_error
+):
     item_data["statuses"][0]["name"] = "some_other_status"
     add_status_mock = mocker.patch.object(DBClient, "add_item_status")
-    error_body = {
-        "errorsExist": True,
-        "errorList": {
-            "error": [
-                {
-                    "errorCode": "60125",
-                    "errorMessage": "some_other_error",
-                    "trackingId": "E01-2609211329-8EKLP-AWAE1781893571",
-                }
-            ]
-        },
-    }
-    add_to_digifeeds_url = f"{S.alma_api_url}/conf/sets/{S.digifeeds_set_id}"
-    add_to_digifeeds_set_stub = responses.post(
-        add_to_digifeeds_url,
-        json=error_body,
-        status=400,
-    )
-
     item = Item(item_data)
     with pytest.raises(Exception) as exc_info:
         item.add_to_digifeeds_set()
-    assert exc_info.type is HTTPError
-    assert add_to_digifeeds_set_stub.call_count == 1
+    assert exc_info.type is HTTPStatusError
+    assert add_to_digifeeds_set_stub_other_error.call_count == 1
     add_status_mock.assert_not_called()
 
 

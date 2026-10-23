@@ -20,6 +20,7 @@ typer = "^0.27.0"
 rclone-python = "^0.1.25"
 structlog = "^26.1.0"
 httpx2 = "^2.16.0"
+pytest-httpx2 = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -38,10 +39,11 @@ sphinxcontrib-mermaid = "^2.1.0"
 
 [tool.pytest.ini_options]
 #addopts = "--cov=aim --cov-report=html --cov-report=term:skip-covered --disable-socket --allow-unix-socket"
-addopts = "--disable-socket --allow-unix-socket"
+addopts = "--disable-socket --allow-unix-socket -p pytest_httpx2"
 testpaths = [
     "tests"
 ]
+
 
 [build-system]
 requires = ["poetry-core"]

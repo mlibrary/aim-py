@@ -31,7 +31,7 @@ def item_in_zephir_too_recent(item_data):
 
 
 @responses.activate
-def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
+def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data, httpx2_mock):
     item_data["statuses"][0]["name"] = "in_zephir"
     get_add_url = f"{S.digifeeds_api_url}/items/some_barcode"
 
@@ -50,15 +50,11 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
         "fail_on_invalid_id": "true",
     }
     add_to_digifeeds_body = {"members": {"member": [{"id": "some_barcode"}]}}
-    add_to_digifeeds_set_stub = responses.post(
+    add_to_digifeeds_set_stub = httpx2_mock.post(
         add_to_digifeeds_url,
-        match=[
-            matchers.query_param_matcher(add_to_digifeeds_query),
-            matchers.json_params_matcher(add_to_digifeeds_body),
-        ],
-        json={},
-        status=200,
-    )
+        json=add_to_digifeeds_body,
+        params=add_to_digifeeds_query,
+    ).respond(200)
 
     result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
     assert get_item.call_count == 1
