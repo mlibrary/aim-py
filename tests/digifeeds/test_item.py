@@ -315,7 +315,14 @@ def test_process_item_not_added_to_digifeeds_set_and_not_found_in_alma(
     assert result == item
 
 
-def test_process_item_not_in_zephir_long_enough(item_in_zephir_too_recent):
+def test_process_item_not_in_zephir_long_enough(
+    item_in_zephir_too_recent, httpx2_mock, alma_metadata
+):
+    alma_metadata["item_data"]["statistics_note_1"] = "umich"
+
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
     item = Item(item_in_zephir_too_recent)
     result = process_item(item)
     assert result is None

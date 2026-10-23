@@ -20,6 +20,14 @@ def item_data():
 
 
 @pytest.fixture
+def alma_metadata():
+    with open("tests/fixtures/google_picklist/item.json") as f:
+        output = json.load(f)
+    output["item_data"]["statistics_note_1"] = "umich"
+    return output
+
+
+@pytest.fixture
 def item_in_zephir_too_recent(item_data):
     zephir_status = {
         "name": "in_zephir",
@@ -166,26 +174,40 @@ def test_move_to_pickup_where_not_in_zephir(mocker):
     assert result.exit_code == 0
 
 
-def test_process_barcode(mocker, item_in_zephir_too_recent):
+def test_process_barcode(mocker, item_in_zephir_too_recent, httpx2_mock, alma_metadata):
     item = Item(item_in_zephir_too_recent)
     mocker.patch("aim.cli.digifeeds.get_item", return_value=item)
+
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
 
     result = runner.invoke(app, ["digifeeds", "process-barcode", "some_barcode"])
 
     assert "add_to_digifeeds_set_start" in result.stdout
+    assert "item_digitizer_already_umich" in result.stdout
     assert "added_to_digifeeds_set" in result.stdout
     assert "in_zephir" in result.stdout
     assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0
 
 
-def test_process_barcodes(mocker, item_in_zephir_too_recent):
+def test_process_barcodes(
+    mocker, item_in_zephir_too_recent, httpx2_mock, alma_metadata
+):
     item1 = Item(item_in_zephir_too_recent)
     data2 = item_in_zephir_too_recent.copy()
     data2["barcode"] = "other_barcode"
     item2 = Item(data2)
 
     mocker.patch("aim.cli.digifeeds.get_item", side_effect=[item1, item2])
+
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "other_barcode"}
+    ).respond(200, json=alma_metadata)
 
     result = runner.invoke(
         app, ["digifeeds", "process-barcodes", "some_barcode", "other_barcode"]

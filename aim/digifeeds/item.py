@@ -87,6 +87,11 @@ class Item:
         item_pid = metadata["item_data"]["pid"]
         metadata["item_data"]["statistics_note_1"] = "umich"
         AlmaClient().update_alma_item(mms_id, holding_id, item_pid, metadata)
+        S.logger.info(
+            "item_digitizer_set_to_umich",
+            message="set digitzier to umich",
+            barcode=self.barcode,
+        )
 
     def check_zephir(self):
         if self.has_status("in_zephir"):
@@ -242,6 +247,8 @@ def process_item(item: Item) -> Item:
             barcode=barcode,
         )
         return add_to_set_item
+
+    add_to_set_item.add_digitizer_to_metadata()
 
     check_zephir_item = add_to_set_item.check_zephir()
     if check_zephir_item:
