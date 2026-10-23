@@ -991,6 +991,21 @@ socks = ["socksio (==1.*)"]
 zstd = ["zstandard (>=0.18.0)"]
 
 [[package]]
+name = "httpx-retries"
+version = "0.6.0"
+description = "A retry layer for HTTPX."
+optional = false
+python-versions = ">=3.10"
+groups = ["main"]
+files = [
+    {file = "httpx_retries-0.6.0-py3-none-any.whl", hash = "sha256:d1e52a8f68a5df42de75ab89049d5020b2d0ab2f5f8bceacda008d12aa1257a3"},
+    {file = "httpx_retries-0.6.0.tar.gz", hash = "sha256:3e0b404969a564829d368417964fd21e6b400a10d17c92d29b8bc247ce8186e3"},
+]
+
+[package.dependencies]
+httpx = ">=0.20.0"
+
+[[package]]
 name = "httpx2"
 version = "2.16.0"
 description = "The next generation HTTP client."
@@ -2946,4 +2961,4 @@ files = [
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.14"
-content-hash = "9b501e950bcaf7071fb5fe2fe673e2f3080c13d3596e0cecf2c6aebb911b7d26"
+content-hash = "63f6383687eee8f3aea4f109d1942701299862743770045ec2621a983ddfea39"

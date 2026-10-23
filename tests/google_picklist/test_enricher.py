@@ -27,7 +27,7 @@ def picklist():
 
 
 @responses.activate
-def test_main(tmp_path, tmpdir, picklist, item2_data):
+def test_main(tmp_path, tmpdir, picklist, item2_data, httpx2_mock):
 
     url = f"{S.alma_api_url}/items"
     not_found_body = {
@@ -42,21 +42,11 @@ def test_main(tmp_path, tmpdir, picklist, item2_data):
             ]
         },
     }
-    responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher({"item_barcode": "39015005144582"}),
-        ],
-        json=item2_data,
-        status=200,
+    httpx2_mock.get(url, params={"item_barcode": "39015005144582"}).respond(
+        200, json=item2_data
     )
-    responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher({"item_barcode": "B29446"}),
-        ],
-        json=not_found_body,
-        status=400,
+    httpx2_mock.get(url, params={"item_barcode": "B29446"}).respond(
+        400, json=not_found_body
     )
 
     input_file = tmp_path / "input.txt"

@@ -1,30 +1,27 @@
 import responses
-from responses import matchers
 
 import pytest
 from aim.services import S
 from aim.google_picklist.alma_client import AlmaClient
-from requests.exceptions import HTTPError
+from httpx2 import HTTPStatusError
+
+
+@pytest.fixture
+def alma_error_string():
+    return '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\r\n<web_service_result xmlns="http://com/exlibris/urm/general/xmlbeans">\r\n            <errorsExist>true</errorsExist>\r\n            <errorList>\r\n                        <error>\r\n                                    <errorCode>UNAUTHORIZED</errorCode>\r\n                                    <errorMessage>API-key not defined or not configured to allow this API.</errorMessage>\r\n                        </error>\r\n            </errorList>\r\n</web_service_result>'
 
 
 @responses.activate
-def test_get_barcode_success():
+def test_get_barcode_success(httpx2_mock):
     url = f"{S.alma_api_url}/items"
     query = {"item_barcode": "some_barcode"}
-    responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        json={"success": "true"},
-        status=200,
-    )
+    httpx2_mock.get(url, params=query).respond(200, json={"success": "true"})
     response = AlmaClient().get_barcode("some_barcode")
     assert response == {"success": "true"}
 
 
 @responses.activate
-def test_get_barcode_not_found():
+def test_get_barcode_not_found(httpx2_mock):
     url = f"{S.alma_api_url}/items"
     query = {"item_barcode": "some_barcode"}
     body = {
@@ -39,56 +36,20 @@ def test_get_barcode_not_found():
             ]
         },
     }
-    responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        json=body,
-        status=400,
-        content_type="application/json",
-    )
+    httpx2_mock.get(url, params=query).respond(400, json=body)
     response = AlmaClient().get_barcode("some_barcode")
     assert response == {"not_found": True}
 
 
 @responses.activate
-def test_get_barcode_retries_on_connection_problem():
+def test_get_barcode_retries_on_connection_problem(httpx2_mock):
     url = f"{S.alma_api_url}/items"
     query = {"item_barcode": "some_barcode"}
     response_body = "Error"
-    rsp1 = responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        body=response_body,
-        status=500,
-    )
-    rsp2 = responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        body=response_body,
-        status=500,
-    )
-    rsp3 = responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        body=response_body,
-        status=500,
-    )
-    rsp4 = responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        json={"success": "true"},
-        status=200,
-    )
+    rsp1 = httpx2_mock.get(url, params=query).respond(500, json=response_body)
+    rsp2 = httpx2_mock.get(url, params=query).respond(500, json=response_body)
+    rsp3 = httpx2_mock.get(url, params=query).respond(500, json=response_body)
+    rsp4 = httpx2_mock.get(url, params=query).respond(200, json={"success": "true"})
 
     response = AlmaClient().get_barcode("some_barcode")
     assert rsp1.call_count == 1
@@ -98,8 +59,7 @@ def test_get_barcode_retries_on_connection_problem():
     assert response == {"success": "true"}
 
 
-@responses.activate
-def test_get_barcode_handles_other_error():
+def test_get_barcode_handles_other_error(httpx2_mock):
     url = f"{S.alma_api_url}/items"
     query = {"item_barcode": "some_barcode"}
     response_body = """<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -114,14 +74,7 @@ def test_get_barcode_handles_other_error():
 </web_service_result>
     """
 
-    responses.get(
-        url,
-        match=[
-            matchers.query_param_matcher(query),
-        ],
-        body=response_body,
-        status=400,
-    )
+    httpx2_mock.get(url, params=query).respond(400, text=response_body)
     with pytest.raises(Exception) as exc_info:
         AlmaClient().get_barcode("some_barcode")
-    assert exc_info.type is HTTPError
+    assert exc_info.type is HTTPStatusError

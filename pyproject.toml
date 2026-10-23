@@ -21,6 +21,7 @@ rclone-python = "^0.1.25"
 structlog = "^26.1.0"
 httpx2 = "^2.16.0"
 pytest-httpx2 = "^1.0.0"
+httpx-retries = "^0.6.0"
 
 
 [tool.poetry.group.dev.dependencies]
