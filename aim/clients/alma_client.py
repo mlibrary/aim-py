@@ -4,7 +4,6 @@ import xml.etree.ElementTree as ET
 import sys
 
 sys.modules["httpx"] = httpx2  # do this first, before importing httpx or httpx_retries
-import httpx  # -> httpx2
 from httpx_retries import RetryTransport, Retry
 
 

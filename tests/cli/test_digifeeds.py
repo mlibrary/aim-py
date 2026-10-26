@@ -1,7 +1,6 @@
 import responses
 import pytest
 import json
-from responses import matchers
 from typer.testing import CliRunner
 from aim.cli.main import app
 from aim.services import S

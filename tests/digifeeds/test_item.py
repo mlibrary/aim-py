@@ -11,7 +11,6 @@ from aim.digifeeds.item import (
 from httpx2 import HTTPStatusError
 from aim.services import S
 import copy
-import httpx2
 
 
 @pytest.fixture
