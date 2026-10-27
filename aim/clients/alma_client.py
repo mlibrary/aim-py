@@ -48,7 +48,9 @@ class AlmaClient:
         query = {"item_barcode": barcode}
         retry = Retry(total=4, backoff_factor=5)
         transport = RetryTransport(retry=retry)
-        with httpx2.Client(headers=self.headers, transport=transport) as client:
+        with httpx2.Client(
+            headers=self.headers, transport=transport, follow_redirects=True
+        ) as client:
             try:
                 response = client.get(url, params=query)
                 response.raise_for_status()
