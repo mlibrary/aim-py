@@ -1,7 +1,6 @@
 import responses
 import pytest
 import json
-from responses import matchers
 from typer.testing import CliRunner
 from aim.cli.main import app
 from aim.services import S
@@ -20,6 +19,14 @@ def item_data():
 
 
 @pytest.fixture
+def alma_metadata():
+    with open("tests/fixtures/google_picklist/item.json") as f:
+        output = json.load(f)
+    output["item_data"]["statistics_note_1"] = "umich"
+    return output
+
+
+@pytest.fixture
 def item_in_zephir_too_recent(item_data):
     zephir_status = {
         "name": "in_zephir",
@@ -31,7 +38,7 @@ def item_in_zephir_too_recent(item_data):
 
 
 @responses.activate
-def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
+def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data, httpx2_mock):
     item_data["statuses"][0]["name"] = "in_zephir"
     get_add_url = f"{S.digifeeds_api_url}/items/some_barcode"
 
@@ -50,15 +57,11 @@ def test_add_to_db_where_item_is_not_in_digifeeds_set(item_data):
         "fail_on_invalid_id": "true",
     }
     add_to_digifeeds_body = {"members": {"member": [{"id": "some_barcode"}]}}
-    add_to_digifeeds_set_stub = responses.post(
+    add_to_digifeeds_set_stub = httpx2_mock.post(
         add_to_digifeeds_url,
-        match=[
-            matchers.query_param_matcher(add_to_digifeeds_query),
-            matchers.json_params_matcher(add_to_digifeeds_body),
-        ],
-        json={},
-        status=200,
-    )
+        json=add_to_digifeeds_body,
+        params=add_to_digifeeds_query,
+    ).respond(200)
 
     result = runner.invoke(app, ["digifeeds", "add-to-digifeeds-set", "some_barcode"])
     assert get_item.call_count == 1
@@ -170,26 +173,40 @@ def test_move_to_pickup_where_not_in_zephir(mocker):
     assert result.exit_code == 0
 
 
-def test_process_barcode(mocker, item_in_zephir_too_recent):
+def test_process_barcode(mocker, item_in_zephir_too_recent, httpx2_mock, alma_metadata):
     item = Item(item_in_zephir_too_recent)
     mocker.patch("aim.cli.digifeeds.get_item", return_value=item)
+
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
 
     result = runner.invoke(app, ["digifeeds", "process-barcode", "some_barcode"])
 
     assert "add_to_digifeeds_set_start" in result.stdout
+    assert "item_digitizer_already_umich" in result.stdout
     assert "added_to_digifeeds_set" in result.stdout
     assert "in_zephir" in result.stdout
     assert "not_in_zephir_long_enough" in result.stdout
     assert result.exit_code == 0
 
 
-def test_process_barcodes(mocker, item_in_zephir_too_recent):
+def test_process_barcodes(
+    mocker, item_in_zephir_too_recent, httpx2_mock, alma_metadata
+):
     item1 = Item(item_in_zephir_too_recent)
     data2 = item_in_zephir_too_recent.copy()
     data2["barcode"] = "other_barcode"
     item2 = Item(data2)
 
     mocker.patch("aim.cli.digifeeds.get_item", side_effect=[item1, item2])
+
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "some_barcode"}
+    ).respond(200, json=alma_metadata)
+    httpx2_mock.get(
+        f"{S.alma_api_url}/items", params={"item_barcode": "other_barcode"}
+    ).respond(200, json=alma_metadata)
 
     result = runner.invoke(
         app, ["digifeeds", "process-barcodes", "some_barcode", "other_barcode"]

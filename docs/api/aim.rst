@@ -13,7 +13,9 @@ Subpackages
    :maxdepth: 4
 
    aim.cli
+   aim.clients
    aim.digifeeds
+   aim.google_picklist
    aim.hathifiles
 
 Submodules

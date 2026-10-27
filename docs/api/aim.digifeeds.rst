@@ -20,7 +20,6 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
-   aim.digifeeds.alma_client
    aim.digifeeds.db_client
    aim.digifeeds.functions
    aim.digifeeds.item

@@ -1,11 +1,11 @@
 import requests
 from rclone_python import rclone
 from datetime import datetime, timedelta
-from aim.digifeeds.alma_client import AlmaClient
+from aim.clients.alma_client import AlmaClient
 from aim.digifeeds.db_client import DBClient
 from aim.services import S
 from aim.hathifiles.client import Client as HathifilesClient
-from requests.exceptions import HTTPError
+from httpx2 import HTTPError
 
 
 class NotAddedToDigifeedsSetError(Exception):
@@ -71,6 +71,27 @@ class Item:
             )
         )
         return item
+
+    def add_digitizer_to_metadata(self):
+        metadata = AlmaClient().get_barcode(self.barcode)
+        if metadata["item_data"]["statistics_note_1"] == "umich":
+            S.logger.info(
+                "item_digitizer_already_umich",
+                message="item already has a umich digitizer",
+                barcode=self.barcode,
+            )
+            return
+
+        mms_id = metadata["bib_data"]["mms_id"]
+        holding_id = metadata["holding_data"]["holding_id"]
+        item_pid = metadata["item_data"]["pid"]
+        metadata["item_data"]["statistics_note_1"] = "umich"
+        AlmaClient().update_alma_item(mms_id, holding_id, item_pid, metadata)
+        S.logger.info(
+            "item_digitizer_set_to_umich",
+            message="set digitzier to umich",
+            barcode=self.barcode,
+        )
 
     def check_zephir(self):
         if self.has_status("in_zephir"):
@@ -226,6 +247,8 @@ def process_item(item: Item) -> Item:
             barcode=barcode,
         )
         return add_to_set_item
+
+    add_to_set_item.add_digitizer_to_metadata()
 
     check_zephir_item = add_to_set_item.check_zephir()
     if check_zephir_item:
