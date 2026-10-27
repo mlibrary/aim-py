@@ -32,12 +32,12 @@ class AlmaClient:
             "fail_on_invalid_id": "true",
         }
         body = {"members": {"member": [{"id": barcode}]}}
-        with httpx2.Client() as client:
+        with httpx2.Client(headers=self.headers) as client:
             try:
                 response = client.post(url, params=query, json=body)
                 response.raise_for_status()
             except httpx2.HTTPError as e:
-                if response.headers["content-type"] != "application/json":
+                if not response.headers["Content-Type"].startswith("application/json"):
                     S.logger.error(
                         f"HTTP error occurred: {e} {self.get_error_string(response.text)}"
                     )
@@ -66,7 +66,10 @@ class AlmaClient:
                         S.logger.error(f"Error code: {code} for barcode: {barcode}")
                 else:
                     S.logger.error(
-                        f"HTTP error occurred: {e} {self.get_error_string(response.text)} for barcode: {barcode}"
+                        "http_error",
+                        message=f"HTTP error occurred: {e} {self.get_error_string(response.text)}",
+                        status=response.status_code,
+                        barcode=barcode,
                     )
                     raise
 
@@ -80,10 +83,16 @@ class AlmaClient:
                 response.raise_for_status()
                 return response.json()
             except httpx2.HTTPError as e:
-                if response.headers["content-type"] != "application/json":
+                if response.headers["Content-Type"].startswith("application/json"):
                     S.logger.error(
-                        f"HTTP error occurred: {e} {self.get_error_string(response.text)}"
+                        "http_error",
+                        message=f"HTTP error occurred: {e} {self.get_error_string(response.text)}",
+                        status=response.status_code,
+                        item_pid=item_pid,
                     )
+                else:
+                    S.logger.error(f"HTTP error occurred: {e} {response.json()}")
+                raise
 
     def get_error_string(self, error_string):
         ns = {"alma": "http://com/exlibris/urm/general/xmlbeans"}

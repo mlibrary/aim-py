@@ -77,7 +77,7 @@ class Item:
         if metadata["item_data"]["statistics_note_1"] == "umich":
             S.logger.info(
                 "item_digitizer_already_umich",
-                message="item already has a umich digitizer",
+                message="Item already has a umich digitizer",
                 barcode=self.barcode,
             )
             return
@@ -86,10 +86,12 @@ class Item:
         holding_id = metadata["holding_data"]["holding_id"]
         item_pid = metadata["item_data"]["pid"]
         metadata["item_data"]["statistics_note_1"] = "umich"
+        if metadata["item_data"]["alternative_call_number_type"]["value"] == "M":
+            metadata["item_data"]["alternative_call_number_type"]["value"] = "#"
         AlmaClient().update_alma_item(mms_id, holding_id, item_pid, metadata)
         S.logger.info(
             "item_digitizer_set_to_umich",
-            message="set digitzier to umich",
+            message="Set digitzier to umich",
             barcode=self.barcode,
         )
 
